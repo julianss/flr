@@ -1,10 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from registry import Registry, db
 import peeweedbevolve
 import peewee as pw
 from playhouse.shortcuts import model_to_dict
 import traceback
 import operator as __operator__
+import os
 
 app = Flask(__name__)
 
@@ -169,3 +170,11 @@ def call():
                     'data': traceback.format_exc()
                 }
             })
+
+# Serve static files
+@app.route("/")
+def base():
+    return send_from_directory(os.path.join('apps',os.environ["app"],'client','public'), 'index.html')
+@app.route("/<path:path>")
+def home(path):
+    return send_from_directory(os.path.join('apps',os.environ["app"],'client','public'), path)

@@ -4,7 +4,6 @@ import peeweedbevolve
 import peewee as pw
 from playhouse.shortcuts import model_to_dict
 import traceback
-from dotenv import load_dotenv
 import operator as __operator__
 
 app = Flask(__name__)

@@ -105,13 +105,18 @@ class BaseModel(pw.Model):
     @classmethod
     def read(cls, fields, filters=[], paginate=False, order=None):
         only = None
+        extra_attrs = []
         if fields:
             if "id" not in fields:
                 fields.append("id")
             only = []
             for field_name in fields:
                 field = getattr(cls, field_name)
-                only.append(field)
+                #if field name is a @property of the model, it must be added to the extra_attrs list
+                if type(field) == property:
+                    extra_attrs.append(field_name)
+                else:
+                    only.append(field)
         results = []
         if only:
             query = cls.select(*only)
@@ -133,7 +138,7 @@ class BaseModel(pw.Model):
                     if hasattr(pw_field.rel_model, "name"):
                         only.append(getattr(pw_field.rel_model, "name"))
         for model in query:
-            data = model_to_dict(model, only=only, recurse=True)
+            data = model_to_dict(model, only=only, recurse=True, extra_attrs=extra_attrs)
             results.append(data)
         return results
 

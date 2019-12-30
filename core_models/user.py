@@ -16,7 +16,7 @@ class FlrUser(BaseModel):
     @staticmethod
     def auth(login, password):
         crypt_password = CryptContext(schemes=["pbkdf2_sha512"]).encrypt(password)
-        user = FwUser.select(FwUser.id, FwUser.password).where(FwUser.login==login)
+        user = FlrUser.select(FlrUser.id, FlrUser.password).where(FlrUser.login==login)
         if not user:
             return False
         user = user.first()
@@ -40,6 +40,6 @@ class FlrUser(BaseModel):
         auth = request.headers.get("Authorization")
         token = auth.split(" ")[1]
         decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
-        request.uid = decoded.get("id")
+        request.uid = decoded.get("uid")
 
 FlrUser.r()

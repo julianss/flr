@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, redirect
 from registry import Registry, db
 import peeweedbevolve
 import peewee as pw
@@ -20,7 +20,7 @@ class BaseModel(pw.Model):
         Registry[cls.__name__] = cls
 
     @classmethod
-    def filter_query(cls, query, filters):
+    def filter_query(cls, query, filters=[], paginate=False):
         operator_table = {
             '=':     __operator__.eq,
             '>':     __operator__.gt,
@@ -70,6 +70,8 @@ class BaseModel(pw.Model):
                 else:
                     break
         query = query.where(*stack)
+        if paginate:
+            query = query.paginate(paginate[0], paginate[1])
         return query
 
     @classmethod
@@ -101,9 +103,11 @@ class BaseModel(pw.Model):
         return deleted
 
     @classmethod
-    def read(cls, fields, filters):
+    def read(cls, fields, filters=[], paginate=False, order=None):
         only = None
         if fields:
+            if "id" not in fields:
+                fields.append("id")
             only = []
             for field_name in fields:
                 field = getattr(cls, field_name)
@@ -113,10 +117,23 @@ class BaseModel(pw.Model):
             query = cls.select(*only)
         else:
             query = cls.select()
-        if filters:
-            query = cls.filter_query(query, filters)
+        if order is not None:
+            order = order.split(" ")
+            order_attr = getattr(cls, order[0])
+            if "desc" in order:
+                order_attr = order_attr.desc()
+            query = query.order_by(order_attr)
+        if filters or paginate:
+            query = cls.filter_query(query, filters, paginate)
+        #Add foreign key fields so model_to_dict renders the name of the related record
+        if only:
+            for pw_field in only:
+                if type(pw_field) == pw.ForeignKeyField:
+                    only.append(getattr(pw_field.rel_model, "id"))
+                    if hasattr(pw_field.rel_model, "name"):
+                        only.append(getattr(pw_field.rel_model, "name"))
         for model in query:
-            data = model_to_dict(model, only=only)
+            data = model_to_dict(model, only=only, recurse=True)
             results.append(data)
         return results
 
@@ -127,15 +144,21 @@ def auth():
         login = params.get("login")
         password = params.get("password")
         jwt = Registry["FlrUser"].auth(login, password)
-        return jsonify({
-            'code': 200,
-            'result': jwt
+        if jwt:
+            return jsonify({
+                'result': jwt
+            })
+        else:
+            return jsonify({
+            'error': {
+                'message': 'Incorrect credentials',
+                'data': 'Incorrect credentials'
+            }
         })
     except Exception as ex:
         print(traceback.format_exc())
         return jsonify({
             'error': {
-                'code': 401,
                 'message': str(ex),
                 'data': traceback.format_exc()
             }
@@ -153,11 +176,18 @@ def call():
                 method_name = "flr_" + method_name
             args = params.get("args", [])
             kwargs = params.get("kwargs", {})
+            rec_id = False
+            if ":" in model_name:
+                model_name, rec_id = model_name.split(":")
+                rec_id = int(rec_id)
             model = Registry[model_name]
-            method = getattr(model, method_name)
+            if rec_id:
+                record = model.get_by_id(rec_id)
+                method = getattr(record, method_name)
+            else:
+                method = getattr(model, method_name)
             res = method(*args, **kwargs)
             return jsonify({
-                'code': 200,
                 'result': res
             })
         except Exception as ex:
@@ -165,16 +195,28 @@ def call():
             print(traceback.format_exc())
             return jsonify({
                 'error': {
-                    'code': 500,
                     'message': str(ex),
                     'data': traceback.format_exc()
                 }
             })
 
+@app.route("/create_user", methods=["POST"])
+def create_user():
+    try:
+        Registry["FlrUser"].create(name=request.form["name"],
+                    password=request.form["password"],
+                    login=request.form["login"])
+        return send_from_app_public_directory('index.html')
+    except:
+        print(traceback.format_exc())
+        return "Error intente más tarde"
+
 # Serve static files
+def send_from_app_public_directory(file):
+    return send_from_directory(os.path.join('apps',os.environ["app"],'client','public'), file)
 @app.route("/")
 def base():
-    return send_from_directory(os.path.join('apps',os.environ["app"],'client','public'), 'index.html')
+    return send_from_app_public_directory('index.html')
 @app.route("/<path:path>")
 def home(path):
-    return send_from_directory(os.path.join('apps',os.environ["app"],'client','public'), path)
+    return send_from_app_public_directory(path)

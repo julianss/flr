@@ -6,6 +6,9 @@ from playhouse.shortcuts import model_to_dict
 import traceback
 import operator as __operator__
 import os
+from openpyxl import Workbook
+from openpyxl.writer.excel import save_virtual_workbook
+import base64
 
 app = Flask(__name__)
 
@@ -141,6 +144,35 @@ class BaseModel(pw.Model):
             data = model_to_dict(model, only=only, recurse=True, extra_attrs=extra_attrs)
             results.append(data)
         return results
+
+    @classmethod
+    def export(cls, fields, filters=[], paginate=False, order=None):
+        results = cls.read(fields, filters, paginate, order)
+        wb = Workbook()
+        ws = wb.active
+        row = 1
+        for col,field in enumerate(fields,1):
+            f = getattr(cls, field)
+            if field == 'id':
+                label = "ID"
+            elif hasattr(f, "help_text"):
+                label = f.help_text
+            else:
+                label = f.__doc__ #get field name from property docstring
+            ws.cell(row=row, column=col, value=label)
+        row += 1
+        for rec in results:
+            for col,field in enumerate(fields,1):
+                val = rec[field]
+                if type(val) == dict:
+                    val = val.get("name", val["id"])
+                ws.cell(row=row, column=col, value=val)
+            row += 1
+        datas = save_virtual_workbook(wb)
+        return {
+            'datas': base64.b64encode(datas).decode("ascii")
+        }
+
 
 @app.route("/auth", methods=["POST"])
 def auth():

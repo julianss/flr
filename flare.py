@@ -131,6 +131,9 @@ class BaseModel(pw.Model):
             if "desc" in order:
                 order_attr = order_attr.desc()
             query = query.order_by(order_attr)
+        #If model has active attribute read only those that are active
+        if hasattr(cls, "active"):
+            query = query.where(getattr(cls, 'active') == True)
         if filters or paginate:
             query = cls.filter_query(query, filters, paginate)
         #Add foreign key fields so model_to_dict renders the name of the related record

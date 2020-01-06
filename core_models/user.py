@@ -9,21 +9,21 @@ SECRET = os.environ.get("jwt_secret")
 
 class FlrUser(BaseModel):
     name = pw.CharField(help_text="Nombre")
-    active = pw.BooleanField(help_text="Activo", null=True)
+    active = pw.BooleanField(help_text="Activo", default=True)
     login = pw.CharField(help_text="Login", unique=True)
     password = pw.CharField(help_text="Password")
 
     @staticmethod
     def auth(login, password):
         crypt_password = CryptContext(schemes=["pbkdf2_sha512"]).encrypt(password)
-        user = FlrUser.select(FlrUser.id, FlrUser.password).where(FlrUser.login==login)
+        user = FlrUser.select(FlrUser.id, FlrUser.password, FlrUser.name).where(FlrUser.login==login, FlrUser.active==True)
         if not user:
             return False
         user = user.first()
         if not pbkdf2_sha512.verify(password, user.password):
             return False
         else:
-            jwt_payload = {'uid': user.id}
+            jwt_payload = {'id': user.id, 'name': user.name}
             encoded_jwt = jwt.encode(jwt_payload, SECRET, algorithm='HS256')
             return encoded_jwt.decode('ascii')
 
@@ -40,6 +40,17 @@ class FlrUser(BaseModel):
         auth = request.headers.get("Authorization")
         token = auth.split(" ")[1]
         decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
-        request.uid = decoded.get("uid")
+        request.uid = decoded.get("id")
 
 FlrUser.r()
+
+class FlrGroup(BaseModel):
+    name = pw.CharField(help_text="Nombre")
+
+FlrGroup.r()
+
+class FlrUserFlrGroup(BaseModel):
+    user_id = pw.ForeignKeyField(FlrUser, help_text="Usuario")
+    group_id = pw.ForeignKeyField(FlrGroup, help_text="Grupo")
+
+FlrUserFlrGroup.r()

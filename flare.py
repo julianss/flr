@@ -246,7 +246,7 @@ def create_user():
         Registry["FlrUser"].create(name=request.form["name"],
                     password=request.form["password"],
                     login=request.form["login"])
-        return send_from_app_public_directory('index.html')
+        return redirect('/')
     except:
         print(traceback.format_exc())
         return "Error intente más tarde"

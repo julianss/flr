@@ -72,7 +72,8 @@ class BaseModel(pw.Model):
                     nary.pop()
                 else:
                     break
-        query = query.where(*stack)
+        if filters:
+            query = query.where(*stack)
         if paginate:
             query = query.paginate(paginate[0], paginate[1])
         return query
@@ -106,7 +107,7 @@ class BaseModel(pw.Model):
         return deleted
 
     @classmethod
-    def read(cls, fields, filters=[], paginate=False, order=None):
+    def read(cls, fields, filters=[], paginate=False, order=None, count=False):
         only = None
         extra_attrs = []
         if fields:
@@ -120,7 +121,6 @@ class BaseModel(pw.Model):
                     extra_attrs.append(field_name)
                 else:
                     only.append(field)
-        results = []
         if only:
             query = cls.select(*only)
         else:
@@ -136,17 +136,21 @@ class BaseModel(pw.Model):
             query = query.where(getattr(cls, 'active') == True)
         if filters or paginate:
             query = cls.filter_query(query, filters, paginate)
-        #Add foreign key fields so model_to_dict renders the name of the related record
-        if only:
-            for pw_field in only:
-                if type(pw_field) == pw.ForeignKeyField:
-                    only.append(getattr(pw_field.rel_model, "id"))
-                    if hasattr(pw_field.rel_model, "name"):
-                        only.append(getattr(pw_field.rel_model, "name"))
-        for model in query:
-            data = model_to_dict(model, only=only, recurse=True, extra_attrs=extra_attrs)
-            results.append(data)
-        return results
+        if count:
+            return query.count()
+        else:
+            results = []
+            #Add foreign key fields so model_to_dict renders the name of the related record
+            if only:
+                for pw_field in only:
+                    if type(pw_field) == pw.ForeignKeyField:
+                        only.append(getattr(pw_field.rel_model, "id"))
+                        if hasattr(pw_field.rel_model, "name"):
+                            only.append(getattr(pw_field.rel_model, "name"))
+            for model in query:
+                data = model_to_dict(model, only=only, recurse=True, extra_attrs=extra_attrs)
+                results.append(data)
+            return results
 
     @classmethod
     def export(cls, fields, filters=[], paginate=False, order=None):

@@ -1,5 +1,9 @@
 from dotenv import load_dotenv
-load_dotenv()
+import sys
+if len(sys.argv) > 1:
+    load_dotenv("." + sys.argv[1])
+else:
+    load_dotenv()
 
 from registry import Registry, db
 from flare import app
@@ -18,4 +22,7 @@ port = os.environ.get("port", 6800)
 host = os.environ.get("host", "0.0.0.0")
 flask_debug = True if os.environ.get("flask_debug",'') == 'True' else False
 print(Registry)
+if Registry["FlrUser"].read([], count=True) == 0:
+    admin_passwd = input("Superuser password: ")
+    Registry["FlrUser"].create(name="Administrator", login="admin", password=admin_passwd)
 app.run(port=port, host=host, debug=flask_debug)

@@ -56,6 +56,8 @@ class BaseModel(pw.Model):
                 field_name, operator, value = node
                 field = getattr(cls, field_name)
                 op = operator_table[operator]
+                if operator in ("like", "ilike"):
+                    value = "%" + value + "%"
                 expr = op(field, value)
                 stack.append(expr)
                 n_exprs += 1

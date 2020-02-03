@@ -38,9 +38,14 @@ class FlrUser(BaseModel):
     @staticmethod
     def decode_jwt(request):
         auth = request.headers.get("Authorization")
+        if not auth:
+            raise Exception("Needs Authorization")
         token = auth.split(" ")[1]
-        decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
-        request.uid = decoded.get("id")
+        try:
+            decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
+            request.uid = decoded.get("id")
+        except:
+            raise Exception("Invalid JWT")
 
 FlrUser.r()
 

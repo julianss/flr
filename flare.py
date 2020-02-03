@@ -82,7 +82,15 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_create(cls, **fields):
-        created = cls.create(**fields)
+        m2m = []
+        #Identify many2many fields, create record without them, will be added later
+        for field_name in fields:
+            if hasattr(cls, field_name):
+                pw_field = getattr(cls, field_name)
+                if type(pw_field) == pw.ManyToManyField:
+                    m2m.append(field_name)
+        fields_no_m2m = {k:fields[k] for k in fields if k not in m2m}
+        created = cls.create(**fields_no_m2m)
         for field_name in fields:
             if hasattr(cls, field_name):
                 pw_field = getattr(cls, field_name)
@@ -90,14 +98,38 @@ class BaseModel(pw.Model):
                     for fields2 in fields[field_name]:
                         fields2[pw_field.field.name] = created.id
                         pw_field.rel_model.create(**fields2)
+                elif type(pw_field) == pw.ManyToManyField:
+                    to_add = []
+                    for related_id in fields[field_name]:
+                        to_add.append(pw_field.rel_model.get_by_id(related_id))
+                    if to_add:
+                        getattr(created, field_name).add(to_add)
+                        created.save()
         return created.id
 
     @classmethod
     def flr_update(cls, fields, filters):
-        query = cls.update(**fields)
-        if filters:
-            query = cls.filter_query(query, filters)
-        modified = query.execute()
+        #Identify many2many fields, take them out they must be updated separately
+        m2m = []
+        for field_name in fields:
+            if hasattr(cls, field_name):
+                pw_field = getattr(cls, field_name)
+                if type(pw_field) == pw.ManyToManyField:
+                    m2m.append(field_name)
+        fields_no_m2m = {k:fields[k] for k in fields if k not in m2m}
+        modified = 0
+        if fields_no_m2m:
+            query = cls.update(**fields_no_m2m)
+            if filters:
+                query = cls.filter_query(query, filters)
+            modified = query.execute()
+        if m2m:
+            query = cls.select(cls.id)
+            if filters:
+                query = cls.filter_query(query, filters)
+                for record in query:
+                    for m2m_field in m2m:
+                        getattr(record, m2m_field).add(fields[m2m_field])
         return modified
 
     @classmethod

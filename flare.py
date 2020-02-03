@@ -148,11 +148,15 @@ class BaseModel(pw.Model):
             if "id" not in fields:
                 fields.append("id")
             only = []
+            m2m = []
             for field_name in fields:
                 field = getattr(cls, field_name)
                 #if field name is a @property of the model, it must be added to the extra_attrs list
                 if type(field) == property:
                     extra_attrs.append(field_name)
+                #if field is many2many it must be handled separately, we want to render it as array of ids
+                elif type(field) == pw.ManyToManyField:
+                    m2m.append(field_name)
                 else:
                     only.append(field)
         if only:
@@ -183,6 +187,9 @@ class BaseModel(pw.Model):
                             only.append(getattr(pw_field.rel_model, "name"))
             for model in query:
                 data = model_to_dict(model, only=only, recurse=True, extra_attrs=extra_attrs)
+                if m2m:
+                    for field_name in m2m:
+                        data[field_name] = [x.id for x in getattr(model, field_name)]
                 results.append(data)
             return results
 

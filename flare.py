@@ -12,6 +12,10 @@ import base64
 
 app = Flask(__name__)
 
+if os.environ.get("enable_cors") == "True":
+    from flask_cors import CORS
+    CORS(app)
+
 class BaseModel(pw.Model):
     class Meta:
         database = db

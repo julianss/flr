@@ -109,7 +109,7 @@ class BaseModel(pw.Model):
                         pw_field.rel_model.create(**fields2)
                 elif type(pw_field) == pw.ManyToManyField:
                     to_add = []
-                    for related_id in fields[field_name]:
+                    for related_id in fields.get(field_name) or []:
                         to_add.append(pw_field.rel_model.get_by_id(related_id))
                     if to_add:
                         getattr(created, field_name).add(to_add)

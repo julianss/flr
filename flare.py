@@ -56,9 +56,14 @@ class BaseModel(pw.Model):
                 field_name, operator, value = node
                 field = getattr(cls, field_name)
                 op = operator_table[operator]
-                if operator in ("like", "ilike"):
-                    value = "%" + value + "%"
-                expr = op(field, value)
+                if type(field) != pw.ManyToManyField:
+                    if operator in ("like", "ilike"):
+                        value = "%" + value + "%"
+                    expr = op(field, value)
+                else:
+                    rel_model_field_id = field.rel_model.__name__.lower() + "_id"
+                    m2m_filter = cls.select().join(field._through_model).where(getattr(field._through_model, rel_model_field_id).in_(value))
+                    expr = op(getattr(cls, "id"), [rec.id for rec in m2m_filter])
                 stack.append(expr)
                 n_exprs += 1
 
@@ -74,7 +79,7 @@ class BaseModel(pw.Model):
                     nary.pop()
                 else:
                     break
-        if filters:
+        if stack:
             query = query.where(*stack)
         if paginate:
             query = query.paginate(paginate[0], paginate[1])
@@ -129,6 +134,7 @@ class BaseModel(pw.Model):
                 query = cls.filter_query(query, filters)
                 for record in query:
                     for m2m_field in m2m:
+                        getattr(record, m2m_field).clear()
                         getattr(record, m2m_field).add(fields[m2m_field])
         return modified
 
@@ -144,6 +150,8 @@ class BaseModel(pw.Model):
     def read(cls, fields, filters=[], paginate=False, order=None, count=False):
         only = None
         extra_attrs = []
+        if not fields:
+            fields = ["id"]
         if fields:
             if "id" not in fields:
                 fields.append("id")

@@ -36,11 +36,13 @@ class FlrUser(BaseModel):
         return super(FlrUser, cls).create(**fields)
 
     @staticmethod
-    def decode_jwt(request):
+    def decode_jwt(request, token=False):
         auth = request.headers.get("Authorization")
         if not auth:
-            raise Exception("Needs Authorization")
-        token = auth.split(" ")[1]
+            if not token:
+                raise Exception("Needs Authorization")
+        if auth:
+            token = auth.split(" ")[1]
         try:
             decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
             request.uid = decoded.get("id")

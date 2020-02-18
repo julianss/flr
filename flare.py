@@ -118,6 +118,8 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_update(cls, fields, filters):
+        #Take out @properties, only regular fields can be updated
+        fields = {k:fields[k] for k in fields if type(getattr(cls, k)) != property}
         #Identify many2many fields, take them out they must be updated separately
         m2m = []
         for field_name in fields:

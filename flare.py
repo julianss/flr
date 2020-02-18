@@ -91,6 +91,8 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_create(cls, **fields):
+        #Take out @properties, only regular fields can be updated
+        fields = {k:fields[k] for k in fields if type(getattr(cls, k)) != property}
         m2m = []
         #Identify many2many fields, create record without them, will be added later
         for field_name in fields:

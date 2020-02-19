@@ -61,8 +61,8 @@ def flr_attach():
             }
         })
 
-@app.route("/download/<int:file_id>", methods=["GET"])
-def download(file_id):
+@app.route("/flrdownload/<int:file_id>", methods=["GET"])
+def flr_download(file_id):
     token = request.args.get("token")
     Registry["FlrUser"].decode_jwt(request, token)
     file = FlrFile.get_by_id(file_id)

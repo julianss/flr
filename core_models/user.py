@@ -1,5 +1,6 @@
 import peewee as pw
-from flare import BaseModel
+from flask import request
+from flare import BaseModel, Registry
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha512
 import jwt
@@ -7,11 +8,17 @@ import os
 
 SECRET = os.environ.get("jwt_secret")
 
+class FlrGroup(BaseModel):
+    name = pw.CharField(help_text="Nombre")
+
+FlrGroup.r()
+
 class FlrUser(BaseModel):
     name = pw.CharField(help_text="Nombre")
     active = pw.BooleanField(help_text="Activo", default=True)
     login = pw.CharField(help_text="Login", unique=True)
     password = pw.CharField(help_text="Password")
+    groups = pw.ManyToManyField(FlrGroup)
 
     @staticmethod
     def auth(login, password):
@@ -49,15 +56,34 @@ class FlrUser(BaseModel):
         except:
             raise Exception("Invalid JWT")
 
+    def get_permissions(self):
+        data = {}
+        for model in Registry:
+            data.setdefault(model, {
+                'perm_read': request.uid == 1,
+                'perm_update': request.uid == 1,
+                'perm_create': request.uid == 1,
+                'perm_delete': request.uid == 1,
+            })
+        for group in self.groups:
+            for rule in group.acls:
+                model_rule = data[rule.model]
+                model_rule["perm_read"] = model_rule["perm_read"] or rule.perm_read 
+                model_rule["perm_update"] = model_rule["perm_update"] or rule.perm_update
+                model_rule["perm_create"] = model_rule["perm_create"] or rule.perm_create
+                model_rule["perm_delete"] = model_rule["perm_delete"] or rule.perm_delete
+        return data
+
 FlrUser.r()
 
-class FlrGroup(BaseModel):
-    name = pw.CharField(help_text="Nombre")
+FlrUserFlrGroup = FlrUser.groups.get_through_model()
 
-FlrGroup.r()
+class FlrACL(BaseModel):
+    group_id = pw.ForeignKeyField(FlrGroup, help_text="Group", backref="acls")
+    model = pw.CharField(help_text="Model")
+    perm_read = pw.BooleanField(help_text="Read permission", null=True, default=False)
+    perm_update = pw.BooleanField(help_text="Update permission", null=True, default=False)
+    perm_create = pw.BooleanField(help_text="Create permission", null=True, default=False)
+    perm_delete = pw.BooleanField(help_text="Delete permission", null=True, default=False)
 
-class FlrUserFlrGroup(BaseModel):
-    user_id = pw.ForeignKeyField(FlrUser, help_text="Usuario")
-    group_id = pw.ForeignKeyField(FlrGroup, help_text="Grupo")
-
-FlrUserFlrGroup.r()
+FlrACL.r()

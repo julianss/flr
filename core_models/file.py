@@ -10,8 +10,8 @@ APP = os.environ.get("app")
 
 class AttachmentsMixin:
     @property
-    def attachments(self):
-        return FlrFile.read(["name"], {'rec_id': self.id, 'model': self.__class__.__name__})
+    def attachments(self): 
+        return FlrFile.read(["name","rec_id"], [['rec_id','=',self.id], ['model','=',self.__class__.__name__]])^M
 
 class FlrFile(BaseModel):
     name = pw.CharField(help_text="Name")

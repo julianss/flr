@@ -8,6 +8,12 @@ import os
 
 SECRET = os.environ.get("jwt_secret")
 
+def encrypt_password(fields):
+    if 'password' in fields:
+        if not fields["password"].startswith("$pbkdf2-sha512$"):
+            crypt_password = CryptContext(schemes=["pbkdf2_sha512"]).encrypt(fields["password"])
+            fields["password"] = crypt_password
+
 class FlrGroup(BaseModel):
     name = pw.CharField(help_text="Nombre")
 
@@ -16,7 +22,7 @@ FlrGroup.r()
 class FlrUser(BaseModel):
     name = pw.CharField(help_text="Nombre")
     active = pw.BooleanField(help_text="Activo", default=True)
-    login = pw.CharField(help_text="Login", unique=True)
+    login = pw.CharField(help_text="Login", unique=True, null=True)
     email = pw.CharField(help_text="Email", unique=True, null=True)
     password = pw.CharField(help_text="Password")
     role = pw.CharField(help_text="Perfil", null=True)
@@ -48,11 +54,13 @@ class FlrUser(BaseModel):
 
     @classmethod
     def create(cls, **fields):
-        if 'password' in fields:
-            if not fields["password"].startswith("$pbkdf2-sha512$"):
-                crypt_password = CryptContext(schemes=["pbkdf2_sha512"]).encrypt(fields["password"])
-                fields["password"] = crypt_password
+        encrypt_password(fields)
         return super(FlrUser, cls).create(**fields)
+
+    @classmethod
+    def flr_update(cls, fields, filters):
+        encrypt_password(fields)
+        return super(FlrUser, cls).flr_update(fields, filters)
 
     @staticmethod
     def decode_jwt(request, token=False):

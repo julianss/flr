@@ -27,6 +27,16 @@ class BaseModel(pw.Model):
         Registry[cls.__name__] = cls
 
     @classmethod
+    def get_fields(cls):
+        fields = []
+        for k in cls._meta.fields.keys():
+            fields.append(k)
+        for k in cls.__dict__:
+            if type(cls.__dict__[k]) in (pw.ManyToManyFieldAccessor, property):
+                fields.append(k)
+        return fields
+
+    @classmethod
     def filter_query(cls, query, filters=[], paginate=False):
         operator_table = {
             '=':     __operator__.eq,

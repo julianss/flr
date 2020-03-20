@@ -121,7 +121,8 @@ class BaseModel(pw.Model):
                         pw_field.rel_model.create(**fields2)
                 elif type(pw_field) == pw.ManyToManyField:
                     to_add = []
-                    for related_id in fields.get(field_name) or []:
+                    related_ids = [x["id"] for x in fields.get(field_name)] or []
+                    for related_id in related_ids:
                         to_add.append(pw_field.rel_model.get_by_id(related_id))
                     if to_add:
                         getattr(created, field_name).add(to_add)
@@ -153,7 +154,7 @@ class BaseModel(pw.Model):
                 for record in query:
                     for m2m_field in m2m:
                         getattr(record, m2m_field).clear()
-                        getattr(record, m2m_field).add(fields[m2m_field])
+                        getattr(record, m2m_field).add([x["id"] for x in fields[m2m_field]])
         return modified
 
     @classmethod
@@ -215,7 +216,10 @@ class BaseModel(pw.Model):
                 data = model_to_dict(model, only=only, recurse=True, extra_attrs=extra_attrs)
                 if m2m:
                     for field_name in m2m:
-                        data[field_name] = [x.id for x in getattr(model, field_name)]
+                        data[field_name] = [{
+                            'id': x.id,
+                            'name': x.name if hasattr(x,"name") else None
+                        } for x in getattr(model, field_name)]
                 results.append(data)
             return results
 

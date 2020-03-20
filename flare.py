@@ -252,7 +252,10 @@ class BaseModel(pw.Model):
 def auth():
     try:
         params = request.get_json()
-        login = params.get("login")
+        if "login" in params:
+            login = params.get("login")
+        elif "email" in params:
+            login = params.get("email")
         password = params.get("password")
         jwt = Registry["FlrUser"].auth(login, password)
         if jwt:

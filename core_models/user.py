@@ -17,20 +17,32 @@ class FlrUser(BaseModel):
     name = pw.CharField(help_text="Nombre")
     active = pw.BooleanField(help_text="Activo", default=True)
     login = pw.CharField(help_text="Login", unique=True)
+    email = pw.CharField(help_text="Email", unique=True, null=True)
     password = pw.CharField(help_text="Password")
+    role = pw.CharField(help_text="Perfil", null=True)
     groups = pw.ManyToManyField(FlrGroup)
 
     @staticmethod
     def auth(login, password):
         crypt_password = CryptContext(schemes=["pbkdf2_sha512"]).encrypt(password)
-        user = FlrUser.select(FlrUser.id, FlrUser.password, FlrUser.name).where(FlrUser.login==login, FlrUser.active==True)
+        auth_field_name = os.environ.get("auth_field", "login")
+        if auth_field_name == "login":
+            auth_field = FlrUser.login
+        elif auth_field_name == "email":
+            auth_field = FlrUser.email
+        user = FlrUser.select().where(auth_field==login, FlrUser.active==True)
         if not user:
             return False
         user = user.first()
         if not pbkdf2_sha512.verify(password, user.password):
             return False
         else:
-            jwt_payload = {'id': user.id, 'name': user.name}
+            jwt_payload = {
+                'id': user.id,
+                'name': user.name,
+                'role': user.role,
+                auth_field_name: getattr(user, auth_field_name)
+            }
             encoded_jwt = jwt.encode(jwt_payload, SECRET, algorithm='HS256')
             return encoded_jwt.decode('ascii')
 

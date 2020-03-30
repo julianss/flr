@@ -11,13 +11,13 @@ APP = os.environ.get("app")
 class AttachmentsMixin:
     @property
     def attachments(self): 
-        return FlrFile.read(["name","rec_id"], [['rec_id','=',self.id], ['model','=',self.__class__.__name__]])^M
+        return FlrFile.read(["name"], [['rec_id','=',self.id], ['model','=',self.__class__.__name__]])
 
 class FlrFile(BaseModel):
     name = pw.CharField(help_text="Name")
     path = pw.CharField(help_text="Filestore Path")
-    model = pw.CharField(help_text="Model")
-    rec_id = pw.CharField(help_text="Record id")
+    model = pw.CharField(help_text="Model", null=True)
+    rec_id = pw.CharField(help_text="Record id", null=True)
 
     def get_content(self):
         f = open(self.path, "rb")
@@ -47,8 +47,16 @@ def flr_attach():
                 os.mkdir(folder)
             fullpath = os.path.join(folder, generated_name[2:])
             file.save(fullpath)
-            created = FlrFile.create(name=file.filename, path=fullpath,
-                model=request.form["model"], rec_id=request.form["rec_id"])
+            vals = {
+                'name': file.filename,
+                'path': fullpath,
+            }
+            if 'model' in request.form and 'rec_id' in request.form:
+                vals.update({
+                    'model': request.form["model"],
+                    'rec_id': request.form["rec_id"]
+                })
+            created = FlrFile.create(**vals)
             return jsonify({
                 'result': created.id 
             })

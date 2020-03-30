@@ -31,8 +31,8 @@ class BaseModel(pw.Model):
         fields = []
         for k in cls._meta.fields.keys():
             fields.append(k)
-        for k in cls.__dict__:
-            if type(cls.__dict__[k]) in (pw.ManyToManyFieldAccessor, property):
+        for k in dir(cls):
+            if type(getattr(cls, k)) in (pw.ManyToManyFieldAccessor, property):
                 fields.append(k)
         return fields
 
@@ -101,7 +101,11 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_create(cls, **fields):
-        #Take out @properties, only regular fields can be updated
+        #Take out @properties, only regular fields can be created, except attachments
+        attachments = []
+        if 'attachments' in fields:
+            attachments = fields["attachments"]
+            del fields["attachments"]
         fields = {k:fields[k] for k in fields if type(getattr(cls, k)) != property}
         m2m = []
         #Identify many2many fields, create record without them, will be added later
@@ -127,11 +131,21 @@ class BaseModel(pw.Model):
                     if to_add:
                         getattr(created, field_name).add(to_add)
                         created.save()
-        return created.id
+        created_id = created.id
+        if attachments:
+            Registry["FlrFile"].flr_update({
+                'model': cls.__name__,
+                'rec_id': created_id
+            }, [('id', 'in', attachments)])
+        return created_id
 
     @classmethod
     def flr_update(cls, fields, filters):
-        #Take out @properties, only regular fields can be updated
+        #Take out @properties, only regular fields can be updated, except attachments
+        attachments = []
+        if 'attachments' in fields:
+            attachments = fields["attachments"]
+            del fields["attachments"]
         fields = {k:fields[k] for k in fields if type(getattr(cls, k)) != property}
         #Identify many2many fields, take them out they must be updated separately
         m2m = []
@@ -147,7 +161,7 @@ class BaseModel(pw.Model):
             if filters:
                 query = cls.filter_query(query, filters)
             modified = query.execute()
-        if m2m:
+        if m2m or attachments:
             query = cls.select(cls.id)
             if filters:
                 query = cls.filter_query(query, filters)
@@ -155,6 +169,11 @@ class BaseModel(pw.Model):
                     for m2m_field in m2m:
                         getattr(record, m2m_field).clear()
                         getattr(record, m2m_field).add([x["id"] for x in fields[m2m_field]])
+                    for att in attachments:
+                        Registry["FlrFile"].flr_update({
+                            'model': cls.__name__,
+                            'rec_id': record.id
+                        }, [('id','=',att)])
         return modified
 
     @classmethod
@@ -181,7 +200,7 @@ class BaseModel(pw.Model):
                 #if field name is a @property of the model, it must be added to the extra_attrs list
                 if type(field) == property:
                     extra_attrs.append(field_name)
-                #if field is many2many it must be handled separately, we want to render it as array of ids
+                #if field is many2many it must be handled separately, we want to render it as array of id-name objects
                 elif type(field) == pw.ManyToManyField:
                     m2m.append(field_name)
                 else:

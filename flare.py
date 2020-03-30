@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, redirect
+from flask import Flask, request, jsonify, send_from_directory, redirect, make_response
 from registry import Registry, db
 import peeweedbevolve
 import peewee as pw
@@ -267,20 +267,20 @@ def auth():
                 'result': jwt
             })
         else:
-            return jsonify({
+            return make_response(jsonify({
             'error': {
                 'message': 'Incorrect credentials',
                 'data': 'Incorrect credentials'
             }
-        })
+        }), 401)
     except Exception as ex:
         print(traceback.format_exc())
-        return jsonify({
+        return make_response(jsonify({
             'error': {
                 'message': str(ex),
                 'data': traceback.format_exc()
             }
-        })
+        }), 500)
 
 @app.route("/call", methods=["POST"])
 def call():
@@ -311,12 +311,12 @@ def call():
         except Exception as ex:
             transaction.rollback()
             print(traceback.format_exc())
-            return jsonify({
+            return make_response(jsonify({
                 'error': {
                     'message': str(ex),
                     'data': traceback.format_exc()
                 }
-            })
+            }), 500)
 
 @app.route("/create_user", methods=["POST"])
 def create_user():

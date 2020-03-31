@@ -32,6 +32,8 @@ class BaseModel(pw.Model):
         for k in cls._meta.fields.keys():
             fields.append(k)
         for k in dir(cls):
+            if k in ("dirty_fields", "_pk"):
+                continue
             if type(getattr(cls, k)) in (pw.ManyToManyFieldAccessor, property):
                 fields.append(k)
         return fields

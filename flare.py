@@ -9,6 +9,7 @@ import os
 from openpyxl import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
 import base64
+from functools import wraps
 
 app = Flask(__name__)
 
@@ -359,3 +360,72 @@ def base():
 @app.route("/<path:path>")
 def home(path):
     return send_from_app_public_directory(path)
+
+#Resful API helpers
+class api:
+    def wrapper(f):
+        @wraps(f)
+        def g(*args, **kwargs):
+            with db.atomic() as transaction:
+                try:
+                    Registry["FlrUser"].decode_jwt(request)
+                    return jsonify(f(*args, **kwargs))
+                except Exception as ex:
+                    transaction.rollback()
+                    print(traceback.format_exc())
+                    return make_response(jsonify({
+                        'error': {
+                            'message': str(ex),
+                            'data': traceback.format_exc()
+                        }
+                    }), 500)
+        return g
+
+    @wrapper
+    def get(model):
+        page = int(request.args.get("page", "0"))
+        limit = int(request.args.get("limit", "0"))
+        count = Registry[model].read([], count=True)
+        paginate = False
+        if page and limit:
+            paginate = (page, limit)
+        Model = Registry[model]
+        fields = Model.get_fields()
+        result = Model.read([f for f in fields if f!='password'], paginate=paginate)
+        return {
+            'count': count,
+            'result': result
+        }
+
+    @wrapper
+    def post(model):
+        params = request.get_json()
+        Registry[model].flr_create(**params)
+        return {'result': 'Ítem agregado con éxito'}
+
+    @wrapper
+    def put(model, id):
+        params = request.get_json()
+        updated = Registry[model].flr_update(params, [('id','=',id)])
+        if updated:
+            return {'result': 'Ítem actualizado con éxito'}
+        else:
+            return {'result': 'No se actualizó ningún ítem'}
+
+    @wrapper
+    def delete(model, id):
+        deleted = Registry[model].flr_delete([('id','=',id)])
+        if deleted:
+            return {'result': 'Ítem eliminado con éxito'}
+        else:
+            return {'result': 'No se eliminó ningún ítem'}
+
+    def make_restful(name, model):
+        routes = (
+            ('get_%s'%name, 'GET', '/%s'%name, lambda: api.get(model)),
+            ('post_%s'%name, 'POST', '/%s'%name, lambda: api.post(model)),
+            ('put_%s'%name, 'PUT', '/%s/<int:id>'%name, lambda id: api.put(model, id)),
+            ('delete_%s'%name, 'DELETE', '/%s/<int:id>'%name, lambda id: api.delete(model, id))
+        )
+        for name, method, url, func in routes:
+            app.add_url_rule(url, name, func, methods=[method])

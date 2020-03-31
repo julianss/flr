@@ -24,5 +24,5 @@ flask_debug = True if os.environ.get("flask_debug",'') == 'True' else False
 print(Registry)
 if Registry["FlrUser"].read([], count=True) == 0:
     admin_passwd = input("Superuser password: ")
-    Registry["FlrUser"].create(name="Administrator", login="admin", password=admin_passwd)
+    Registry["FlrUser"].create(name="Administrator", login="admin", email="admin", password=admin_passwd)
 app.run(port=port, host=host, debug=flask_debug)

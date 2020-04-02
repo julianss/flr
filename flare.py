@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, redirect, make_response
+from flask import Flask, request, jsonify, send_from_directory, redirect, make_response, Response
 from registry import Registry, db
 import peeweedbevolve
 import peewee as pw
@@ -431,3 +431,16 @@ class api:
         )
         for name, method, url, func in routes:
             app.add_url_rule(url, name, func, methods=[method])
+            
+@app.route("/flrroutes", methods=["GET"])
+def list_routes():
+    routes = []
+    for rule in app.url_map.iter_rules():
+        rule_str = "%s"%rule
+        if rule_str not in ("/","/<path:path>","/static/<path:filename>","/flrroutes","/create_user"):
+            routes.append([",".join([m for m in rule.methods if m in ("GET","POST","DELETE","PUT")]), rule_str])
+    routes.sort(key=lambda x:x[1])
+    routes = ["{:20s} {:50s}".format(route[0], route[1]) for route in routes]
+    resp = Response("\n".join(routes))
+    resp.headers["Content-type"] = "text/plain"
+    return resp

@@ -32,11 +32,12 @@ class BaseModel(pw.Model):
         fields = []
         for k in cls._meta.fields.keys():
             fields.append(k)
+        for k in cls._meta.manytomany.keys():
+            fields.append(k)
         for k in dir(cls):
-            if k in ("dirty_fields", "_pk"):
-                continue
-            if type(getattr(cls, k)) in (pw.ManyToManyFieldAccessor, property):
-                fields.append(k)
+            if type(getattr(cls, k)) == property:
+                if k not in ("dirty_fields", "_pk"):
+                    fields.append(k)
         return fields
 
     @classmethod

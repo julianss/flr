@@ -1,6 +1,6 @@
 import peewee as pw
 from flare import BaseModel, app, db, Registry, request
-from flask import send_file, jsonify
+from flask import send_file, jsonify, make_response
 import uuid
 import os
 import traceback
@@ -62,12 +62,12 @@ def flr_attach():
             })
     except Exception as ex:
         print(traceback.format_exc())
-        return jsonify({
+        return make_response(jsonify({
             'error': {
                 'message': str(ex),
                 'data': traceback.format_exc()
             }
-        })
+        }), 500)
 
 @app.route("/flrdownload/<int:file_id>", methods=["GET"])
 def flr_download(file_id):

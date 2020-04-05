@@ -13,6 +13,18 @@ class AttachmentsMixin:
     def attachments(self): 
         return FlrFile.read(["name"], [['rec_id','=',self.id], ['model','=',self.__class__.__name__]])
 
+    def update_attachments(self, new_ids):
+        old_ids = [rec["id"] for rec in self.attachments]
+        if set(old_ids) != set(new_ids):
+            FlrFile.flr_update({
+                'model': type(self).__name__,
+                'rec_id': self.id
+            }, [('id','in',new_ids)])
+            for old_id in old_ids:
+                if old_id not in new_ids:
+                    FlrFile.flr_delete([('id','=',old_id)])
+        return True
+
 class FlrFile(BaseModel):
     name = pw.CharField(help_text="Name")
     path = pw.CharField(help_text="Filestore Path")

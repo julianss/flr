@@ -145,11 +145,7 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_update(cls, fields, filters):
-        #Take out @properties, only regular fields can be updated, except attachments
-        attachments = []
-        if 'attachments' in fields:
-            attachments = fields["attachments"]
-            del fields["attachments"]
+        #Take out @properties, only regular fields can be updated
         fields = {k:fields[k] for k in fields if type(getattr(cls, k)) != property}
         #Identify many2many fields, take them out they must be updated separately
         m2m = []
@@ -165,19 +161,14 @@ class BaseModel(pw.Model):
             if filters:
                 query = cls.filter_query(query, filters)
             modified = query.execute()
-        if m2m or attachments:
+        if m2m:
             query = cls.select(cls.id)
             if filters:
                 query = cls.filter_query(query, filters)
-                for record in query:
-                    for m2m_field in m2m:
-                        getattr(record, m2m_field).clear()
-                        getattr(record, m2m_field).add([x["id"] for x in fields[m2m_field]])
-                    for att in attachments:
-                        Registry["FlrFile"].flr_update({
-                            'model': cls.__name__,
-                            'rec_id': record.id
-                        }, [('id','=',att)])
+            for record in query:
+                for m2m_field in m2m:
+                    getattr(record, m2m_field).clear()
+                    getattr(record, m2m_field).add([x["id"] for x in fields[m2m_field]])
         return modified
 
     @classmethod

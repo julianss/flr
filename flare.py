@@ -364,13 +364,16 @@ class api:
                     return jsonify(f(*args, **kwargs))
                 except Exception as ex:
                     transaction.rollback()
+                    code = 500
+                    if str(ex) == "Invalid JWT":
+                        code = 401
                     print(traceback.format_exc())
                     return make_response(jsonify({
                         'error': {
                             'message': str(ex),
                             'data': traceback.format_exc()
                         }
-                    }), 500)
+                    }), code)
         return g
 
     @wrapper

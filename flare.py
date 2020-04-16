@@ -35,9 +35,12 @@ class BaseModel(pw.Model):
         for k in cls._meta.manytomany.keys():
             fields.append(k)
         for k in dir(cls):
-            if type(getattr(cls, k)) == property:
+            tattr = type(getattr(cls, k))
+            if tattr == property:
                 if k not in ("dirty_fields", "_pk"):
                     fields.append(k)
+            if tattr == pw.BackrefAccessor:
+                fields.append(k)
         return fields
 
     @classmethod
@@ -145,8 +148,8 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_update(cls, fields, filters):
-        #Take out @properties, only regular fields can be updated
-        fields = {k:fields[k] for k in fields if type(getattr(cls, k)) != property}
+        #Take out @properties and reference fields, only regular fields can be updated
+        fields = {k:fields[k] for k in fields if type(getattr(cls, k)) not in (property, pw.BackrefAccessor)}
         #Identify many2many fields, take them out they must be updated separately
         m2m = []
         for field_name in fields:
@@ -195,8 +198,8 @@ class BaseModel(pw.Model):
                 #if field name is a @property of the model, it must be added to the extra_attrs list
                 if type(field) == property:
                     extra_attrs.append(field_name)
-                #if field is many2many it must be handled separately, we want to render it as array of id-name objects
-                elif type(field) == pw.ManyToManyField:
+                #if field is many2many or one2many it must be handled separately, we want to render it as array of id-name objects
+                elif type(field) in (pw.ManyToManyField, pw.BackrefAccessor):
                     m2m.append(field_name)
                 else:
                     only.append(field)

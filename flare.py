@@ -368,7 +368,7 @@ class api:
                 except Exception as ex:
                     transaction.rollback()
                     code = 500
-                    if str(ex) == "Invalid JWT":
+                    if str(ex) == "Invalid JWT" or str(ex) == "Needs Authorization":
                         code = 401
                     print(traceback.format_exc())
                     return make_response(jsonify({

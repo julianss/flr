@@ -358,6 +358,9 @@ def home(path):
 
 #Resful API helpers
 class api:
+
+    specs = {}
+
     def wrapper(f):
         @wraps(f)
         def g(*args, **kwargs):
@@ -418,7 +421,7 @@ class api:
         else:
             return {'result': 'No se eliminó ningún ítem'}
 
-    def make_restful(name, model, post_func=False):
+    def make_restful(name, model, post_func=False, specs=False):
         if not post_func:
             post_func = lambda: api.post(model)
         routes = (
@@ -428,8 +431,15 @@ class api:
             ('delete_%s'%name, 'DELETE', '/%s/<int:id>'%name, lambda id: api.delete(model, id))
         )
         for name, method, url, func in routes:
-            app.add_url_rule(url, name, func, methods=[method])
-            
+            api.add_url_rule(name, method, url, func, specs=specs)
+
+    def add_url_rule(name, method, url, func, specs=False):
+        app.add_url_rule(url, name, func, methods=[method])
+        if specs:
+            api.specs[name] = specs
+
+ROUTES_UNDOCUMENTED = ("/","/<path:path>","/static/<path:filename>","/flrroutes","/create_user")
+
 @app.route("/flrroutes", methods=["GET"])
 def list_routes():
     routes = []

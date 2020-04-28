@@ -383,7 +383,7 @@ class api:
         return g
 
     @wrapper
-    def get(model):
+    def get(model, fields):
         page = int(request.args.get("page", "0"))
         limit = int(request.args.get("limit", "0"))
         count = Registry[model].read([], count=True)
@@ -391,8 +391,10 @@ class api:
         if page and limit:
             paginate = (page, limit)
         Model = Registry[model]
-        fields = Model.get_fields()
-        result = Model.read([f for f in fields if f!='password'], paginate=paginate)
+        if not fields:
+            fields = Model.get_fields()
+            fields = [f for f in fields if f!='password']
+        result = Model.read(fields, paginate=paginate)
         return {
             'count': count,
             'result': result
@@ -421,11 +423,11 @@ class api:
         else:
             return {'result': 'No se eliminó ningún ítem'}
 
-    def make_restful(name, model, post_func=False, specs=False):
+    def make_restful(name, model, post_func=False, specs=False, get_fields=[]):
         if not post_func:
             post_func = lambda: api.post(model)
         routes = (
-            ('get_%s'%name, 'GET', '/%s'%name, lambda: api.get(model)),
+            ('get_%s'%name, 'GET', '/%s'%name, lambda: api.get(model, get_fields)),
             ('post_%s'%name, 'POST', '/%s'%name, post_func),
             ('put_%s'%name, 'PUT', '/%s/<int:id>'%name, lambda id: api.put(model, id)),
             ('delete_%s'%name, 'DELETE', '/%s/<int:id>'%name, lambda id: api.delete(model, id))

@@ -4,6 +4,7 @@ from flask import send_file, jsonify, make_response
 import uuid
 import os
 import traceback
+import base64
 
 FILESTORE_PATH = os.environ.get("filestore_path", "./filestore")
 APP = os.environ.get("app")
@@ -30,6 +31,26 @@ class FlrFile(BaseModel):
     path = pw.CharField(help_text="Filestore Path")
     model = pw.CharField(help_text="Model", null=True)
     rec_id = pw.CharField(help_text="Record id", null=True)
+
+    @classmethod
+    def create_from_data(cls, data, name=False):
+        generated_name = str(uuid.uuid4()).replace("-","")
+        if not os.path.isdir(FILESTORE_PATH):
+            os.mkdir(FILESTORE_PATH)
+        if not os.path.isdir(os.path.join(FILESTORE_PATH, APP)):
+            os.mkdir(os.path.join(FILESTORE_PATH, APP))
+        folder = os.path.join(FILESTORE_PATH, APP, generated_name[0:2])
+        if not os.path.isdir(folder):
+            os.mkdir(folder)
+        fullpath = os.path.join(folder, generated_name[2:])
+        with open(fullpath, "wb") as f:
+            f.write(base64.b64decode(data))
+        vals = {
+            'name': name or generated_name,
+            'path': fullpath,
+        }
+        created = Registry["FlrFile"].create(**vals)
+        return created
 
     def get_content(self):
         f = open(self.path, "rb")

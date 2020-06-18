@@ -44,6 +44,41 @@ class BaseModel(pw.Model):
         return fields
 
     @classmethod
+    def get_fields_desc(cls, which=[]):
+        fields = {}
+        for k in cls._meta.fields.keys():
+            if k not in which:
+                continue
+            field = cls._meta.fields[k]
+            desc = {
+                'label': field.help_text,
+                'type': field.__class__.__name__.replace("Field", "").lower()
+            }
+            if field.choices:
+                desc.update({
+                    'type': 'select',
+                    'options': field.choices
+                })
+            fields[k] = desc
+        for k in cls._meta.manytomany.keys():
+            if k not in which:
+                continue
+            field = cls._meta.manytomany[k]
+            fields[k] = {
+                'label': field.help_text if hasattr(field, "help_text") else "Unkown",
+                'type': 'manytomany'
+            }
+        for k in dir(cls):
+            if k not in which:
+                continue
+            tattr = type(getattr(cls, k))
+            if tattr == property:
+                fields[k] = {}
+            if tattr == pw.BackrefAccessor:
+                fields[k] = {}
+        return fields
+
+    @classmethod
     def filter_query(cls, query, filters=[], paginate=False):
         operator_table = {
             '=':     __operator__.eq,

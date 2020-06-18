@@ -429,7 +429,7 @@ class api:
         if not fields:
             fields = Model.get_fields()
             fields = [f for f in fields if f!='password']
-        result = Model.read(fields, paginate=paginate)
+        result = Model.read(fields, paginate=paginate, order="id desc")
         return {
             'count': count,
             'result': result

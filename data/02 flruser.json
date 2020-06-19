@@ -1,0 +1,50 @@
+[
+    {
+        "model": "FlrMenu",
+        "meta_id": "menu_flruser",
+        "data": {
+            "name": "Usuarios",
+            "sequence": 1,
+            "section_id_META_ID": "menu_section_admin",
+            "groups_META_ID": ["flgroup_admin"]
+        }
+    },
+    {
+        "model": "FlrView",
+        "meta_id": "flruser_list_view",
+        "data": {
+            "name": "Users list view",
+            "model": "FlrUser",
+            "view_type": "list",
+            "definition": {
+                "create": true,
+                "edit": true,
+                "structure": [
+                    {"field": "name"},
+                    {"field": "email"}
+                ]
+            },
+            "menu_id_META_ID": "menu_flruser",
+            "sequence": 1
+        }
+    },
+    {
+        "model": "FlrView",
+        "meta_id": "flruser_form_view",
+        "data": {
+            "name": "Users form view",
+            "model": "FlrUser",
+            "view_type": "form",
+            "definition": {
+                "structure": [
+                    {"field": "name"},
+                    {"field": "email"},
+                    {"field": "password", "password": true},
+                    {"field": "active"}
+                ]
+            },
+            "menu_id_META_ID": "menu_flruser",
+            "sequence": 2
+        }
+    }
+]

@@ -10,6 +10,7 @@ from openpyxl import Workbook
 from openpyxl.writer.excel import save_virtual_workbook
 import base64
 from functools import wraps
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -26,6 +27,10 @@ class BaseModel(pw.Model):
         if cls.__name__ in Registry:
             raise Exception(cls.__name__ + " already exists in the model registry")
         Registry[cls.__name__] = cls
+        cls._meta.add_field("created_by", pw.ForeignKeyField(Registry["FlrUser"], null=True))
+        cls._meta.add_field("created_on", pw.DateTimeField(null=True))
+        cls._meta.add_field("updated_by", pw.ForeignKeyField(Registry["FlrUser"], null=True))
+        cls._meta.add_field("updated_on", pw.DateTimeField(null=True))
 
     @classmethod
     def get_fields(cls):
@@ -142,6 +147,13 @@ class BaseModel(pw.Model):
         return query
 
     @classmethod
+    def create(cls, **fields):
+        fields["created_on"] = datetime.now()
+        if request:
+            fields["created_by"] = request.uid
+        return super(BaseModel, cls).create(**fields)
+
+    @classmethod
     def flr_create(cls, **fields):
         #Take out @properties, only regular fields can be created, except attachments
         attachments = []
@@ -167,7 +179,10 @@ class BaseModel(pw.Model):
                         pw_field.rel_model.create(**fields2)
                 elif type(pw_field) == pw.ManyToManyField:
                     to_add = []
-                    related_ids = [x["id"] for x in fields.get(field_name)] or []
+                    related_ids = [
+                        (x["id"] if type(x)==dict else x)
+                        for x in fields.get(field_name)
+                    ] or []
                     for related_id in related_ids:
                         to_add.append(pw_field.rel_model.get_by_id(related_id))
                     if to_add:
@@ -206,7 +221,9 @@ class BaseModel(pw.Model):
             for record in query:
                 for m2m_field in m2m:
                     getattr(record, m2m_field).clear()
-                    getattr(record, m2m_field).add([x["id"] for x in fields[m2m_field]])
+                    getattr(record, m2m_field).add([
+                        x["id"] if type(x) == dict else x
+                        for x in fields[m2m_field]])
         return modified
 
     @classmethod
@@ -219,6 +236,8 @@ class BaseModel(pw.Model):
 
     @classmethod
     def read(cls, fields, filters=[], paginate=False, order=None, count=False):
+        if order is None and hasattr(cls, "_order"):
+            order = cls._order
         only = None
         extra_attrs = []
         if not fields:

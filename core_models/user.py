@@ -14,11 +14,6 @@ def encrypt_password(fields):
             crypt_password = CryptContext(schemes=["pbkdf2_sha512"]).encrypt(fields["password"])
             fields["password"] = crypt_password
 
-class FlrGroup(BaseModel):
-    name = pw.CharField(help_text="Nombre")
-
-FlrGroup.r()
-
 class FlrUser(BaseModel):
     name = pw.CharField(help_text="Nombre")
     active = pw.BooleanField(help_text="Activo", default=True)
@@ -26,7 +21,6 @@ class FlrUser(BaseModel):
     email = pw.CharField(help_text="Email", unique=True, null=True)
     password = pw.CharField(help_text="Password")
     role = pw.CharField(help_text="Perfil", null=True)
-    groups = pw.ManyToManyField(FlrGroup)
 
     @staticmethod
     def auth(login, password):
@@ -94,8 +88,13 @@ class FlrUser(BaseModel):
                 model_rule["perm_delete"] = model_rule["perm_delete"] or rule.perm_delete
         return data
 
-FlrUser.r()
+class FlrGroup(BaseModel):
+    name = pw.CharField(help_text="Nombre")
 
+FlrUser._meta.add_field("groups", pw.ManyToManyField(FlrGroup))
+
+FlrUser.r()
+FlrGroup.r()
 FlrUserFlrGroup = FlrUser.groups.get_through_model()
 
 class FlrACL(BaseModel):

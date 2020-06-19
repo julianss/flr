@@ -1,0 +1,9 @@
+[
+    {
+        "model": "FlrMenuSection",
+        "meta_id": "menu_section_admin",
+        "data": {
+            "name": "Administración"
+        }
+    }
+]

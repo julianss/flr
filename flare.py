@@ -149,7 +149,7 @@ class BaseModel(pw.Model):
     @classmethod
     def create(cls, **fields):
         fields["created_on"] = datetime.now()
-        if request:
+        if request and hasattr(request, "uid"):
             fields["created_by"] = request.uid
         return super(BaseModel, cls).create(**fields)
 

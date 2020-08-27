@@ -34,7 +34,7 @@ class BaseModel(pw.Model):
 
     @classmethod
     def get_fields(cls):
-        fields = []
+        fields = ["id"]
         for k in cls._meta.fields.keys():
             fields.append(k)
         for k in cls._meta.manytomany.keys():
@@ -51,14 +51,18 @@ class BaseModel(pw.Model):
     @classmethod
     def get_fields_desc(cls, which=[]):
         fields = {}
+        which.append("id")
         for k in cls._meta.fields.keys():
             if k not in which:
                 continue
             field = cls._meta.fields[k]
             desc = {
-                'label': field.help_text,
-                'type': field.__class__.__name__.replace("Field", "").lower()
+                'label': field.verbose_name or field.help_text,
+                'type': field.__class__.__name__.replace("Field", "").lower(),
+                'required': not field.null
             }
+            if desc["type"] == "foreignkey":
+                desc["model"] = field.rel_model.__name__
             if field.choices:
                 desc.update({
                     'type': 'select',
@@ -69,9 +73,12 @@ class BaseModel(pw.Model):
             if k not in which:
                 continue
             field = cls._meta.manytomany[k]
+            verbose_name = field.verbose_name if hasattr(field, "verbose_name") else False
+            help_text = field.help_text if hasattr(field, "help_text") else False
             fields[k] = {
-                'label': field.help_text if hasattr(field, "help_text") else "Unkown",
-                'type': 'manytomany'
+                'label': verbose_name or help_text,
+                'type': 'manytomany',
+                'model': field.rel_model.__name__
             }
         for k in dir(cls):
             if k not in which:
@@ -81,6 +88,7 @@ class BaseModel(pw.Model):
                 fields[k] = {}
             if tattr == pw.BackrefAccessor:
                 fields[k] = {}
+        fields["id"]["label"] = "ID"
         return fields
 
     @classmethod

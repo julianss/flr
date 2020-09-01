@@ -189,6 +189,13 @@ class BaseModel(pw.Model):
                 if type(pw_field) == pw.ManyToManyField:
                     m2m.append(field_name)
         fields_no_m2m = {k:fields[k] for k in fields if k not in m2m}
+        #ForeignKey fields can be sent in object format, if so extract id
+        for field_name in fields:
+            if hasattr(cls, field_name):
+                pw_field = getattr(cls, field_name)
+                if type(pw_field) == pw.ForeignKeyField:
+                    if type(fields_no_m2m[field_name]) == dict:
+                        fields_no_m2m[field_name] = fields_no_m2m[field_name]["id"]
         created = cls.create(**fields_no_m2m)
         for field_name in fields:
             if hasattr(cls, field_name):
@@ -228,6 +235,13 @@ class BaseModel(pw.Model):
                 if type(pw_field) == pw.ManyToManyField:
                     m2m.append(field_name)
         fields_no_m2m = {k:fields[k] for k in fields if k not in m2m}
+        #ForeignKey fields can be sent in object format, if so extract id
+        for field_name in fields:
+            if hasattr(cls, field_name):
+                pw_field = getattr(cls, field_name)
+                if type(pw_field) == pw.ForeignKeyField:
+                    if type(fields_no_m2m[field_name]) == dict:
+                        fields_no_m2m[field_name] = fields_no_m2m[field_name]["id"]
         modified = 0
         if fields_no_m2m:
             query = cls.update(**fields_no_m2m)

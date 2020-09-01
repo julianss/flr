@@ -50,6 +50,10 @@ class BaseModel(pw.Model):
 
     @classmethod
     def get_fields_desc(cls, which=[]):
+        related_fields = []
+        for field in which:
+            if "." in field:
+                related_fields.append(field)
         fields = {}
         which.append("id")
         for k in cls._meta.fields.keys():
@@ -78,8 +82,16 @@ class BaseModel(pw.Model):
             fields[k] = {
                 'label': verbose_name or help_text,
                 'type': 'manytomany',
-                'model': field.rel_model.__name__
+                'model': field.rel_model.__name__,
+                'related_fields': []
             }
+            rfs = []
+            for rf in related_fields:
+                parent, child = rf.split(".")
+                if parent == k:
+                    rfs.append(child)
+            if rfs:
+                fields[k]["related_fields"] = field.rel_model.get_fields_desc(rfs)
         for k in dir(cls):
             if k not in which:
                 continue
@@ -248,6 +260,7 @@ class BaseModel(pw.Model):
             order = cls._order
         only = None
         extra_attrs = []
+        related_fields_m2m = {}
         if not fields:
             fields = ["id"]
         if fields:
@@ -256,15 +269,21 @@ class BaseModel(pw.Model):
             only = []
             m2m = []
             for field_name in fields:
-                field = getattr(cls, field_name)
-                #if field name is a @property of the model, it must be added to the extra_attrs list
-                if type(field) == property:
-                    extra_attrs.append(field_name)
-                #if field is many2many or one2many it must be handled separately, we want to render it as array of id-name objects
-                elif type(field) in (pw.ManyToManyField, pw.BackrefAccessor):
-                    m2m.append(field_name)
+                if "." in field_name:
+                    parent, child = field_name.split(".")
+                    field = getattr(cls, parent)
+                    if type(field) == pw.ManyToManyField:
+                        related_fields_m2m.setdefault(parent, []).append(child)
                 else:
-                    only.append(field)
+                    field = getattr(cls, field_name)
+                    #if field name is a @property of the model, it must be added to the extra_attrs list
+                    if type(field) == property:
+                        extra_attrs.append(field_name)
+                    #if field is many2many or one2many it must be handled separately, we want to render it as array of id-name objects
+                    elif type(field) in (pw.ManyToManyField, pw.BackrefAccessor):
+                        m2m.append(field_name)
+                    else:
+                        only.append(field)
         if only:
             query = cls.select(*only)
         else:
@@ -284,7 +303,7 @@ class BaseModel(pw.Model):
             return query.count()
         else:
             results = []
-            #Add foreign key fields so model_to_dict renders the name of the related record
+            # Add foreign key fields so model_to_dict renders the name of the related record
             if only:
                 for pw_field in only:
                     if type(pw_field) == pw.ForeignKeyField:
@@ -295,10 +314,17 @@ class BaseModel(pw.Model):
                 data = model_to_dict(model, only=only, recurse=True, extra_attrs=extra_attrs)
                 if m2m:
                     for field_name in m2m:
-                        data[field_name] = [{
-                            'id': x.id,
-                            'name': x.name if hasattr(x,"name") else None
-                        } for x in getattr(model, field_name)]
+                        related_records = getattr(model, field_name)
+                        related_records_dicts = []
+                        for relr in related_records:
+                            rendered = {
+                                'id': relr.id,
+                                'name': relr.name if hasattr(relr,"name") else None,
+                            }
+                            for related_field in related_fields_m2m[field_name]:
+                                rendered[related_field] = getattr(relr, related_field)
+                            related_records_dicts.append(rendered)
+                        data[field_name] = related_records_dicts
                 results.append(data)
             return results
 

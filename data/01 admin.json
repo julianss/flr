@@ -3,7 +3,8 @@
         "model": "FlrMenuSection",
         "meta_id": "menu_section_admin",
         "data": {
-            "name": "Administración"
+            "name": "Administración",
+            "sequence": "999"
         }
     }
 ]

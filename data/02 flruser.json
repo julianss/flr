@@ -40,7 +40,13 @@
                     {"field": "name"},
                     {"field": "email"},
                     {"field": "password", "password": true},
-                    {"field": "active"}
+                    {"field": "active"},
+                    {
+                        "field": "groups",
+                        "related_fields": ["name"],
+                        "label": "Roles"
+
+                    }
                 ]
             },
             "menu_id_META_ID": "menu_flruser",

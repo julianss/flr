@@ -1,0 +1,8 @@
+#!/bin/bash
+cp ".example" ".$1"
+mkdir apps/$1
+echo "from . import models" > apps/$1/__init__.py
+mkdir apps/$1/models
+touch apps/$1/models/__init__.py
+npx degit sveltejs/template apps/$1/client
+cp -r svelte_client/* apps/$1/client/src

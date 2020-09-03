@@ -52,5 +52,49 @@
             "menu_id_META_ID": "menu_flruser",
             "sequence": 2
         }
+    },
+    {
+        "model": "FlrMenu",
+        "meta_id": "menu_flrgroup",
+        "data": {
+            "name": "Grupos",
+            "sequence": 2,
+            "section_id_META_ID": "menu_section_admin",
+            "groups_META_ID": ["flgroup_admin"]
+        }
+    },
+    {
+        "model": "FlrView",
+        "meta_id": "flrgroup_list_view",
+        "data": {
+            "name": "Groups list view",
+            "model": "FlrGroup",
+            "view_type": "list",
+            "definition": {
+                "create": true,
+                "edit": true,
+                "structure": [
+                    {"field": "name"}
+                ]
+            },
+            "menu_id_META_ID": "menu_flrgroup",
+            "sequence": 1
+        }
+    },
+    {
+        "model": "FlrView",
+        "meta_id": "flrgroup_form_view",
+        "data": {
+            "name": "Groups form view",
+            "model": "FlrGroup",
+            "view_type": "form",
+            "definition": {
+                "structure": [
+                    {"field": "name"}
+                ]
+            },
+            "menu_id_META_ID": "menu_flrgroup",
+            "sequence": 2
+        }
     }
 ]

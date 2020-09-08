@@ -99,7 +99,20 @@ class BaseModel(pw.Model):
             if tattr == property:
                 fields[k] = {}
             if tattr == pw.BackrefAccessor:
-                fields[k] = {}
+                field = getattr(cls, k)
+                fields[k] = {
+                    'label': k.capitalize(),
+                    'type': 'backref',
+                    'model': field.rel_model.__name__,
+                    'related_fields': []
+                }
+                rfs = []
+                for rf in related_fields:
+                    parent, child = rf.split(".")
+                    if parent == k:
+                        rfs.append(child)
+                if rfs:
+                    fields[k]["related_fields"] = field.rel_model.get_fields_desc(rfs)
         fields["id"]["label"] = "ID"
         return fields
 
@@ -200,6 +213,7 @@ class BaseModel(pw.Model):
         for field_name in fields:
             if hasattr(cls, field_name):
                 pw_field = getattr(cls, field_name)
+                #Create one2many related records
                 if type(pw_field) == pw.BackrefAccessor:
                     for fields2 in fields[field_name]:
                         fields2[pw_field.field.name] = created.id
@@ -227,13 +241,28 @@ class BaseModel(pw.Model):
     def flr_update(cls, fields, filters):
         #Take out @properties and reference fields, only regular fields can be updated
         fields = {k:fields[k] for k in fields if type(getattr(cls, k)) not in (property, pw.BackrefAccessor)}
-        #Identify many2many fields, take them out they must be updated separately
         m2m = []
         for field_name in fields:
             if hasattr(cls, field_name):
                 pw_field = getattr(cls, field_name)
+                #Identify many2many fields, take them out they must be updated separately
                 if type(pw_field) == pw.ManyToManyField:
                     m2m.append(field_name)
+                #One2many related records can be either created or updated now
+                elif type(pw_field) == pw.BackrefAccessor:
+                    for fields2 in fields[field_name]:
+                        #It's new, create it
+                        if not "id" in fields2:
+                            fields2[pw_field.field.name] = created.id
+                            pw_field.rel_model.create(**fields2)
+                        #Already exists, update it
+                        else:
+                            rel_id_field = getattr(pw_field.rel_model, "id")
+                            rel_id = fields2["id"]
+                            del fields2["id"]
+                            pw_field.rel_model.update(**fields2).where(rel_id_field==rel_id)
+                    #Take it out so a normal update isn't attempted on this field
+                    del fields[field_name]
         fields_no_m2m = {k:fields[k] for k in fields if k not in m2m}
         #ForeignKey fields can be sent in object format, if so extract id
         for field_name in fields:
@@ -286,14 +315,14 @@ class BaseModel(pw.Model):
                 if "." in field_name:
                     parent, child = field_name.split(".")
                     field = getattr(cls, parent)
-                    if type(field) == pw.ManyToManyField:
+                    if type(field) in (pw.ManyToManyField, pw.BackrefAccessor):
                         related_fields_m2m.setdefault(parent, []).append(child)
                 else:
                     field = getattr(cls, field_name)
                     #if field name is a @property of the model, it must be added to the extra_attrs list
                     if type(field) == property:
                         extra_attrs.append(field_name)
-                    #if field is many2many or one2many it must be handled separately, we want to render it as array of id-name objects
+                    #if field is many2many or one2many it must be handled separately
                     elif type(field) in (pw.ManyToManyField, pw.BackrefAccessor):
                         m2m.append(field_name)
                     else:

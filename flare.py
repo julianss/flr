@@ -525,13 +525,15 @@ class api:
         else:
             return {'result': 'No se eliminó ningún ítem'}
 
-    def make_restful(name, model, post_func=False, specs=False, get_fields=[]):
+    def make_restful(name, model, post_func=False, put_func=False, specs=False, get_fields=[]):
         if not post_func:
             post_func = lambda: api.post(model)
+        if not put_func:
+            put_func = lambda id: api.put(model, id)
         routes = (
             ('get_%s'%name, 'GET', '/%s'%name, lambda: api.get(model, get_fields)),
             ('post_%s'%name, 'POST', '/%s'%name, post_func),
-            ('put_%s'%name, 'PUT', '/%s/<int:id>'%name, lambda id: api.put(model, id)),
+            ('put_%s'%name, 'PUT', '/%s/<int:id>'%name, put_func),
             ('delete_%s'%name, 'DELETE', '/%s/<int:id>'%name, lambda id: api.delete(model, id))
         )
         for name, method, url, func in routes:

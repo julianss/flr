@@ -33,6 +33,16 @@ class BaseModel(pw.Model):
         cls._meta.add_field("updated_on", pw.DateTimeField(null=True))
 
     @classmethod
+    def get_default(cls):
+        return {}
+
+    def get_dict_id_and_name(self):
+        return {
+            'id': self.id,
+            'name': self.name if hasattr(self, "name") else "%s,%s"%(self.__class__.__name__, self.id)
+        }
+
+    @classmethod
     def get_fields(cls):
         fields = ["id"]
         for k in cls._meta.fields.keys():
@@ -203,24 +213,24 @@ class BaseModel(pw.Model):
                     m2m.append(field_name)
         fields_no_m2m = {k:fields[k] for k in fields if k not in m2m}
         #ForeignKey fields can be sent in object format, if so extract id
-        #Also, if the value is falsy, null the field
         for field_name in fields:
             if hasattr(cls, field_name):
                 pw_field = getattr(cls, field_name)
                 if type(pw_field) == pw.ForeignKeyField:
                     if type(fields_no_m2m[field_name]) == dict:
                         fields_no_m2m[field_name] = fields_no_m2m[field_name]["id"]
-                    elif not fields_no_m2m[field_name]:
-                        fields_no_m2m[field_name] = None
         created = cls.create(**fields_no_m2m)
         for field_name in fields:
             if hasattr(cls, field_name):
                 pw_field = getattr(cls, field_name)
                 #Create one2many related records
                 if type(pw_field) == pw.BackrefAccessor:
-                    for fields2 in fields[field_name]:
-                        fields2[pw_field.field.name] = created.id
-                        pw_field.rel_model.create(**fields2)
+                    if fields.get(field_name) is not None:
+                        for fields2 in fields.get(field_name,[]):
+                            fields2[pw_field.field.name] = created.id
+                            if "id" in fields2:
+                                del fields2["id"]
+                            pw_field.rel_model.flr_create(**fields2)
                 elif type(pw_field) == pw.ManyToManyField:
                     to_add = []
                     related_ids = [
@@ -242,31 +252,22 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_update(cls, fields, filters):
-        #Take out @properties and reference fields, only regular fields can be updated
-        fields = {k:fields[k] for k in fields if type(getattr(cls, k)) not in (property, pw.BackrefAccessor)}
+        #Take out @properties, only regular fields can be updated
+        #Take out also non-existing fields that could have been sent by mistake or for example
+        #the "virtual" name field that is generated when a model has no name field.
+        fields = {k:fields[k] for k in fields
+            if hasattr(cls, k) and type(getattr(cls, k)) not in (property,)}
         m2m = []
+        o2m = []
         for field_name in fields:
             if hasattr(cls, field_name):
                 pw_field = getattr(cls, field_name)
-                #Identify many2many fields, take them out they must be updated separately
+                #Identify many2many and one2many fields, take them out they must be updated separately
                 if type(pw_field) == pw.ManyToManyField:
                     m2m.append(field_name)
-                #One2many related records can be either created or updated now
                 elif type(pw_field) == pw.BackrefAccessor:
-                    for fields2 in fields[field_name]:
-                        #It's new, create it
-                        if not "id" in fields2:
-                            fields2[pw_field.field.name] = created.id
-                            pw_field.rel_model.create(**fields2)
-                        #Already exists, update it
-                        else:
-                            rel_id_field = getattr(pw_field.rel_model, "id")
-                            rel_id = fields2["id"]
-                            del fields2["id"]
-                            pw_field.rel_model.update(**fields2).where(rel_id_field==rel_id)
-                    #Take it out so a normal update isn't attempted on this field
-                    del fields[field_name]
-        fields_no_m2m = {k:fields[k] for k in fields if k not in m2m}
+                    o2m.append(field_name)
+        fields_no_m2m = {k:fields[k] for k in fields if k not in m2m and k not in o2m}
         #ForeignKey fields can be sent in object format, if so extract id
         #Also, if the value is falsy, null the field
         for field_name in fields:
@@ -293,6 +294,34 @@ class BaseModel(pw.Model):
                     getattr(record, m2m_field).add([
                         x["id"] if type(x) == dict else x
                         for x in fields[m2m_field]])
+        if o2m:
+            updated_ids = [x["id"] for x in cls.read([], filters=filters)]
+            #o2m updating should only be used for a single record
+            assert len(updated_ids) == 1, "one2many fields can only be updated for a single record"
+            updated_id = updated_ids[0]
+            for field_name in o2m:
+                pw_field = getattr(cls, field_name)
+                #If there are missing records, we must delete them, so take note of the records
+                #currently stored in the database and compare them to the incoming ones
+                original_ids = set([x.id for x in getattr(cls.get_by_id(updated_id), field_name)])
+                new_ids = set([x["id"] for x in fields[field_name] if "id" in x])
+                to_delete = original_ids - new_ids
+                if to_delete:
+                    pw_field.rel_model.flr_delete([('id','in',to_delete)])
+                #Now process the incoming values to create or edit the child records as needed
+                for fields2 in fields[field_name]:
+                    #It's new, create it
+                    if not fields2.get("id") or str(fields2.get("id")).startswith("tmp"):
+                        fields2[pw_field.field.name] = updated_id
+                        if "id" in fields2:
+                            del fields2["id"]
+                        pw_field.rel_model.flr_create(**fields2)
+                    #Already exists, update it
+                    #TODO only update it if it's dirty
+                    else:
+                        rel_id = fields2["id"]
+                        del fields2["id"]
+                        pw_field.rel_model.flr_update(fields2, [("id","=",rel_id)])
         return modified
 
     @classmethod
@@ -304,7 +333,9 @@ class BaseModel(pw.Model):
         return deleted
 
     @classmethod
-    def read(cls, fields, filters=[], paginate=False, order=None, count=False):
+    def read(cls, fields, ids=[], filters=[], paginate=False, order=None, count=False):
+        if ids:
+            filters.append(("id","in",ids))
         if order is None and hasattr(cls, "_order"):
             order = cls._order
         only = None
@@ -318,6 +349,8 @@ class BaseModel(pw.Model):
             only = []
             m2m = []
             for field_name in fields:
+                #Take note of the related fields (dot notation), will be used to render the dicts
+                #of many-to-many and one-to-many records
                 if "." in field_name:
                     parent, child = field_name.split(".")
                     field = getattr(cls, parent)
@@ -361,17 +394,21 @@ class BaseModel(pw.Model):
                             only.append(getattr(pw_field.rel_model, "name"))
             for model in query:
                 data = model_to_dict(model, only=only, recurse=True, extra_attrs=extra_attrs)
+                # Add many-to-many and one-to-many fields. For this, the array of related records
+                # will be added one by one, creating the dicts for the records using the list
+                # of related fields (the ones that were specified using dot notation)
                 if m2m:
                     for field_name in m2m:
                         related_records = getattr(model, field_name)
                         related_records_dicts = []
                         for relr in related_records:
-                            rendered = {
-                                'id': relr.id,
-                                'name': relr.name if hasattr(relr,"name") else None,
-                            }
-                            for related_field in related_fields_m2m[field_name]:
-                                rendered[related_field] = getattr(relr, related_field)
+                            rendered = relr.get_dict_id_and_name()
+                            for related_field in related_fields_m2m.get(field_name, []):
+                                if type(getattr(relr.__class__, related_field)) == pw.ForeignKeyField:
+                                    rel = getattr(relr, related_field)
+                                    rendered[related_field] = rel.get_dict_id_and_name()
+                                else:
+                                    rendered[related_field] = getattr(relr, related_field)
                             related_records_dicts.append(rendered)
                         data[field_name] = related_records_dicts
                 results.append(data)

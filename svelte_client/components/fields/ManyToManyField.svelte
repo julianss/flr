@@ -8,6 +8,9 @@
     export let edit;
     export let relatedFields = [];
     export let relatedFieldsDesc = {};
+    export let allowAdd;
+    export let allowRemove;
+    export let readonly;
     let valueFK;
 
     function renderField(obj, field){
@@ -46,7 +49,7 @@
 
 <div class="form-group">
     <label>{label}</label>
-    {#if edit}
+    {#if edit && allowAdd && !readonly}
         <ForeignKeyField
             label=""
             bind:value={valueFK}
@@ -59,13 +62,13 @@
         />
     {/if}
     <table class="table table-sm">
-        <thead class="thead-dark">
+        <thead class="thead-light">
             <tr>
                 {#each relatedFields as field}
-                    {#if !relatedFieldsDesc || !relatedFieldsDesc[field]}
-                        <th>{field}</th>
+                    {#if !relatedFieldsDesc || !relatedFieldsDesc[field.field]}
+                        <th>{field.field}</th>
                     {:else}
-                        <th>{relatedFieldsDesc[field].label}</th>
+                        <th>{relatedFieldsDesc[field.field].label}</th>
                     {/if}
                 {/each}
                 <th></th>
@@ -75,14 +78,16 @@
             {#each value as obj}
                 <tr>
                     {#each relatedFields as field}
-                        <td>{renderField(obj, field)}</td>
+                        <td>{renderField(obj, field.field)}</td>
                     {/each}
                     <td class="basura">
-                        <img
-                            hidden={!edit}
-                            on:click={()=>remove(obj.id)}
-                            src="icons/trash-fill.svg"
-                            alt="Remover"/>
+                        {#if allowRemove}
+                            <img
+                                hidden={!edit}
+                                on:click={()=>remove(obj.id)}
+                                src="icons/trash-fill.svg"
+                                alt="Remover"/>
+                        {/if}
                     </td>
                 </tr>
             {/each}

@@ -17,6 +17,7 @@
     let notDirty = null;
     let fieldsDescription = null;
     let editMode = false;
+    let onChanges = {};
 
     activeViewStore.subscribe((event) => {
         if(event){
@@ -33,6 +34,14 @@
             if(views != null){
                 view = views["form"];
                 sections = [];
+                onChanges = [];
+                for(let k in view.definition){
+                    for(let item of view.definition[k]){
+                        if(item.field && item.onchange){
+                            onChanges[item.field] = item.onchange;
+                        }
+                    }
+                }
                 for(let item of view.definition.structure){
                     if(item.section){
                         sections.push(item.section)
@@ -79,7 +88,7 @@
                     fields.push(item.field);
                     if(item.related_fields){
                         for(let rf of item.related_fields){
-                            fields.push(item.field + "." + rf);
+                            fields.push(item.field + "." + rf.field);
                         }
                     }
                 }
@@ -99,9 +108,17 @@
                         for(let field in fieldsDescription){
                             blankRecord[field] = null;
                         }
-                        record = blankRecord;
-                        notDirty = JSON.parse(JSON.stringify(blankRecord));
-                        editMode = true;
+                        call(view.model, "get_default").then(
+                            (defaults) => {
+                                for(let field in defaults){
+                                    blankRecord[field] = defaults[field];
+                                }
+                                record = blankRecord;
+                                notDirty = JSON.parse(JSON.stringify(blankRecord));
+                                editMode = true;
+                            }
+                        )
+                        
                     }
                 }
             );
@@ -168,6 +185,21 @@
         }
     }
 
+    function fieldChanged(field){
+        if(onChanges[field]){
+            call(view.model, onChanges[field], [record]).then(
+                (resp) => {
+                    if(resp["value"]){
+                        for(let f in resp["value"]){
+                            record[f] = resp["value"][f];
+                        }
+                        record = record;
+                    }
+                }
+            )
+        }
+    }
+
 </script>
 
 <div hidden={!visible}>
@@ -228,6 +260,11 @@
                                     required={item.required || fieldsDescription[item.field].required}
                                     relatedFields={item.related_fields}
                                     relatedFieldsDesc={fieldsDescription[item.field].related_fields}
+                                    on:change={()=>fieldChanged(item.field)}
+                                    nolabel={item.nolabel || false}
+                                    add={item.add}
+                                    remove={item.remove}
+                                    readonly={item.readonly || false}
                                 />
                             </div>
                         {/if}

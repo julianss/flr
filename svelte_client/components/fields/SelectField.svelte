@@ -1,8 +1,11 @@
 <script>
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
     export let label = "";
     export let value;
     export let edit;
     export let options = [];
+    export let readonly;
 
     function getLabel(value){
         for(let o of options){
@@ -11,12 +14,17 @@
             }
         }
     }
+
+    function changed(){
+        dispatch("change", {});
+    }
+
 </script>
 
 <div class="form-group">
     <label>{label}</label>
-    {#if edit}
-        <select class="form-control" bind:value={value}>
+    {#if edit && !readonly}
+        <select class="form-control" bind:value={value} on:blur={changed}>
             <option value={false}></option>
             {#each options as option}
                 <option value={option[0]}>{option[1]}</option>

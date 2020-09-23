@@ -10,10 +10,11 @@
     export let edit;
     export let relatedFields = [];
     export let placeholder = "";
+    export let query = "";
+    export let readonly;
     let loaded = false;
     let results = [];
     let showResults = false;
-    let query = "";
     let selectedName = "";
     let uniqueId = Date.now().toString() + "-" + Math.random().toString().substring(2);
 
@@ -49,6 +50,14 @@
         hideResults();
         dispatch('change', result);
         //document.getElementById("modal-close-"+uniqueId).click()
+    }
+
+    function clear(){
+        query = "";
+        value = false;
+        results = [];
+        hideResults();
+        dispatch('change', false);
     }
 
     function getSelectedDisplayName(){
@@ -89,7 +98,7 @@
 
 <div class="form-group">
     <label>{label}</label>
-    {#if edit}
+    {#if edit && !readonly}
         <div class="input-wrapper">
             <div class="input-group mb-3">
                 <input
@@ -106,6 +115,13 @@
                         type="button"
                         >
                         <img src="icons/caret-down-fill.svg" alt="v"/>
+                    </button>
+                    <button
+                        class="btn btn-outline-secondary"
+                        on:click={clear}
+                        type="button"
+                        >
+                        <img src="icons/trash-fill.svg" alt="v"/>
                     </button>
                    <!--<button
                         data-target="#modal-foreignfield-{uniqueId}"

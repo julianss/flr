@@ -9,6 +9,7 @@
     import SelectField from './fields/SelectField.svelte'
     import ManyToManyField from './fields/ManyToManyField.svelte'
     import BackRefField from './fields/BackRefField.svelte'
+    import FileField from './fields/FileField.svelte'
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
     export let type;
@@ -139,6 +140,14 @@
                 relatedFieldsDesc={relatedFieldsDesc}
                 allowAdd={add}
                 allowRemove={remove}
+                on:change={changed}
+                readonly={readonly}
+            />
+        {:else if type === "file"}
+            <FileField
+                label={label}
+                bind:value={value}
+                edit={edit}
                 on:change={changed}
                 readonly={readonly}
             />

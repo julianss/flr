@@ -198,20 +198,25 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_create(cls, **fields):
-        #Take out @properties, only regular fields can be created, except attachments
+        #Attachments may be present (files that have already been created,
+        #just attach them to the created model at the end)
         attachments = []
         if 'attachments' in fields:
             attachments = fields["attachments"]
             del fields["attachments"]
+        #Take out @properties, only regular fields can be created
         fields = {k:fields[k] for k in fields if type(getattr(cls, k)) != property}
         m2m = []
-        #Identify many2many fields, create record without them, will be added later
+        filefields = []
+        #Identify many2many and file fields, create record without them, will be added later
         for field_name in fields:
             if hasattr(cls, field_name):
                 pw_field = getattr(cls, field_name)
                 if type(pw_field) == pw.ManyToManyField:
                     m2m.append(field_name)
-        fields_no_m2m = {k:fields[k] for k in fields if k not in m2m}
+                elif type(pw_field) == pw.FileField:
+                    filefields.append(field_name)
+        fields_no_m2m = {k:fields[k] for k in fields if k not in m2m and k not in filefields}
         #ForeignKey fields can be sent in object format, if so extract id
         for field_name in fields:
             if hasattr(cls, field_name):
@@ -223,25 +228,36 @@ class BaseModel(pw.Model):
         for field_name in fields:
             if hasattr(cls, field_name):
                 pw_field = getattr(cls, field_name)
+                #Create files from the base64 data
+                if type(pw_field) == pw.FileField:
+                    value = fields.get(field_name)
+                    if value is not None:
+                        data = value.get("datab64", "")
+                        name = value.get("name", "untitled")
+                        file_id = Registry["FlrFile"].create_from_data(data, name)
+                        setattr(created, field_name, file_id)
+                        created.save()
                 #Create one2many related records
-                if type(pw_field) == pw.BackrefAccessor:
+                elif type(pw_field) == pw.BackrefAccessor:
                     if fields.get(field_name) is not None:
                         for fields2 in fields.get(field_name,[]):
                             fields2[pw_field.field.name] = created.id
                             if "id" in fields2:
                                 del fields2["id"]
                             pw_field.rel_model.flr_create(**fields2)
+                #Associate many to many records
                 elif type(pw_field) == pw.ManyToManyField:
-                    to_add = []
-                    related_ids = [
-                        (x["id"] if type(x)==dict else x)
-                        for x in fields.get(field_name)
-                    ] or []
-                    for related_id in related_ids:
-                        to_add.append(pw_field.rel_model.get_by_id(related_id))
-                    if to_add:
-                        getattr(created, field_name).add(to_add)
-                        created.save()
+                    if fields.get(field_name) is not None:
+                        to_add = []
+                        related_ids = [
+                            (x["id"] if type(x)==dict else x)
+                            for x in fields.get(field_name)
+                        ] or []
+                        for related_id in related_ids:
+                            to_add.append(pw_field.rel_model.get_by_id(related_id))
+                        if to_add:
+                            getattr(created, field_name).add(to_add)
+                            created.save()
         created_id = created.id
         if attachments:
             Registry["FlrFile"].flr_update({
@@ -252,6 +268,11 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_update(cls, fields, filters):
+        #Determine which ids will be updated
+        query = cls.select(cls.id)
+        if filters:
+            query = cls.filter_query(query, filters)
+        ids = [x.id for x in query]
         #Take out @properties, only regular fields can be updated
         #Take out also non-existing fields that could have been sent by mistake or for example
         #the "virtual" name field that is generated when a model has no name field.
@@ -259,15 +280,18 @@ class BaseModel(pw.Model):
             if hasattr(cls, k) and type(getattr(cls, k)) not in (property,)}
         m2m = []
         o2m = []
+        filefields = []
         for field_name in fields:
             if hasattr(cls, field_name):
                 pw_field = getattr(cls, field_name)
-                #Identify many2many and one2many fields, take them out they must be updated separately
+                #Identify many2many, one2many and file fields, take them out they must be updated separately
                 if type(pw_field) == pw.ManyToManyField:
                     m2m.append(field_name)
                 elif type(pw_field) == pw.BackrefAccessor:
                     o2m.append(field_name)
-        fields_no_m2m = {k:fields[k] for k in fields if k not in m2m and k not in o2m}
+                elif type(pw_field) == pw.FileField:
+                    filefields.append(field_name)
+        fields_no_m2m = {k:fields[k] for k in fields if k not in m2m and k not in o2m and k not in filefields}
         #ForeignKey fields can be sent in object format, if so extract id
         #Also, if the value is falsy, null the field
         for field_name in fields:
@@ -280,14 +304,10 @@ class BaseModel(pw.Model):
                         fields_no_m2m[field_name] = None
         modified = 0
         if fields_no_m2m:
-            query = cls.update(**fields_no_m2m)
-            if filters:
-                query = cls.filter_query(query, filters)
+            query = cls.update(**fields_no_m2m).where(cls.id.in_(ids))
             modified = query.execute()
         if m2m:
-            query = cls.select(cls.id)
-            if filters:
-                query = cls.filter_query(query, filters)
+            query = cls.select(cls.id).where(cls.id.in_(ids))
             for record in query:
                 for m2m_field in m2m:
                     getattr(record, m2m_field).clear()
@@ -295,10 +315,9 @@ class BaseModel(pw.Model):
                         x["id"] if type(x) == dict else x
                         for x in fields[m2m_field]])
         if o2m:
-            updated_ids = [x["id"] for x in cls.read([], filters=filters)]
-            #o2m updating should only be used for a single record
-            assert len(updated_ids) == 1, "one2many fields can only be updated for a single record"
-            updated_id = updated_ids[0]
+            #for the moment o2m updating will be supported only for a single record
+            assert len(ids) == 1, "one2many fields can only be updated for a single record"
+            updated_id = ids[0]
             for field_name in o2m:
                 pw_field = getattr(cls, field_name)
                 #If there are missing records, we must delete them, so take note of the records
@@ -322,6 +341,28 @@ class BaseModel(pw.Model):
                         rel_id = fields2["id"]
                         del fields2["id"]
                         pw_field.rel_model.flr_update(fields2, [("id","=",rel_id)])
+        if filefields:
+            FlrFile = Registry["FlrFile"]
+            for filefield in fields:
+                value = fields.get(filefield)
+                #Delete old file
+                if value is None or value.get("datab64"):
+                    query = cls.select(getattr(cls, filefield)).where(cls.id.in_(ids))
+                    file_ids = []
+                    for record in query:
+                        file_id = getattr(record, filefield)
+                        if file_id:
+                            file_ids.append(file_id.id)
+                    FlrFile.delete().where(FlrFile.id.in_(file_ids)).execute()
+                #Create new file
+                if value is not None:
+                    for id in ids:
+                        data = value.get("datab64", "")
+                        name = value.get("name", "untitled")
+                        file_id = FlrFile.create_from_data(data, name)
+                        record = cls.get_by_id(id)
+                        setattr(record, field_name, file_id)
+                        record.save()
         return modified
 
     @classmethod
@@ -388,7 +429,7 @@ class BaseModel(pw.Model):
             # Add foreign key fields so model_to_dict renders the name of the related record
             if only:
                 for pw_field in only:
-                    if type(pw_field) == pw.ForeignKeyField:
+                    if type(pw_field) == pw.ForeignKeyField or type(pw_field) == pw.FileField:
                         only.append(getattr(pw_field.rel_model, "id"))
                         if hasattr(pw_field.rel_model, "name"):
                             only.append(getattr(pw_field.rel_model, "name"))

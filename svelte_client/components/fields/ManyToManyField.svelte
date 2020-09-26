@@ -26,6 +26,9 @@
     }
 
     function add(event){
+        if(!event.detail.id){
+            return;
+        }
         let ids = [];
         for(let obj of value){
             ids.push(obj.id);

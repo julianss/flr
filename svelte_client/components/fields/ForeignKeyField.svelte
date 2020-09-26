@@ -29,9 +29,14 @@
             kwargs.filters.push(['name','ilike',query])
         }
         loaded = false;
-        let readFields = relatedFields;
+        let readFields;
         if(!relatedFields || relatedFields.length == 0){
             readFields = ["id", "name"];
+        }else{
+            readFields = [];
+            for(let rf of relatedFields){
+                readFields.push(rf.field);
+            }
         }
         call(model, "read", [readFields], kwargs).then(
             (resp) => {

@@ -664,10 +664,13 @@ def list_routes():
     routes = []
     for rule in app.url_map.iter_rules():
         rule_str = "%s"%rule
-        if rule_str not in ("/","/<path:path>","/static/<path:filename>","/flrroutes","/create_user"):
-            routes.append([",".join([m for m in rule.methods if m in ("GET","POST","DELETE","PUT")]), rule_str])
-    routes.sort(key=lambda x:x[1])
-    routes = ["{:20s} {:50s}".format(route[0], route[1]) for route in routes]
+        if rule_str not in ROUTES_UNDOCUMENTED:
+            routes.append([rule.endpoint,
+            ",".join([m for m in rule.methods if m in ("GET","POST","DELETE","PUT")]),
+            rule_str,
+            ])
+    routes.sort(key=lambda x:x[2])
+    routes = ["{:20s} {:10s} {:50s}".format(route[0], route[1], route[2]) for route in routes]
     resp = Response("\n".join(routes))
     resp.headers["Content-type"] = "text/plain"
     return resp

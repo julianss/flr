@@ -1,6 +1,6 @@
 import peewee as pw
-from flask import request
-from flare import BaseModel, Registry
+from flask import request, has_request_context
+from flare import BaseModel, Registry, normalize_filters, combine_filters
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha512
 import jwt
@@ -13,6 +13,7 @@ def encrypt_password(fields):
         if not fields["password"].startswith("$pbkdf2-sha512$"):
             crypt_password = CryptContext(schemes=["pbkdf2_sha512"]).encrypt(fields["password"])
             fields["password"] = crypt_password
+
 
 class FlrUser(BaseModel):
     name = pw.CharField(help_text="Nombre")
@@ -70,9 +71,13 @@ class FlrUser(BaseModel):
         except:
             raise Exception("Invalid JWT")
 
-    def get_permissions(self):
+    def get_permissions(self, model=False):
         data = {}
-        for model in Registry:
+        if not model:
+            models = [model for model in Registry]
+        else:
+            models = [model]
+        for model in models:
             data.setdefault(model, {
                 'perm_read': request.uid == 1,
                 'perm_update': request.uid == 1,
@@ -88,6 +93,44 @@ class FlrUser(BaseModel):
                 model_rule["perm_delete"] = model_rule["perm_delete"] or rule.perm_delete
         return data
 
+    @classmethod
+    def check_access(cls, model, operation):
+        if has_request_context():
+            user = cls.get_by_id(request.uid)
+            permissions = user.get_permissions(model)
+            if not permissions[model]["perm_" + operation]:
+                raise Exception("Access denied for operation %s on model %s"%(operation, model))
+        else:
+            return True
+
+    @classmethod
+    def check_rules(cls, model, operation, args, kwargs):
+        if has_request_context():
+            user = Registry["FlrUser"].get_by_id(request.uid)
+            user_groups = [g.id for g in user.groups]
+            FlrRule = Registry["FlrRule"]
+            rules = FlrRule.select().where(
+                FlrRule.group_id.in_(user_groups),
+                FlrRule.model == model
+            )
+            total_result = {'ok': True, 'force_filter': []}
+            for rule in rules:
+                validator = getattr(Registry[model], rule.method)
+                result = validator(operation, args, kwargs)
+                if not result["ok"]:
+                    msg = "Access denied for operation %s on model %s"%(operation, model)
+                    if result.get("msg", ""):
+                        msg += "\n" + result["msg"]
+                    raise Exception(msg)
+                if result.get('force_filter', []):
+                    total_result["force_filter"].append(normalize_filters(result["force_filter"]))
+            if total_result["force_filter"]:
+                total_result["force_filter"] = combine_filters("|", total_result["force_filter"])
+            return total_result
+        else:
+            return {'ok': True}
+    
+
 class FlrGroup(BaseModel):
     name = pw.CharField(help_text="Nombre")
 
@@ -95,7 +138,7 @@ FlrUser._meta.add_field("groups", pw.ManyToManyField(FlrGroup))
 
 FlrUser.r()
 FlrGroup.r()
-FlrUserFlrGroup = FlrUser.groups.get_through_model()
+
 
 class FlrACL(BaseModel):
     group_id = pw.ForeignKeyField(FlrGroup, help_text="Group", backref="acls")
@@ -106,3 +149,11 @@ class FlrACL(BaseModel):
     perm_delete = pw.BooleanField(help_text="Delete permission", null=True, default=False)
 
 FlrACL.r()
+
+class FlrRule(BaseModel):
+    group_id = pw.ForeignKeyField(FlrGroup, verbose_name="Group", backref="rules")
+    name = pw.CharField(verbose_name="Rule name")
+    model = pw.CharField(verbose_name="Model")
+    method = pw.CharField(verbose_name="Model method", help_text="Method in model that performs the access validation")
+
+FlrRule.r()

@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory, redirect, make_response, Response
 from registry import Registry, db
+from utils import normalize_filters, combine_filters
 import peeweedbevolve
 import peewee as pw
 from playhouse.shortcuts import model_to_dict
@@ -41,6 +42,15 @@ class BaseModel(pw.Model):
             'id': self.id,
             'name': self.name if hasattr(self, "name") else "%s,%s"%(self.__class__.__name__, self.id)
         }
+
+    @classmethod
+    def dict_get_id(cls, value):
+        if type(value) == int:
+            return value
+        elif type(value) == dict:
+            return value.get("id")
+        else:
+            return None
 
     @classmethod
     def get_fields(cls):
@@ -198,8 +208,12 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_create(cls, **fields):
-        #Attachments may be present (files that have already been created,
-        #just attach them to the created model at the end)
+        #Check ACL and rules
+        FlrUser = Registry["FlrUser"]
+        FlrUser.check_access(cls.__name__, "create")
+        FlrUser.check_rules(cls.__name__, "create", [], fields)
+        #Attachments may be present (files that have already been created)
+        #Attach them to the created model at the end
         attachments = []
         if 'attachments' in fields:
             attachments = fields["attachments"]
@@ -375,10 +389,27 @@ class BaseModel(pw.Model):
 
     @classmethod
     def read(cls, fields, ids=[], filters=[], paginate=False, order=None, count=False):
+        #Check ACL and rules
+        FlrUser = Registry["FlrUser"]
+        FlrUser.check_access(cls.__name__, "read")
+        result = FlrUser.check_rules(cls.__name__, "read", fields, {
+            "ids": ids, "filters": filters, "paginate": paginate, "order": order, "count": count
+        })
+        #If the shorthand 'ids' parameter was used append the ids to the filters
         if ids:
             filters.append(("id","in",ids))
+        #If there are forced filters because of security rules combine them into the existing filters
+        forced_filters = result.get("force_filter", [])
+        if forced_filters:
+            if not filters:
+                filters = forced_filters
+            else:
+                filters = normalize_filters(filters)
+                filters = combine_filters('&', [filters, forced_filters])
+        #If no order is specified and model has a default order defined, use it
         if order is None and hasattr(cls, "_order"):
             order = cls._order
+
         only = None
         extra_attrs = []
         related_fields_m2m = {}

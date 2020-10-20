@@ -1,7 +1,7 @@
 import { call } from './service.js'
 
 function getUid(){
-    let token = localStorage.getItem("flare_sms_jwt");
+    let token = localStorage.getItem("flare_yourappname_jwt");
     let decoded = parseJWT(token);
     return decoded.id
 }

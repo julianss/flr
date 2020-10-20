@@ -45,7 +45,7 @@
                         "add": true,
                         "remove": true,
                         "field": "groups",
-                        "related_fields": ["name"],
+                        "related_fields": [{"field": "name"}],
                         "label": "Roles"
 
                     }

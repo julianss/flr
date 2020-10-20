@@ -86,11 +86,12 @@ class FlrUser(BaseModel):
             })
         for group in self.groups:
             for rule in group.acls:
-                model_rule = data[rule.model]
-                model_rule["perm_read"] = model_rule["perm_read"] or rule.perm_read 
-                model_rule["perm_update"] = model_rule["perm_update"] or rule.perm_update
-                model_rule["perm_create"] = model_rule["perm_create"] or rule.perm_create
-                model_rule["perm_delete"] = model_rule["perm_delete"] or rule.perm_delete
+                if rule.model in models:
+                    model_rule = data[rule.model]
+                    model_rule["perm_read"] = model_rule["perm_read"] or rule.perm_read 
+                    model_rule["perm_update"] = model_rule["perm_update"] or rule.perm_update
+                    model_rule["perm_create"] = model_rule["perm_create"] or rule.perm_create
+                    model_rule["perm_delete"] = model_rule["perm_delete"] or rule.perm_delete
         return data
 
     @classmethod
@@ -99,7 +100,7 @@ class FlrUser(BaseModel):
             user = cls.get_by_id(request.uid)
             permissions = user.get_permissions(model)
             if not permissions[model]["perm_" + operation]:
-                raise Exception("Access denied for operation %s on model %s"%(operation, model))
+                raise Exception("Access denied for operation %s on model %s by ACL"%(operation, model))
         else:
             return True
 
@@ -118,7 +119,7 @@ class FlrUser(BaseModel):
                 validator = getattr(Registry[model], rule.method)
                 result = validator(operation, args, kwargs)
                 if not result["ok"]:
-                    msg = "Access denied for operation %s on model %s"%(operation, model)
+                    msg = "Access denied for operation %s on model %s by Security Rule"%(operation, model)
                     if result.get("msg", ""):
                         msg += "\n" + result["msg"]
                     raise Exception(msg)
@@ -141,6 +142,7 @@ FlrGroup.r()
 
 
 class FlrACL(BaseModel):
+    name = pw.CharField(verbose_name="Name")
     group_id = pw.ForeignKeyField(FlrGroup, help_text="Group", backref="acls")
     model = pw.CharField(help_text="Model")
     perm_read = pw.BooleanField(help_text="Read permission", null=True, default=False)

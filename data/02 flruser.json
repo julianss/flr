@@ -101,9 +101,63 @@
     },
     {
         "model": "FlrMenu",
+        "meta_id": "menu_flracl",
+        "data": {
+            "name": "Listas de control de acceso (ACL)",
+            "sequence": 3,
+            "section_id_META_ID": "menu_section_admin",
+            "groups_META_ID": ["flgroup_admin"]
+        }
+    },
+    {
+        "model": "FlrView",
+        "meta_id": "flracl_list_view",
+        "data": {
+            "name": "ACL list view",
+            "model": "FlrACL",
+            "view_type": "list",
+            "definition": {
+                "structure": [
+                    {"field": "name"},
+                    {"field": "model"},
+                    {"field": "group_id"},
+                    {"field": "perm_read"},
+                    {"field": "perm_create"},
+                    {"field": "perm_update"},
+                    {"field": "perm_delete"}
+                ]
+            },
+            "menu_id_META_ID": "menu_flracl",
+            "sequence": 1
+        }
+    },
+    {
+        "model": "FlrView",
+        "meta_id": "flracl_form_view",
+        "data": {
+            "name": "ACL form view",
+            "model": "FlrACL",
+            "view_type": "form",
+            "definition": {
+                "structure": [
+                    {"field": "name"},
+                    {"field": "model"},
+                    {"field": "group_id"},
+                    {"field": "perm_read"},
+                    {"field": "perm_create"},
+                    {"field": "perm_update"},
+                    {"field": "perm_delete"}
+                ]
+            },
+            "menu_id_META_ID": "menu_flracl",
+            "sequence": 2
+        }
+    },
+    {
+        "model": "FlrMenu",
         "meta_id": "menu_flrrule",
         "data": {
-            "name": "Reglas de acceso",
+            "name": "Reglas de seguridad",
             "sequence": 4,
             "section_id_META_ID": "menu_section_admin",
             "groups_META_ID": ["flgroup_admin"]

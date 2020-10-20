@@ -1,4 +1,9 @@
 #!/bin/bash
+if [ -z "$1" ]
+    then
+        echo "app name missing"
+        exit 1
+fi
 cp ".example" ".$1"
 mkdir apps/$1
 echo "from . import models" > apps/$1/__init__.py
@@ -6,4 +11,9 @@ mkdir apps/$1/models
 touch apps/$1/models/__init__.py
 npx degit sveltejs/template apps/$1/client
 cp -r svelte_client/* apps/$1/client/src
+mv apps/$1/client/src/index.html apps/$1/client/src/public/index.html
 sed -i "s/flare_yourappname_jwt/flare_$1_jwt/g" apps/$1/client/src/services/service.js
+sed -i "s/yourappname/$1/g" apps/$1/client/src/public/index.html
+echo ".form-group label {
+    font-weight: bold;
+}" >> apps/$1/client/src/public/global.css

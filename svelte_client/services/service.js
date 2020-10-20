@@ -1,8 +1,8 @@
 import { writable } from 'svelte/store';
 import { get_store_value } from 'svelte/internal'
 
-if(localStorage.getItem("flare_sms_jwt")){
-    var initial_jwt = localStorage.getItem("flare_sms_jwt");
+if(localStorage.getItem("flare_yourappname_jwt")){
+    var initial_jwt = localStorage.getItem("flare_yourappname_jwt");
 }else{
     var initial_jwt = "";
 }
@@ -37,7 +37,7 @@ export function auth(login, password){
         (resp) => {
             if(resp.result){
                 jwt.set(resp.result);
-                localStorage.setItem("flare_sms_jwt", resp.result);
+                localStorage.setItem("flare_yourappname_jwt", resp.result);
             }
             loading.set(false);
             return resp;

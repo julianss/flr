@@ -6,3 +6,4 @@ mkdir apps/$1/models
 touch apps/$1/models/__init__.py
 npx degit sveltejs/template apps/$1/client
 cp -r svelte_client/* apps/$1/client/src
+sed -i "s/flare_yourappname_jwt/flare_$1_jwt/g" apps/$1/client/src/services/service.js

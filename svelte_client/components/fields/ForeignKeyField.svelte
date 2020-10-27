@@ -17,6 +17,7 @@
     let showResults = false;
     let selectedName = "";
     let uniqueId = Date.now().toString() + "-" + Math.random().toString().substring(2);
+    let offset = -1;
 
     function search(){
         let kwargs = {paginate:[1,10]};
@@ -42,6 +43,7 @@
             (resp) => {
                 results = resp
                 loaded = true;
+                offset = -1;
             }
         )
         showResults = true;
@@ -50,7 +52,6 @@
     function selectResult(result){
         query = "";
         value = result;
-        query = result.name;
         results = [];
         hideResults();
         dispatch('change', result);
@@ -77,26 +78,36 @@
 
     function hideResults() {
         showResults = false;
-        query = value.name;
     }
 
     // function modalOpen(){
     //     search();
     // }
 
-    document.addEventListener('click', function(event){
-        var specifiedElement = document.getElementById(`results-dropdown-${uniqueId}`);
-        if(specifiedElement){
-            var isClickInside = specifiedElement.contains(event.target);
-            if(!isClickInside && loaded){
+    document.addEventListener('keydown', function(event){
+        var divResults = document.getElementById(`results-dropdown-${uniqueId}`)
+        if (divResults && results.length > 0){
+            if (event.key === "ArrowDown"){
+                if (offset + 1 < divResults.childNodes.length - 1){
+                    offset ++;
+                }
+            }else if (event.key === "ArrowUp"){
+                if (offset >= 0){
+                    offset --;
+                }
+                if (offset == -1){
+                    hideResults()
+                }
+            }
+            else if (event.key === "Escape"){
                 hideResults();
             }
-        }
-    })
-
-    document.addEventListener('keydown', function(event){
-        if(event.key === "Escape"){
-            hideResults();
+            if (offset >= 0){
+                divResults.childNodes[offset].focus()
+                if (event.key === "Enter"){
+                    selectResult(results[offset])
+                }
+            }
         }
     })
 </script>
@@ -109,6 +120,7 @@
                 <input
                     type="text"
                     class="form-control"
+                    id="query-input-{uniqueId}"
                     bind:value={query}
                     on:keyup={search}
                     placeholder={placeholder}
@@ -143,7 +155,7 @@
                     transition:fade
                     class="dropdown-search-results">
                     {#each results as result}
-                        <p on:click={()=>selectResult(result)}>{result.name}</p>
+                        <p tabindex="0" on:click={()=>selectResult(result)}>{result.name}</p>
                     {/each}
                     {#if results.length == 0}
                         <p class="p_sin_resultados">Sin resultados qué mostrar</p>

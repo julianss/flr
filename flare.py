@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory, redirect, make_response, Response
 from registry import Registry, db
-from utils import normalize_filters, combine_filters
+from utils import normalize_filters, combine_filters, CustomJSONEncoder
 import peeweedbevolve
 import peewee as pw
 from playhouse.shortcuts import model_to_dict
@@ -14,6 +14,7 @@ from functools import wraps
 from datetime import datetime
 
 app = Flask(__name__)
+app.json_encoder = CustomJSONEncoder
 
 if os.environ.get("enable_cors") == "True":
     from flask_cors import CORS

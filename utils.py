@@ -1,3 +1,30 @@
+import datetime
+from flask.json import JSONEncoder
+
+# To render dates in a format different to Flask's default we need a Custom JSON encoder
+class CustomJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        try:
+            if isinstance(obj, datetime.datetime):
+                return obj.strftime("%Y-%m-%d %H:%M:%S")
+
+            elif isinstance(obj, datetime.date):
+                return obj.strftime("%Y-%m-%d")
+
+            elif isinstance(obj, datetime.time):
+                return obj.strftime()
+
+            iterable = iter(obj)
+        except TypeError:
+            pass
+        else:
+            return list(iterable)
+        return JSONEncoder.default(self, obj)
+
+# Functions used to combine filters. Needed for combining the forced filters
+# of the security rules Filters are more easily combined when the expressions
+# are normalized, meaning all '&' are explicit.
+# These two functions where taken from the odoo codebase almost verbatim.
 def normalize_filters(filters):
     result = []
     expected = 1
@@ -27,8 +54,3 @@ def combine_filters(operator, filters_list):
         count += 1
     result = [operator] * (count - 1) + result
     return result
-
-if __name__ == '__main__':
-    a = normalize_filters([('a','=',1)])
-    b = normalize_filters([('b','=',1)])
-    print(combine_filters('|',[a]))

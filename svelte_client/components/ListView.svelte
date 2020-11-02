@@ -1,5 +1,6 @@
 <script>
     import { call } from './../services/service.js';
+    import * as utils from './../services/utils.js';
     import { 
         viewsStore,
         activeViewStore,
@@ -136,8 +137,10 @@
         if(record[field] === null){
             return "";
         }else{
-            if(fieldsDescription[field].type == "foreignkey"){
+            if(fieldsDescription[field].type === "foreignkey"){
                 return record[field].name || record[field].id;
+            }else if(fieldsDescription[field].type === "date"){
+                return utils.renderDate(record[field]);
             }else{
                 return record[field];
             }

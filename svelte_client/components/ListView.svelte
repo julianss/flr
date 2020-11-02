@@ -5,6 +5,7 @@
         activeViewStore,
         activeRecordIdStore,
         recordCreatedStore,
+        searchFiltersStore,
         publish,
         getValue
     } from './../services/writables.js';
@@ -18,11 +19,20 @@
     let numberOfPages;
     let numberOfRecords;
     let pageSize = 80;
+    let filters = [];
+    
+    searchFiltersStore.subscribe((event) => {
+        if(event){
+            filters = event.filters;
+            fetchedRecords = [];
+            fetchRecords();
+        }
+    })
 
     activeViewStore.subscribe((event) => {
         if(event){
             let type = event.type;
-            visible = type === "list";
+            visible = type === "list" || type == "search";
         }
     });
 
@@ -33,7 +43,7 @@
             page = 1;
             fieldsDescription = null;
             let views = event.views;
-            if(views != null){
+            if(views != null && views["list"]){
                 view = views["list"];
                 fetchRecords();
             }
@@ -47,6 +57,13 @@
         }
     })
 
+    function openSearch() {
+        publish({
+            event: 'activeViewChanged',
+            type: 'search'
+        })
+    }
+
 	async function fetchRecords(){
         fetching = true;
         if(view){
@@ -57,13 +74,13 @@
             if(!fieldsDescription){
                 fieldsDescription = await call(view.model, "get_fields_desc", [fields]);
             }
-            call(view.model, "read", [fields], {count:true}).then(
+            call(view.model, "read", [fields], {filters:filters,count:true}).then(
                 (resp) => {
                     numberOfPages = Math.ceil(resp / pageSize);
                     numberOfRecords = resp;
                 }
             )
-            call(view.model, "read", [fields], {paginate:[page, pageSize]}).then(
+            call(view.model, "read", [fields], {filters:filters,paginate:[page, pageSize]}).then(
                 (resp) => {
                     fetchedRecords = resp;
                     fetching = false;
@@ -138,6 +155,10 @@
             </div>
         {/if}
         <div class="col-md" style="text-align:right">
+            <button type="button"
+                class="btn btn-secondary">
+                <img src="icons/search.svg" alt="Filtros" on:click={openSearch}/>
+            </button>
             <button type="button"
                 class="btn btn-secondary btn-sm"
                 disabled={fetching || page==1}

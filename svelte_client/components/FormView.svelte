@@ -31,7 +31,7 @@
         if(event){
             fieldsDescription = null;
             let views = event.views;
-            if(views != null){
+            if(views != null && views["form"]){
                 view = views["form"];
                 sections = [];
                 onChanges = [];

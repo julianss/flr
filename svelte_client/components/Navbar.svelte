@@ -10,6 +10,7 @@
   onMount(async () => {
     sections = await getMenus();
     username = await getUserName();
+    clickMenu(sections[0].menus[0].id);
   })
 
   function clickMenu(menuId) {
@@ -19,7 +20,7 @@
         let firstType = null;
         for(let view of resp){
           loadedViews[view.view_type] = view;
-          if(firstType === null){
+          if(firstType === null && view.view_type != "search"){
             firstType = view.view_type;
           }
         }
@@ -41,7 +42,9 @@
 </script>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <a class="navbar-brand" href="#">My App</a>
+  <a class="navbar-brand">
+    <img src="images/DTLogo2.svg" style="width:200px"/>
+  </a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>

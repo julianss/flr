@@ -5,6 +5,7 @@ export const viewsStore = writable(null);
 export const activeRecordIdStore = writable();
 export const activeViewStore = writable(null);
 export const recordCreatedStore = writable(null);
+export const searchFiltersStore = writable({});
 
 export function publish(event) {
     event.timestamp = (new Date()).getTime();
@@ -18,6 +19,8 @@ export function publish(event) {
         activeViewStore.set(event);
     }else if(event.event == "recordCreated"){
         recordCreatedStore.set(event);
+    }else if(event.event == "filtersChanged"){
+        searchFiltersStore.set(event);
     }
 }
 

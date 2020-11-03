@@ -41,9 +41,9 @@ Run the app creation script with the name of the app you want. A new folder will
     
 Download a bootstrap.min.css in the public/ folder of the client. You can download one from [Bootswatch](https://bootswatch.com/)
 
-The new app script also creates a dot file in the flare/ folder named **.YourAppName**. Edit it to add the database information. Insert a random string in the JWT Secret variable. Set interactive evolve and flask debug to "True". Finally run the server passing the app name as argument. The first time you run it (and on subsecuent runs after more models are created) peewee-db-evolve will present you with the sql that needs to be executed in the database, type yes and enter. By default the server listens on port 6800.
+The new app script also creates a dot file in the flare/ folder named **.YourAppName**. Edit it to add the database information. Insert a random string in the JWT Secret variable. Set interactive evolve and flask debug to "True". Finally run the server passing the app name as argument. The first time you run it, and on subsequent runs after more models are added, peewee-db-evolve will generate the sql that needs to be executed in the database to match the defined models, type yes and enter. By default the server listens on port 6800.
 
-    ṕython3 run.py YourAppName
+    python3 run.py YourAppName
 
 # Built with
 - [Peewee](http://docs.peewee-orm.com/en/latest/)

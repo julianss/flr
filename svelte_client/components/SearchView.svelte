@@ -17,6 +17,7 @@
     let filters = [];
     let view;
     let selectedValues = {};
+    let selectedValues2 = {};
     let selectedOperators = {};
 
     activeViewStore.subscribe((event) => {
@@ -52,13 +53,23 @@
         for(var field of fields){
             var operator = selectedOperators[field];
             var value = selectedValues[field];
+            var value2 = selectedValues2[field];
             if(typeof(value) === "object"){
                 if(value.id){
                     value = value.id;
                 }
             }
-            if(operator && value){
-                filters.push([field, operator, value]);
+            if(operator && (value || value2)){
+                if(operator === "between"){
+                    if(value){
+                        filters.push([field,'>=',value]);
+                    }
+                    if(value2){
+                        filters.push([field,'<=',value2]);
+                    }
+                }else{
+                    filters.push([field, operator, value]);
+                }
             }
         }
         filters = filters;
@@ -112,6 +123,9 @@
                                                 <option value="ilike">contiene</option>
                                                 <option value="not ilike">no contiene</option>
                                             {/if}
+                                            {#if ["date"].includes(fieldsDescription[item.field].type)}
+                                                <option value="between">entre</option>
+                                            {/if}
                                         </select>
                                     </span>
                                     <span style="width:50%">
@@ -126,6 +140,19 @@
                                             nolabel={true}
                                             on:change={updateFilters}
                                         />
+                                        {#if selectedOperators[item.field] === "between"}
+                                            <Field
+                                                type={fieldsDescription[item.field].type}
+                                                label={item.label || fieldsDescription[item.field].label}
+                                                edit={true}
+                                                bind:value={selectedValues2[item.field]}
+                                                model={fieldsDescription[item.field].model}
+                                                options={fieldsDescription[item.field].options}
+                                                required={false}
+                                                nolabel={true}
+                                                on:change={updateFilters}
+                                            />
+                                        {/if}
                                     </span>
                                 </div>
                             {/if}

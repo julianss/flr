@@ -138,6 +138,18 @@ class BaseModel(pw.Model):
         return fields
 
     @classmethod
+    def get_batch_actions(cls):
+        actions = []
+        perm = Registry["FlrUser"].get_by_id(request.uid).get_permissions(cls.__name__)
+        if perm[cls.__name__]["perm_delete"]:
+            actions.append({
+                'method': 'delete',
+                'label': 'Borrar',
+                'confirm': '¿Confirmar eliminar los registros seleccionados?'
+            })
+        return actions
+
+    @classmethod
     def filter_query(cls, query, filters=[], paginate=False):
         operator_table = {
             '=':     __operator__.eq,
@@ -341,7 +353,7 @@ class BaseModel(pw.Model):
                 new_ids = set([x["id"] for x in fields[field_name] if "id" in x])
                 to_delete = original_ids - new_ids
                 if to_delete:
-                    pw_field.rel_model.flr_delete([('id','in',to_delete)])
+                    pw_field.rel_model.flr_delete(to_delete)
                 #Now process the incoming values to create or edit the child records as needed
                 for fields2 in fields[field_name]:
                     #It's new, create it
@@ -381,10 +393,8 @@ class BaseModel(pw.Model):
         return modified
 
     @classmethod
-    def flr_delete(cls, filters):
-        query = cls.delete()
-        if filters:
-            query = cls.filter_query(query, filters)
+    def flr_delete(cls, ids):
+        query = cls.delete().where(cls.id.in_(ids))
         deleted = query.execute()
         return deleted
 
@@ -664,7 +674,7 @@ class api:
 
     @wrapper
     def delete(model, id):
-        deleted = Registry[model].flr_delete([('id','=',id)])
+        deleted = Registry[model].flr_delete([id])
         if deleted:
             return {'result': 'Ítem eliminado con éxito'}
         else:

@@ -21,6 +21,9 @@
     let numberOfRecords;
     let pageSize = 80;
     let filters = [];
+    let batchActions = [];
+    let selectAllChecked;
+    let selectedRecords = {};
     
     searchFiltersStore.subscribe((event) => {
         if(event){
@@ -69,11 +72,19 @@
         fetching = true;
         if(view){
             let fields = [];
+            selectedRecords = {};
             for(let item of view.definition.structure){
                 fields.push(item.field);
             }
             if(!fieldsDescription){
                 fieldsDescription = await call(view.model, "get_fields_desc", [fields]);
+            }
+            if(batchActions.length === 0){
+                call(view.model, "get_batch_actions").then(
+                    (resp) => {
+                        batchActions = resp;
+                    }
+                )
             }
             call(view.model, "read", [fields], {filters:filters,count:true}).then(
                 (resp) => {
@@ -85,6 +96,9 @@
                 (resp) => {
                     fetchedRecords = resp;
                     fetching = false;
+                    for(let record of fetchedRecords){
+                        selectedRecords[record.id] = false;
+                    }
                 }
             );
         }
@@ -146,6 +160,32 @@
             }
         }
     }
+
+    function onChangeSelectAll(){
+        for(let id in selectedRecords){
+            selectedRecords[id] = selectAllChecked;
+        }
+    }
+
+    function getSelectedIds(){
+        var ids = [];
+        for(let id in selectedRecords){
+            if(selectedRecords[id]){
+                ids.push(parseInt(id));
+            }
+        }
+        return ids;
+    }
+
+    function doBatchAction(method){
+        var ids = getSelectedIds();
+        call(view.model, method, [ids]).then(
+            (resp) => {
+                fetchedRecords = [];
+                fetchRecords();
+            }
+        )
+    }
 </script>
 
 <div hidden={!visible}>
@@ -157,7 +197,30 @@
                 </button>
             </div>
         {/if}
-        <div class="col-md" style="text-align:right">
+        <div class="col-md top-left-controls">
+            {#if selectedRecords && getSelectedIds().length > 0 }
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="actionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Acciones
+                    </button>
+                    {#if batchActions.length > 0}
+                        <div class="dropdown-menu" aria-labelledby="actionsDropdown">
+                            {#each batchActions as action}
+                            <button class="dropdown-item" type="button"
+                                on:click={()=>{
+                                    if(action.confirm){
+                                        if(confirm(action.confirm)){
+                                            doBatchAction(action.method);
+                                        }
+                                    }else{
+                                        doBatchAction(action.method);
+                                    }
+                                }}>{action.label}</button>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            {/if}
             <button type="button"
                 class="btn btn-secondary">
                 <img src="icons/search.svg" alt="Filtros" on:click={openSearch}/>
@@ -197,6 +260,10 @@
     <table class="table table-sm">
         <thead class="thead-light">
             {#if fieldsDescription && view}
+                <th>
+                    <input type="checkbox" bind:checked={selectAllChecked}
+                        on:change={onChangeSelectAll}/>
+                </th>
                 {#each view.definition.structure as item}
                     {#if item.field && item.field in fieldsDescription}
                         <th>{item.label || fieldsDescription[item.field].label}</th>
@@ -209,6 +276,10 @@
         <tbody>
             {#each fetchedRecords as record}
                 <tr on:click={() => viewEdit(record.id)}>
+                    <td>
+                        <input type="checkbox" bind:checked={selectedRecords[record.id]}
+                            on:click|stopPropagation/>
+                    </td>
                     {#each view.definition.structure as item}
                         {#if item.field && item.field in fieldsDescription}
                             <td>{renderField(record, item.field)}</td>
@@ -235,5 +306,13 @@
     }
     table tr{
         cursor:pointer
+    }
+    .top-left-controls{
+        align-items:center;
+        justify-content:flex-end;
+        display: flex;
+    }
+    .top-left-controls button {
+        margin: 2px 2px 2px 2px;
     }
 </style>

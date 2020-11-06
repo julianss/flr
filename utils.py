@@ -54,3 +54,10 @@ def combine_filters(operator, filters_list):
         count += 1
     result = [operator] * (count - 1) + result
     return result
+
+#Function to combine various pdfs into one.
+# from_here - PdfFileReader from which pages will be read
+# to_here - PdfFileWriter where pages will be written
+def add_pages(from_here, to_here):
+    for n in range(from_here.getNumPages()):
+        to_here.addPage(from_here.getPage(n))

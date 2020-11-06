@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory, redirect, make_response, Response
-from registry import Registry, db
-from utils import normalize_filters, combine_filters, CustomJSONEncoder
+from registry import Registry, ReportHelpers, db
+from utils import normalize_filters, combine_filters, CustomJSONEncoder, add_pages
 import peeweedbevolve
 import peewee as pw
 from playhouse.shortcuts import model_to_dict
@@ -12,6 +12,9 @@ from openpyxl.writer.excel import save_virtual_workbook
 import base64
 from functools import wraps
 from datetime import datetime
+import jwt
+
+SECRET = os.environ.get("jwt_secret")
 
 app = Flask(__name__)
 app.json_encoder = CustomJSONEncoder
@@ -525,7 +528,6 @@ class BaseModel(pw.Model):
             'datas': base64.b64encode(datas).decode("ascii")
         }
 
-
 @app.route("/auth", methods=["POST"])
 def auth():
     try:
@@ -591,6 +593,18 @@ def call():
                     'data': traceback.format_exc()
                 }
             }), 500)
+
+@app.route("/report/download", methods=["GET"])
+def download_report():
+    token = request.args["reqToken"]
+    decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
+    with open(decoded.get("path"), "rb") as f:
+        data = f.read()
+    os.unlink(decoded.get("path"))
+    response = Response(data, mimetype="application/pdf")
+    filename = decoded.get("filename")
+    response.headers["Content-Disposition"] = "attachment; filename=%s"%filename
+    return response
 
 @app.route("/create_user", methods=["POST"])
 def create_user():

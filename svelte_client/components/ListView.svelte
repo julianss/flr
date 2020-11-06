@@ -198,27 +198,25 @@
             </div>
         {/if}
         <div class="col-md top-left-controls">
-            {#if selectedRecords && getSelectedIds().length > 0 }
+            {#if selectedRecords && getSelectedIds().length > 0 && batchActions.length > 0}
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="actionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Acciones
                     </button>
-                    {#if batchActions.length > 0}
-                        <div class="dropdown-menu" aria-labelledby="actionsDropdown">
-                            {#each batchActions as action}
-                            <button class="dropdown-item" type="button"
-                                on:click={()=>{
-                                    if(action.confirm){
-                                        if(confirm(action.confirm)){
-                                            doBatchAction(action.method);
-                                        }
-                                    }else{
+                    <div class="dropdown-menu" aria-labelledby="actionsDropdown">
+                        {#each batchActions as action}
+                        <button class="dropdown-item" type="button"
+                            on:click={()=>{
+                                if(action.confirm){
+                                    if(confirm(action.confirm)){
                                         doBatchAction(action.method);
                                     }
-                                }}>{action.label}</button>
-                            {/each}
-                        </div>
-                    {/if}
+                                }else{
+                                    doBatchAction(action.method);
+                                }
+                            }}>{action.label}</button>
+                        {/each}
+                    </div>
                 </div>
             {/if}
             <button type="button"

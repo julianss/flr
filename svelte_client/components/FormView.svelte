@@ -1,5 +1,6 @@
 <script>
     import { call } from './../services/service.js';
+    import { requestReport } from './../services/report.js';
     import { 
         viewsStore,
         activeViewStore,
@@ -18,6 +19,7 @@
     let fieldsDescription = null;
     let editMode = false;
     let onChanges = {};
+    let reports = [];
 
     activeViewStore.subscribe((event) => {
         if(event){
@@ -55,6 +57,11 @@
                     activeSection = sections[0];
                 }
             }
+            call("FlrReport", "read", [["name"]], {filters:[["model","=",view.model]]}).then(
+                (resp) => {
+                    reports = resp;
+                }
+            )
         }
     })
 
@@ -204,46 +211,65 @@
 
 <div hidden={!visible}>
     <div id="form_view_toolbar">
-        <button type="button" class="btn btn-secondary" on:click={back}>
-            ≡ Listado
-        </button>
-        {#if recordId && !editMode}
-            <button type="button" class="btn btn-primary" on:click={create}>
-                Nuevo
+        <div class="col-md">
+            <button type="button" class="btn btn-secondary" on:click={back}>
+                ≡ Listado
             </button>
-        {/if}
-        {#if editMode}
-            <button type="button" class="btn btn-primary" on:click={save}>
-                Guardar
-            </button>
-            <button type="button" class="btn btn-light" on:click={discard}>
-                Descartar
-            </button>
-        {/if}
-        {#if !editMode}
-            <button type="button" class="btn btn-primary" on:click={edit}>
-                Editar
-            </button>
-        {/if}
+            {#if recordId && !editMode}
+                <button type="button" class="btn btn-primary" on:click={create}>
+                    Nuevo
+                </button>
+            {/if}
+            {#if editMode}
+                <button type="button" class="btn btn-primary" on:click={save}>
+                    Guardar
+                </button>
+                <button type="button" class="btn btn-light" on:click={discard}>
+                    Descartar
+                </button>
+            {/if}
+            {#if !editMode}
+                <button type="button" class="btn btn-primary" on:click={edit}>
+                    Editar
+                </button>
+            {/if}
+        </div>
+        <div class="col-md top-left-buttons">
+            {#if record && reports && record.id && reports.length>0}
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="actionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Imprimir
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="actionsDropdown">
+                        {#each reports as report}
+                            <button class="dropdown-item" type="button"
+                                on:click={()=>{
+                                requestReport(report.name, [record.id])
+                                }}>{report.name}</button>
+                        {/each}
+                    </div>
+                </div>
+            {/if}
+        </div>
     </div>
     <div id="form_area_wrapper">
-        {#if sections.length > 1}
-            <div class="pills">
-                <ul class="nav nav-pills nav-fill">
-                    {#each sections as section}
-                        <li class="nav-item">
-                            <a
-                                class={section==activeSection?'nav-link active':'nav-link'}
-                                on:click={()=>activeSection=section}
-                                href="#">
-                                {section}
-                            </a>
-                        </li>
-                    {/each}
-                </ul>
-            </div>
-        {/if}
         <div id="form_area">
+            {#if sections.length > 1}
+                <div class="pills">
+                    <ul class="nav nav-pills">
+                        {#each sections as section}
+                            <li class="nav-item">
+                                <a
+                                    class={section==activeSection?'nav-link active':'nav-link'}
+                                    on:click={()=>activeSection=section}
+                                    href="#">
+                                    {section}
+                                </a>
+                            </li>
+                        {/each}
+                    </ul>
+                </div>
+            {/if}
             {#if view && fieldsDescription && record}
                 {#each sections as section}
                     {#each view.definition[section] as item}
@@ -277,10 +303,21 @@
 
 <style>
     .pills {
-        background-color:white
+        background-color:white;
+        margin-bottom: 10px;
+        border-bottom: 1px solid lightgray
     }
     #form_view_toolbar {
-        padding: 10px
+        padding: 10px;
+        display: flex
+    }
+    .top-left-buttons{
+        align-items:center;
+        justify-content:flex-end;
+        display: flex;
+    }
+    .top-left-buttons button {
+        margin: 2px 2px 2px 2px;
     }
     @media(min-width: 600px){
         #form_area {

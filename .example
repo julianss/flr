@@ -9,3 +9,8 @@ export flask_debug=""
 export jwt_secret=""
 export auth_field="email"
 export admin_pass="qwe123"
+export mail_host=""
+export mail_port=""
+export mail_user=""
+export mail_pass=""
+

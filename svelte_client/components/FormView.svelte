@@ -255,8 +255,8 @@
     <div id="form_area_wrapper">
         <div id="form_area">
             {#if sections.length > 1}
-                <div class="pills">
-                    <ul class="nav nav-pills">
+                <div class="tabs">
+                    <ul class="nav nav-tabs">
                         {#each sections as section}
                             <li class="nav-item">
                                 <a
@@ -302,10 +302,9 @@
 </div>
 
 <style>
-    .pills {
+    .tabs {
         background-color:white;
         margin-bottom: 10px;
-        border-bottom: 1px solid lightgray
     }
     #form_view_toolbar {
         padding: 10px;

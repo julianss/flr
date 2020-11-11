@@ -14,6 +14,7 @@ class FlrReport(BaseModel):
     name = pw.CharField(verbose_name="Name", unique=True)
     model = pw.CharField(verbose_name="Model")
     template_path = pw.CharField(verbose_name="Template file path")
+    report_helper = pw.CharField(verbose_name="Report helper class", null=True)
 
     @classmethod
     def request_report(cls, report_name, ids):
@@ -45,8 +46,8 @@ class FlrReport(BaseModel):
         for rec in Model.select().where(Model.id.in_(ids)):
             context = {'rec': rec}
             helper = False
-            if report_name in ReportHelpers:
-                helper = ReportHelpers[parser]
+            if self.report_helper and self.report_helper in ReportHelpers:
+                helper = ReportHelpers[self.report_helper]()
             # Report helper classes can implement the method get_context to update the variables
             # that will be sent to the render function
             if helper and hasattr(helper, "get_context"):
@@ -65,7 +66,7 @@ class FlrReport(BaseModel):
             with open(outfname, "rb") as f:                                 
                 data = f.read()
             # Helper classes can implement the method post_convert to edit the generated pdf
-            if helper and has_attr(helper, "post_convert"):
+            if helper and hasattr(helper, "post_convert"):
                 data = helper.post_convert(rec, data)
             reader = PdfFileReader(BytesIO(data))
             add_pages(reader, final_pdf)

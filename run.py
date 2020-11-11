@@ -6,7 +6,7 @@ else:
     load_dotenv()
 
 from registry import Registry, db
-from flare import app
+from flare import app, sendmail
 import json
 import os
 import core_models

@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory, redirect, make_response, Response
 from registry import Registry, ReportHelpers, db
-from utils import normalize_filters, combine_filters, CustomJSONEncoder, add_pages
+from utils import normalize_filters, combine_filters, CustomJSONEncoder, add_pages, sendmail
 import peeweedbevolve
 import peewee as pw
 from playhouse.shortcuts import model_to_dict

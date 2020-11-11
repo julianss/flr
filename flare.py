@@ -373,7 +373,7 @@ class BaseModel(pw.Model):
                         pw_field.rel_model.flr_update(fields2, [("id","=",rel_id)])
         if filefields:
             FlrFile = Registry["FlrFile"]
-            for filefield in fields:
+            for filefield in filefields:
                 value = fields.get(filefield)
                 #Delete old file
                 if value is None or value.get("datab64"):
@@ -391,7 +391,7 @@ class BaseModel(pw.Model):
                         name = value.get("name", "untitled")
                         file_id = FlrFile.create_from_data(data, name)
                         record = cls.get_by_id(id)
-                        setattr(record, field_name, file_id)
+                        setattr(record, filefield, file_id)
                         record.save()
         return modified
 

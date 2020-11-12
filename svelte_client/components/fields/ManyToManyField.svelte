@@ -30,7 +30,10 @@
             return;
         }
         let ids = [];
-        for(let obj of value || []){
+        if (!value){
+            value = [];
+        }
+        for(let obj of value){
             ids.push(obj.id);
         }
         if(!ids.includes(event.detail.id)){

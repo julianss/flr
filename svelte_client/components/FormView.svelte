@@ -1,7 +1,7 @@
 <script>
     import { call } from './../services/service.js';
     import { requestReport } from './../services/report.js';
-    import { 
+    import {
         viewsStore,
         activeViewStore,
         activeRecordIdStore,
@@ -20,12 +20,14 @@
     let editMode = false;
     let onChanges = {};
     let reports = [];
+    let validations = [];
 
     activeViewStore.subscribe((event) => {
         if(event){
             let type = event.type;
             visible = type === "form";
             editMode = false;
+            validations = [];
         }
     });
 
@@ -125,7 +127,7 @@
                                 editMode = true;
                             }
                         )
-                        
+
                     }
                 }
             );
@@ -137,19 +139,24 @@
         for(let field in record){
             if(JSON.stringify(notDirty[field]) !== JSON.stringify(record[field])){
                 dirtyPart[field] = record[field];
-            }            
+            }
         }
         dirtyPart.id = undefined;
         return dirtyPart;
     }
 
-    function validate(fieldDesc, value){
+    function validate(item, value){
+        let fieldDesc = fieldsDescription[item.field];
+        if (fieldDesc.required === true && !value){
+            validations.push(item)
+        }
     }
 
     function save(){
         let method;
         let args;
         let kwargs;
+        validations = [];
         if(!record.id){
             record.id = undefined;
             method = "create";
@@ -160,24 +167,26 @@
             args = [getRecordDirtyPart()];
             kwargs = {filters: [["id","=",record.id]]}
         }
-        let validations = [];
-        // for(let section of sections){
-        //     for(let item of view.definition[section]){
-        //         validations.push(validate(item, ))
-        //     }
-        // }
-        call(view.model, method, args, kwargs).then(
-            (resp) => {
-                if(!resp.error){
-                    publish({
-                        event: 'activeRecordIdChanged',
-                        id: method=="create"?resp:record.id
-                    })
-                    publish({event: 'recordCreated'})
-                    editMode = false;
-                }
+
+        for(let section of sections){
+            for(let item of view.definition[section]){
+                validate(item, record[item.field])
             }
-        )
+        }
+        if (validations.length === 0){
+            call(view.model, method, args, kwargs).then(
+                (resp) => {
+                    if(!resp.error){
+                        publish({
+                            event: 'activeRecordIdChanged',
+                            id: method=="create"?resp:record.id
+                        })
+                        publish({event: 'recordCreated'})
+                        editMode = false;
+                    }
+                }
+            )
+        }
     }
 
     function edit(){
@@ -271,6 +280,14 @@
                 </div>
             {/if}
             {#if view && fieldsDescription && record}
+                {#if validations.length > 0}
+                    <div class="alert alert-danger" role="alert">
+                        <strong>Required fields</strong><br>
+                        {#each validations as item}
+                            {item.label || fieldsDescription[item.field].label}<br>
+                        {/each}
+                    </div>
+                {/if}
                 {#each sections as section}
                     {#each view.definition[section] as item}
                         {#if item.field && item.field in fieldsDescription }
@@ -302,6 +319,14 @@
 </div>
 
 <style>
+
+    .validations :global(label::after){
+        content:"*";
+        color:red
+    }
+    .validations :global(input, select){
+        background-color:seashell
+    }
     .tabs {
         background-color:white;
         margin-bottom: 10px;

@@ -1,7 +1,7 @@
 <script>
     import { call } from './../services/service.js';
     import * as utils from './../services/utils.js';
-    import { 
+    import {
         viewsStore,
         activeViewStore,
         activeRecordIdStore,
@@ -24,7 +24,7 @@
     let batchActions = [];
     let selectAllChecked;
     let selectedRecords = {};
-    
+
     searchFiltersStore.subscribe((event) => {
         if(event){
             filters = event.filters;
@@ -42,7 +42,6 @@
 
     viewsStore.subscribe((event) => {
         if(event){
-            console.log(event);
             fetchedRecords = [];
             page = 1;
             fieldsDescription = null;
@@ -118,7 +117,7 @@
         page = toPage;
         fetchRecords();
     }
-    
+
     function create(){
         publish({
             'event': 'activeViewChanged',
@@ -192,9 +191,10 @@
     <div id="list_view_toolbar" class="row">
         {#if view && view.definition.create !== false}
             <div class="col-md">
-                <button type="button" class="btn btn-primary" on:click={create}>
+                <button type="button" class="btn btn-primary mb-2" on:click={create}>
                     Nuevo
                 </button>
+                <strong class="ml-2" style="font-size:30px">{view.menu_view_name}</strong>
             </div>
         {/if}
         <div class="col-md top-left-controls">
@@ -254,7 +254,7 @@
             </button>
         </div>
     </div>
-    
+
     <table class="table table-sm">
         <thead class="thead-light">
             {#if fieldsDescription && view}
@@ -285,8 +285,8 @@
                             <td></td>
                         {/if}
                     {/each}
-                </tr> 
-            {/each} 
+                </tr>
+            {/each}
         </tbody>
     </table>
     {#if fetchedRecords.length === 0 && !fetching }

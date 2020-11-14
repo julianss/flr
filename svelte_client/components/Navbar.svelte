@@ -10,16 +10,17 @@
   onMount(async () => {
     sections = await getMenus();
     username = await getUserName();
-    clickMenu(sections[0].menus[0].id);
+    clickMenu(sections[0].menus[0]);
   })
 
-  function clickMenu(menuId) {
-    getViews(menuId).then(
+  function clickMenu(menu) {
+    getViews(menu.id).then(
       (resp) => {
         let loadedViews = {};
         let firstType = null;
         for(let view of resp){
           loadedViews[view.view_type] = view;
+          loadedViews[view.view_type]['menu_view_name'] = menu.name;
           if(firstType === null && view.view_type != "search"){
             firstType = view.view_type;
           }
@@ -59,7 +60,7 @@
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               {#each section.menus as menu}
-                <a class="dropdown-item" href="#" on:click={()=>clickMenu(menu.id)}>{menu.name}</a>
+                <a class="dropdown-item" href="#" on:click={()=>clickMenu(menu)}>{menu.name}</a>
               {/each}
             </div>
           </li>

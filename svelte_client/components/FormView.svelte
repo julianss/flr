@@ -221,26 +221,29 @@
 <div hidden={!visible}>
     <div id="form_view_toolbar">
         <div class="col-md">
-            <button type="button" class="btn btn-secondary" on:click={back}>
+            <button type="button" class="btn btn-secondary mb-2" on:click={back}>
                 ≡ Listado
             </button>
             {#if recordId && !editMode}
-                <button type="button" class="btn btn-primary" on:click={create}>
+                <button type="button" class="btn btn-primary mb-2" on:click={create}>
                     Nuevo
                 </button>
             {/if}
             {#if editMode}
-                <button type="button" class="btn btn-primary" on:click={save}>
+                <button type="button" class="btn btn-primary mb-2" on:click={save}>
                     Guardar
                 </button>
-                <button type="button" class="btn btn-light" on:click={discard}>
+                <button type="button" class="btn btn-light mb-2" on:click={discard}>
                     Descartar
                 </button>
             {/if}
             {#if !editMode}
-                <button type="button" class="btn btn-primary" on:click={edit}>
+                <button type="button" class="btn btn-primary mb-2" on:click={edit}>
                     Editar
                 </button>
+            {/if}
+            {#if view}
+                <strong class="ml-2" style="font-size:30px">{view.menu_view_name}</strong>
             {/if}
         </div>
         <div class="col-md top-left-buttons">

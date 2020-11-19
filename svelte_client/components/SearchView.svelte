@@ -34,11 +34,18 @@
             let views = event.views;
             if(views != null && views["search"]){
                 view = views["search"];
-            }
-            for(let field of view.definition.fields){
-                fields.push(field.field);
-                selectedOperators[field] = null;
-                selectedValues[field] = null;
+                for(let field of view.definition.fields){
+                    fields.push(field.field);
+                    selectedOperators[field] = null;
+                    selectedValues[field] = null;
+                }
+            }else if(views != null && views["list"]){
+                view = views["list"];
+                for(let field of view.definition.structure){
+                    fields.push(field.field);
+                    selectedOperators[field] = null;
+                    selectedValues[field] = null;
+                }
             }
             call(view.model, "get_fields_desc", [fields]).then(
                 (resp) => {
@@ -102,7 +109,7 @@
             <div class="modal-body">
                 <div class="form-group">
                     {#if fieldsDescription && view}
-                        {#each view.definition.fields as item}
+                        {#each view.definition.fields || view.definition.structure as item}
                             {#if item.field && item.field in fieldsDescription }
                                 <div class="search-row">
                                     <span style="width:30%">

@@ -55,7 +55,7 @@ def normalize_filters(filters):
     for token in filters:
         if expected == 0:
             result.insert(0, '&')
-            expected = 1    
+            expected = 1
         result.append(token)
         if type(token) in (list, tuple):
             expected -= 1

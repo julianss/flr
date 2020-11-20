@@ -78,10 +78,10 @@
 </nav>
 
 <style>
-  .remove-button-css { 
+  .remove-button-css {
     outline: none;
-    border: 0px; 
-    box-sizing: none; 
-    background-color: transparent; 
+    border: 0px;
+    box-sizing: none;
+    background-color: transparent;
   }
 </style>

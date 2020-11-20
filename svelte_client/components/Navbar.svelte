@@ -43,9 +43,9 @@
 </script>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <a class="navbar-brand">
-    <img src="images/DTLogo2.svg" style="width:200px"/>
-  </a>
+  <span class="navbar-brand">
+    <img src="" style="width:200px" alt="Logo"/>
+  </span>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -55,24 +55,33 @@
       {#each sections as section}
         {#if section.menus}
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button class="btn btn-secondary remove-button-css dropdown-toggle" id="navbarDropdown" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               {section.name}
-            </a>
+            </button>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               {#each section.menus as menu}
-                <a class="dropdown-item" href="#" on:click={()=>clickMenu(menu)}>{menu.name}</a>
+                <button class="dropdown-item" type="button" on:click={()=>clickMenu(menu)}>{menu.name}</button>
               {/each}
             </div>
           </li>
         {/if}
       {/each}
       <li class="nav-item dropdown ml-auto">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {username} </a>
+          <button class="btn btn-secondary remove-button-css dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {username} </button>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-              <a class="dropdown-item" href="#" on:click={logout}>Cerrar sesión</a>
+              <button class="dropdown-item" type="button" on:click={logout}>Cerrar sesión</button>
           </div>
       </li>
     </ul>
 
   </div>
 </nav>
+
+<style>
+  .remove-button-css { 
+    outline: none;
+    border: 0px; 
+    box-sizing: none; 
+    background-color: transparent; 
+  }
+</style>

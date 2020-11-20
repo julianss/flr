@@ -200,5 +200,20 @@
             "menu_id_META_ID": "menu_flrrule",
             "sequence": 2
         }
+    },
+    {
+        "model": "FlrView",
+        "meta_id": "flrpreferences_form_view",
+        "data": {
+            "name": "Preferences",
+            "model": "FlrPreferences",
+            "view_type": "form",
+            "definition": {
+                "structure": [
+                    {"field": "old_password", "password": true},
+                    {"field": "new_password", "password": true}
+                ]
+            }
+        }
     }
 ]

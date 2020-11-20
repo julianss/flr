@@ -88,7 +88,7 @@ class FlrUser(BaseModel):
             for rule in group.acls:
                 if rule.model in models:
                     model_rule = data[rule.model]
-                    model_rule["perm_read"] = model_rule["perm_read"] or rule.perm_read 
+                    model_rule["perm_read"] = model_rule["perm_read"] or rule.perm_read
                     model_rule["perm_update"] = model_rule["perm_update"] or rule.perm_update
                     model_rule["perm_create"] = model_rule["perm_create"] or rule.perm_create
                     model_rule["perm_delete"] = model_rule["perm_delete"] or rule.perm_delete
@@ -130,7 +130,7 @@ class FlrUser(BaseModel):
             return total_result
         else:
             return {'ok': True}
-    
+
 
 class FlrGroup(BaseModel):
     name = pw.CharField(help_text="Nombre")
@@ -140,6 +140,11 @@ FlrUser._meta.add_field("groups", pw.ManyToManyField(FlrGroup))
 FlrUser.r()
 FlrGroup.r()
 
+class FlrPreferences(BaseModel):
+    old_password = pw.CharField(help_text="Password")
+    new_password = pw.CharField(help_text="Password")
+
+FlrPreferences.r()
 
 class FlrACL(BaseModel):
     name = pw.CharField(verbose_name="Name")

@@ -14,32 +14,42 @@
   })
 
   function clickMenu(menu) {
-    getViews(menu.id).then(
-      (resp) => {
-        let loadedViews = {};
-        let firstType = null;
-        for(let view of resp){
-          loadedViews[view.view_type] = view;
-          loadedViews[view.view_type]['menu_view_name'] = menu.name;
-          if(firstType === null && view.view_type != "search"){
-            firstType = view.view_type;
-          }
-        }
-        publish({
-          event: 'viewsChanged',
-          views: loadedViews,
-        });
-        publish({
-          event: 'activeRecordIdChanged',
-          id: null,
-        })
-        publish({
-          event: 'activeViewChanged',
-          type: firstType,
-        })
-      }
-    )
+    getViews(menu.id).then((resp) => openViews(resp))
   }
+
+  function loadView(view){
+    getViews(view).then((resp) => openViews(resp))
+  }
+
+  function openViews(resp){
+    let loadedViews = {};
+    let firstType = null;
+    for(let view of resp){
+      loadedViews[view.view_type] = view;
+      if (view.menu_id){
+        loadedViews[view.view_type]['menu_view_name'] = view.menu_id.name;
+      }
+      else {
+        loadedViews[view.view_type]['menu_view_name'] = view.name;
+      }
+      if(firstType === null && view.view_type != "search"){
+        firstType = view.view_type;
+      }
+    }
+    publish({
+      event: 'viewsChanged',
+      views: loadedViews,
+    });
+    publish({
+      event: 'activeRecordIdChanged',
+      id: null,
+    })
+    publish({
+      event: 'activeViewChanged',
+      type: firstType,
+    })
+  }
+
 </script>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -69,7 +79,9 @@
       <li class="nav-item dropdown ml-auto">
           <button class="btn btn-secondary remove-button-css dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {username} </button>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-              <button class="dropdown-item" type="button" on:click={logout}>Cerrar sesión</button>
+              <a class="dropdown-item" href="#" on:click={()=>loadView('FlrPreferences')}>Preferencias</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="#" on:click={logout}>Cerrar sesión</a>
           </div>
       </li>
     </ul>
@@ -78,10 +90,10 @@
 </nav>
 
 <style>
-  .remove-button-css { 
+  .remove-button-css {
     outline: none;
-    border: 0px; 
-    box-sizing: none; 
-    background-color: transparent; 
+    border: 0px;
+    box-sizing: none;
+    background-color: transparent;
   }
 </style>

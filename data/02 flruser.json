@@ -210,8 +210,16 @@
             "view_type": "form",
             "definition": {
                 "structure": [
+                    {"section": "Información general"},
+                    {"section": "Cambiar contraseña"}
+                ],
+                "Información general": [
+                    {"field": "user", "readonly": true}
+                ],
+                "Cambiar contraseña": [
                     {"field": "old_password", "password": true},
-                    {"field": "new_password", "password": true}
+                    {"field": "new_password", "password": true},
+                    {"field": "confirm_new_password", "password": true}
                 ]
             }
         }

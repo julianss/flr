@@ -1,8 +1,7 @@
 <script>
   import { getUserName, logout } from './../services/session.js'
-  import { getMenus, getViews } from './../services/menu.js'
+  import { getMenus, getViews, openViews } from './../services/menu.js'
   import { onMount } from 'svelte';
-  import { publish } from './../services/writables.js';
 
   let sections = [];
   let username = "";
@@ -19,35 +18,6 @@
 
   function loadView(view){
     getViews(view).then((resp) => openViews(resp))
-  }
-
-  function openViews(resp){
-    let loadedViews = {};
-    let firstType = null;
-    for(let view of resp){
-      loadedViews[view.view_type] = view;
-      if (view.menu_id){
-        loadedViews[view.view_type]['menu_view_name'] = view.menu_id.name;
-      }
-      else {
-        loadedViews[view.view_type]['menu_view_name'] = view.name;
-      }
-      if(firstType === null && view.view_type != "search"){
-        firstType = view.view_type;
-      }
-    }
-    publish({
-      event: 'viewsChanged',
-      views: loadedViews,
-    });
-    publish({
-      event: 'activeRecordIdChanged',
-      id: null,
-    })
-    publish({
-      event: 'activeViewChanged',
-      type: firstType,
-    })
   }
 
 </script>

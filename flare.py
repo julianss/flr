@@ -606,6 +606,37 @@ def download_report():
     response.headers["Content-Disposition"] = "attachment; filename=%s"%filename
     return response
 
+@app.route("/recoverypassword", methods=["POST"])
+def recoverypassword():
+    params = request.get_json()
+    try:
+        email = params.get('email')
+        user = Registry["FlrUser"].select().where(Registry["FlrUser"].email==email)
+        if not user:
+            return make_response(jsonify({
+                'error': {
+                    'message': 'email'
+                }
+            }), 500)
+        user = user.first()
+        token = jwt.encode({"id":user.id}, SECRET, algorithm="HS256")
+        host = os.getenv('db_host')
+        url = "http://%s:6800/resetPassword?token=%s" % (host, token.decode('ascii'))
+        message = 'Haga <a href="%s"><strong>click en esta liga</strong></a>'\
+                  ' para reestablecer su contraseña' % url
+        fromaddrs = os.getenv('mail_user')
+        sendmail(fromaddrs, email, 'Reestablecer contraseña', message)
+        return make_response(jsonify({
+            'result': True
+        }))
+    except Exception as ex:
+        return make_response(jsonify({
+            'error': {
+                'message': str(ex),
+                'data': traceback.format_exc()
+            }
+        }), 500)
+
 @app.route("/create_user", methods=["POST"])
 def create_user():
     try:
@@ -623,9 +654,24 @@ def send_from_app_public_directory(file):
 @app.route("/")
 def base():
     return send_from_app_public_directory('index.html')
+
 @app.route("/<path:path>")
 def home(path):
     return send_from_app_public_directory(path)
+
+@app.route("/resetPassword", methods=["GET", "POST"])
+def resetpassword():
+    if request.method == "GET":
+        return send_from_app_public_directory('index.html')
+    else:
+        params = request.get_json()
+        decoded = jwt.decode(params.get('token'), SECRET, algorithms=['HS256'])
+        Registry["FlrUser"].flr_update({
+            'password': params.get('password'),
+        }, [('id','=',decoded.get('id'))])
+        return make_response(jsonify({
+            'result': True
+        }))
 
 #Resful API helpers
 class api:

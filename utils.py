@@ -2,6 +2,8 @@ import datetime
 from flask.json import JSONEncoder
 import os
 import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import re
 
 def sendmail(fromaddr, toaddrs, subject, message):
@@ -11,13 +13,19 @@ def sendmail(fromaddr, toaddrs, subject, message):
     subject -- str
     message -- str
     """
+    msg = MIMEMultipart('alternative')
     if isinstance(toaddrs, str):
         toaddrs = re.split(',| ', toaddrs.strip())
-    header = ("Subject: %s\r\nFrom: %s\r\nTo: %s\r\n\r\n"
-        % (subject, fromaddr, ", ".join(toaddrs)))
+    msg['Subject'] = subject
+    msg['From'] = fromaddr
+    msg['To'] = ", ".join(toaddrs)
+    message = message.replace('\r\n', '<br>')
+    message = message.replace('\n', '<br>')
+    msg.attach(MIMEText(message, 'html'))
+    # message.encode('utf-8')
     server = smtplib.SMTP_SSL(os.getenv('mail_host'), port=int(os.getenv('mail_port', 0)))
     server.login(os.getenv('mail_user'), os.getenv('mail_pass'))
-    server.sendmail(fromaddr, toaddrs, header.encode('utf-8') + message.encode('utf-8'))
+    server.sendmail(fromaddr, toaddrs, msg.as_string())
     server.quit()
 
 # To render dates in a format different to Flask's default we need a Custom JSON encoder

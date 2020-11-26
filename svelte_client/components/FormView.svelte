@@ -21,6 +21,7 @@
     let onChanges = {};
     let reports = [];
     let validations = [];
+    let isWizard = false;
 
     activeViewStore.subscribe((event) => {
         if(event){
@@ -36,6 +37,11 @@
             fieldsDescription = null;
             let views = event.views;
             if(views != null && views["form"]){
+                if (!views["list"]){
+                    isWizard = true;
+                }else{
+                    isWizard = false;
+                }
                 view = views["form"];
                 sections = [];
                 onChanges = [];
@@ -221,26 +227,32 @@
 <div hidden={!visible}>
     <div id="form_view_toolbar">
         <div class="col-md">
-            <button type="button" class="btn btn-secondary mb-2" on:click={back}>
-                ≡ Listado
-            </button>
-            {#if recordId && !editMode}
-                <button type="button" class="btn btn-primary mb-2" on:click={create}>
-                    Nuevo
+            {#if !isWizard}
+                <button type="button" class="btn btn-secondary mb-2" on:click={back}>
+                    ≡ Listado
                 </button>
+                {#if recordId && !editMode}
+                    <button type="button" class="btn btn-primary mb-2" on:click={create}>
+                        Nuevo
+                    </button>
+                {/if}
             {/if}
             {#if editMode}
                 <button type="button" class="btn btn-primary mb-2" on:click={save}>
                     Guardar
                 </button>
-                <button type="button" class="btn btn-light mb-2" on:click={discard}>
-                    Descartar
-                </button>
+                {#if !isWizard}
+                    <button type="button" class="btn btn-light mb-2" on:click={discard}>
+                        Descartar
+                    </button>
+                {/if}
             {/if}
             {#if !editMode}
-                <button type="button" class="btn btn-primary mb-2" on:click={edit}>
-                    Editar
-                </button>
+                {#if !isWizard}
+                    <button type="button" class="btn btn-primary mb-2" on:click={edit}>
+                        Editar
+                    </button>
+                {/if}
             {/if}
             {#if view}
                 <strong class="ml-2" style="font-size:30px">{view.menu_view_name}</strong>
@@ -322,14 +334,6 @@
 </div>
 
 <style>
-
-    .validations :global(label::after){
-        content:"*";
-        color:red
-    }
-    .validations :global(input, select){
-        background-color:seashell
-    }
     .tabs {
         background-color:white;
         margin-bottom: 10px;

@@ -11,6 +11,7 @@
     export let allowAdd;
     export let allowRemove;
     export let readonly;
+    export let viewtype;
     let valueFK;
 
     function renderField(obj, field){
@@ -30,6 +31,7 @@
             return;
         }
         let ids = [];
+
         if (!value){
             value = [];
         }
@@ -55,54 +57,64 @@
 
 <div class="form-group">
     <label>{label}</label>
-    {#if edit && allowAdd && !readonly}
-        <ForeignKeyField
-            label=""
-            bind:value={valueFK}
-            edit={edit}
-            model={model}
-            filters={filters}
-            on:change={add}
-            relatedFields={relatedFields}
-            placeholder="Agregar elemento"
-        />
-    {/if}
-    <table class="table table-sm">
-        <thead class="thead-light">
-            <tr>
-                {#each relatedFields as field}
-                    {#if !relatedFieldsDesc || !relatedFieldsDesc[field.field]}
-                        <th>{field.field}</th>
-                    {:else}
-                        <th>{relatedFieldsDesc[field.field].label}</th>
-                    {/if}
-                {/each}
-                <th></th>
-            </tr>
-        </thead>
-        {#if (value || []).length>0}
-            {#each value as obj}
+    {#if viewtype === 'form'}
+        {#if edit && allowAdd && !readonly}
+            <ForeignKeyField
+                label=""
+                bind:value={valueFK}
+                edit={edit}
+                model={model}
+                filters={filters}
+                on:change={add}
+                relatedFields={relatedFields}
+                placeholder="Agregar elemento"
+            />
+        {/if}
+        <table class="table table-sm">
+            <thead class="thead-light">
                 <tr>
                     {#each relatedFields as field}
-                        <td>{renderField(obj, field.field)}</td>
-                    {/each}
-                    <td class="basura">
-                        {#if allowRemove}
-                            <img
-                                hidden={!edit}
-                                on:click={()=>remove(obj.id)}
-                                src="icons/trash-fill.svg"
-                                alt="Remover"/>
+                        {#if !relatedFieldsDesc || !relatedFieldsDesc[field.field]}
+                            <th>{field.field}</th>
+                        {:else}
+                            <th>{relatedFieldsDesc[field.field].label}</th>
                         {/if}
-                    </td>
+                    {/each}
+                    <th></th>
                 </tr>
+            </thead>
+            {#if (value || []).length>0}
+                {#each value as obj}
+                    <tr>
+                        {#each relatedFields as field}
+                            <td>{renderField(obj, field.field)}</td>
+                        {/each}
+                        <td class="basura">
+                            {#if allowRemove}
+                                <img
+                                    hidden={!edit}
+                                    on:click={()=>remove(obj.id)}
+                                    src="icons/trash-fill.svg"
+                                    alt="Remover"/>
+                            {/if}
+                        </td>
+                    </tr>
+                {/each}
+            {:else}
+                <tr>
+                    <td colspan="100">(Sin elementos)</td>
+                </tr>
+            {/if}
+        </table>
+    {:else if viewtype == 'list'}
+        {#if (value || []).length>0}
+            {#each value as obj}
+                {#each relatedFields as field}
+                    <p>{renderField(obj, field.field)}</p>
+                {/each}
             {/each}
-        {:else}
-            <tr>
-                <td colspan="100">(Sin elementos)</td>
-            </tr>
         {/if}
-    </table>
+    {/if}
 </div>
 
 <style>

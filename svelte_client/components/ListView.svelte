@@ -10,6 +10,7 @@
         publish,
         getValue
     } from './../services/writables.js';
+    import Field from './Field.svelte';
 
     let view = null;
     let visible = false;
@@ -74,6 +75,11 @@
             selectedRecords = {};
             for(let item of view.definition.structure){
                 fields.push(item.field);
+                if(item.related_fields){
+                    for(let rf of item.related_fields){
+                        fields.push(item.field + "." + rf.field);
+                    }
+                }
             }
             if(!fieldsDescription){
                 fieldsDescription = await call(view.model, "get_fields_desc", [fields]);
@@ -280,7 +286,19 @@
                     </td>
                     {#each view.definition.structure as item}
                         {#if item.field && item.field in fieldsDescription}
-                            <td>{renderField(record, item.field)}</td>
+                            <td>
+                                <Field
+                                    type={fieldsDescription[item.field].type}
+                                    edit={false}
+                                    bind:value={record[item.field]}
+                                    password={item.password || false}
+                                    model={fieldsDescription[item.field].model}
+                                    relatedFields={item.related_fields}
+                                    relatedFieldsDesc={fieldsDescription[item.field].related_fields}
+                                    nolabel={true}
+                                    viewtype={'list'}
+                                />
+                            </td>
                         {:else}
                             <td></td>
                         {/if}

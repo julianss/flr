@@ -29,6 +29,7 @@
     export let add;
     export let remove;
     export let readonly;
+    export let viewtype;
 
     function changed(){
         dispatch("change", {});
@@ -131,6 +132,7 @@
                 allowRemove={remove}
                 on:change={changed}
                 readonly={readonly}
+                viewtype={viewtype}
             />
         {:else if type === "backref"}
             <BackRefField
@@ -145,6 +147,7 @@
                 allowRemove={remove}
                 on:change={changed}
                 readonly={readonly}
+                viewtype={viewtype}
             />
         {:else if type === "file"}
             <FileField

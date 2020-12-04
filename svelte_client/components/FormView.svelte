@@ -324,6 +324,7 @@
                                     add={item.add}
                                     remove={item.remove}
                                     readonly={item.readonly || false}
+                                    viewtype={'form'}
                                 />
                             </div>
                         {/if}

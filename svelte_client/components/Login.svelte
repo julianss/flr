@@ -70,6 +70,21 @@
         incorrect = false;
     }
 
+    function setInputType(inputId, imgId){
+        var inputObj = document.getElementById(inputId);
+        if (inputObj){
+            var buttonImg = document.getElementById(imgId)
+            if (inputObj.type === "password"){
+                inputObj.type = "text";
+                buttonImg.src = "icons/eye-slash.svg"
+            }else{
+                inputObj.type = "password";
+                buttonImg.src = "icons/eye.svg"
+            }
+            inputObj.focus()
+        }
+    }
+
 </script>
 
 <div id="login-screen">
@@ -92,7 +107,20 @@
                         </div>
                         <div class="form-group">
                             <label>Contraseña</label>
-                            <input class="form-control" type="password" bind:value={password}>
+                            <div class="input-group">
+                                <input class="form-control border-right-0" id="password" type="password" bind:value={password}>
+                                <div class="input-group-prepend border-right-0">
+                                    <button tabindex="-1" type="button" class="btn border border-left-0 pb-1"
+                                        on:click={() => setInputType("password", "passwordimg")}>
+                                        <img
+                                            id="passwordimg"
+                                            src="icons/eye.svg"
+                                            alt="Show"
+                                        />
+                                    </button>
+                                </div>
+                            </div>
+
                         </div>
                         <div class="form-group">
                             <button type="button" class="btn btn-primary" on:click={authenticate}>Iniciar sesión</button>
@@ -115,13 +143,38 @@
                     {/if}
                 {:else}
                     {#if !successreset}
+
                         <div class="form-group">
                             <label>Nueva contraseña</label>
-                            <input class="form-control" type="password" bind:value={newpassword}>
+                            <div class="input-group">
+                                <input class="form-control border-right-0" id="newpassword" type="password" bind:value={newpassword}>
+                                <div class="input-group-prepend border-right-0">
+                                    <button tabindex="-1" type="button" class="btn border border-left-0 pb-1"
+                                        on:click={() => setInputType("newpassword", "newpasswordimg")}>
+                                        <img
+                                            id="newpasswordimg"
+                                            src="icons/eye.svg"
+                                            alt="Show"
+                                        />
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Confirmar contraseña</label>
-                            <input class="form-control" type="password" bind:value={confirmpass}>
+                            <div class="input-group">
+                                <input class="form-control border-right-0" id="confirmpass" type="password" bind:value={confirmpass}>
+                                <div class="input-group-prepend border-right-0">
+                                    <button tabindex="-1" type="button" class="btn border border-left-0 pb-1"
+                                        on:click={() => setInputType("confirmpass", "confirmpassimg")}>
+                                        <img
+                                            id="confirmpassimg"
+                                            src="icons/eye.svg"
+                                            alt="Show"
+                                        />
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <button type="button" class="btn btn-primary" on:click={doResetPassword}>Cambiar contraseña</button>
@@ -164,4 +217,5 @@
         width: 200px;
         margin-bottom:30px;
     }
+
 </style>

@@ -10,6 +10,7 @@
     import ManyToManyField from './fields/ManyToManyField.svelte'
     import BackRefField from './fields/BackRefField.svelte'
     import FileField from './fields/FileField.svelte'
+    import AutoField from './fields/AutoField.svelte'
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
     export let type;
@@ -151,6 +152,13 @@
                 bind:value={value}
                 edit={edit}
                 on:change={changed}
+                readonly={readonly}
+            />
+        {:else if type === "auto"}
+            <AutoField
+                label={label}
+                bind:value={value}
+                edit={edit}
                 readonly={readonly}
             />
         {/if}

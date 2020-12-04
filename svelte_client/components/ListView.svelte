@@ -225,9 +225,9 @@
                     </div>
                 </div>
             {/if}
-            <button type="button"
+            <button type="button" on:click={openSearch}
                 class="btn btn-secondary">
-                <img src="icons/search.svg" alt="Filtros" on:click={openSearch}/>
+                <img src="icons/search.svg" alt="Filtros" />
             </button>
             <button type="button"
                 class="btn btn-secondary btn-sm"

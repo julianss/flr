@@ -17,6 +17,7 @@
     export let value;
     export let edit;
     export let password;
+    export let viewpassword;
     export let model;
     export let filters = [];
     export let options = [];
@@ -52,6 +53,7 @@
                 bind:value={value}
                 edit={edit}
                 password={password}
+                viewpassword={viewpassword}
                 on:change={changed}
                 readonly={readonly}
             />

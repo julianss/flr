@@ -313,6 +313,7 @@
                                     edit={editMode}
                                     bind:value={record[item.field]}
                                     password={item.password || false}
+                                    viewpassword={item.viewpassword || false}
                                     model={fieldsDescription[item.field].model}
                                     options={fieldsDescription[item.field].options}
                                     required={item.required || fieldsDescription[item.field].required}
@@ -323,6 +324,7 @@
                                     add={item.add}
                                     remove={item.remove}
                                     readonly={item.readonly || false}
+                                    viewtype={'form'}
                                 />
                             </div>
                         {/if}

@@ -217,9 +217,9 @@
                     {"field": "user", "readonly": true}
                 ],
                 "Cambiar contraseña": [
-                    {"field": "old_password", "password": true},
-                    {"field": "new_password", "password": true},
-                    {"field": "confirm_new_password", "password": true}
+                    {"field": "old_password", "password": true, "viewpassword": true},
+                    {"field": "new_password", "password": true, "viewpassword": true},
+                    {"field": "confirm_new_password", "password": true, "viewpassword": true}
                 ]
             }
         }

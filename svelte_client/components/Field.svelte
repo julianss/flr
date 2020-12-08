@@ -10,6 +10,7 @@
     import ManyToManyField from './fields/ManyToManyField.svelte'
     import BackRefField from './fields/BackRefField.svelte'
     import FileField from './fields/FileField.svelte'
+    import AutoField from './fields/AutoField.svelte'
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
     export let type;
@@ -17,6 +18,7 @@
     export let value;
     export let edit;
     export let password;
+    export let viewpassword;
     export let model;
     export let filters = [];
     export let options = [];
@@ -27,6 +29,7 @@
     export let add;
     export let remove;
     export let readonly;
+    export let viewtype;
 
     function changed(){
         dispatch("change", {});
@@ -52,6 +55,7 @@
                 bind:value={value}
                 edit={edit}
                 password={password}
+                viewpassword={viewpassword}
                 on:change={changed}
                 readonly={readonly}
             />
@@ -128,6 +132,7 @@
                 allowRemove={remove}
                 on:change={changed}
                 readonly={readonly}
+                viewtype={viewtype}
             />
         {:else if type === "backref"}
             <BackRefField
@@ -142,6 +147,7 @@
                 allowRemove={remove}
                 on:change={changed}
                 readonly={readonly}
+                viewtype={viewtype}
             />
         {:else if type === "file"}
             <FileField
@@ -149,6 +155,13 @@
                 bind:value={value}
                 edit={edit}
                 on:change={changed}
+                readonly={readonly}
+            />
+        {:else if type === "auto"}
+            <AutoField
+                label={label}
+                bind:value={value}
+                edit={edit}
                 readonly={readonly}
             />
         {/if}

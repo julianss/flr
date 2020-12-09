@@ -24,7 +24,9 @@ db.evolve(interactive=db_interactive_evolve)
 port = os.environ.get("port", 6800)
 host = os.environ.get("host", "0.0.0.0")
 flask_debug = True if os.environ.get("flask_debug",'') == 'True' else False
-print(Registry)
+print("Loaded models:")
+for model in sorted(list(Registry.keys())):
+    print(model)
 
 Meta = Registry["FlrMeta"]
 

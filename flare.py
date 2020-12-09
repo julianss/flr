@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory, redirect, make_response, Response
 from registry import Registry, ReportHelpers, db
 from utils import normalize_filters, combine_filters, CustomJSONEncoder, add_pages, sendmail
+from apscheduler.schedulers.background import BackgroundScheduler
 import peeweedbevolve
 import peewee as pw
 from playhouse.shortcuts import model_to_dict
@@ -19,11 +20,21 @@ SECRET = os.environ.get("jwt_secret")
 app = Flask(__name__)
 app.json_encoder = CustomJSONEncoder
 
+scheduler = BackgroundScheduler()
+
+def cron(year=None, month=None, day=None, day_of_week=None, hour=None, minute=None, second=None):
+    def inner(func):
+        scheduler.add_job(func, 'cron', year=year, month=month, day=day, day_of_week=day_of_week, hour=hour, minute=minute, second=second)
+        return func
+    return inner
+
 if os.environ.get("enable_cors") == "True":
     from flask_cors import CORS
     CORS(app)
 
 class BaseModel(pw.Model):
+    _transient = False
+
     class Meta:
         database = db
 
@@ -527,6 +538,13 @@ class BaseModel(pw.Model):
         return {
             'datas': base64.b64encode(datas).decode("ascii")
         }
+
+@cron(minute="*/30")
+def delete_temporary_records():
+    for model in Registry:
+        Model = Registry[model]
+        if Model._transient:
+            db.execute_sql("delete from {} where age(now(), created_on) > interval '30 minutes'".format(Model._meta.table_name))
 
 @app.route("/auth", methods=["POST"])
 def auth():

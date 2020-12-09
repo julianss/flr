@@ -141,6 +141,8 @@ FlrUser.r()
 FlrGroup.r()
 
 class FlrPreferences(BaseModel):
+    _transient = True
+
     user = pw.ForeignKeyField(FlrUser, help_text="Usuario")
     old_password = pw.CharField(help_text="Password anterior")
     new_password = pw.CharField(help_text="Password nuevo")
@@ -155,7 +157,7 @@ class FlrPreferences(BaseModel):
 
     @classmethod
     def flr_create(cls, **fields):
-        user = FlrUser.get_by_id(fields.get("user_id"))
+        user = FlrUser.get_by_id(request.uid)
         if not pbkdf2_sha512.verify(fields.get("old_password"), user.password):
             raise Exception("El password anterior no coincide")
         elif not fields.get('new_password') == fields.get('confirm_new_password'):

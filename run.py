@@ -6,7 +6,7 @@ else:
     load_dotenv()
 
 from registry import Registry, db
-from flare import app, sendmail
+from flare import app, scheduler
 import json
 import os
 import core_models
@@ -138,4 +138,7 @@ with db.atomic() as transaction:
         transaction.rollback()
         raise
 
+print("Starting scheduler")
+scheduler.start()
+scheduler.print_jobs()
 app.run(port=port, host=host, debug=flask_debug)

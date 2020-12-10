@@ -9,11 +9,6 @@ import base64
 FILESTORE_PATH = os.environ.get("filestore_path", "./filestore")
 APP = os.environ.get("app")
 
-class FileField(pw.ForeignKeyField):
-    def __init__(self, *args, **kwargs):
-        super(FileField, self).__init__(Registry["FlrFile"], on_delete="SET NULL", *args, **kwargs)
-
-pw.FileField = FileField
 
 class AttachmentsMixin:
     @property

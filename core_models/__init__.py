@@ -1,3 +1,4 @@
+from . import custom_fields
 from . import user
 from . import meta
 from . import menu

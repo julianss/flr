@@ -8,6 +8,7 @@
         publish
     } from './../services/writables.js';
     import Field from './Field.svelte';
+    import Element from './Element.svelte';
 
     let view = null;
     let sections = [];
@@ -100,10 +101,12 @@
             let fields = [];
             for(let section of sections){
                 for(let item of view.definition[section]){
-                    fields.push(item.field);
-                    if(item.related_fields){
-                        for(let rf of item.related_fields){
-                            fields.push(item.field + "." + rf.field);
+                    if (item.field){
+                        fields.push(item.field);
+                        if(item.related_fields){
+                            for(let rf of item.related_fields){
+                                fields.push(item.field + "." + rf.field);
+                            }
                         }
                     }
                 }
@@ -325,6 +328,13 @@
                                     remove={item.remove}
                                     readonly={item.readonly || false}
                                     viewtype={'form'}
+                                />
+                            </div>
+                        {:else if item.tag}
+                            <div>
+                                <Element
+                                    tag={item.tag}
+                                    text={item.text}
                                 />
                             </div>
                         {/if}

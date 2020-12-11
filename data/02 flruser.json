@@ -40,6 +40,7 @@
                     {"field": "name"},
                     {"field": "email"},
                     {"field": "password", "password": true},
+                    {"field": "company_id"},
                     {"field": "active"},
                     {
                         "add": true,
@@ -199,29 +200,6 @@
             },
             "menu_id_META_ID": "menu_flrrule",
             "sequence": 2
-        }
-    },
-    {
-        "model": "FlrView",
-        "meta_id": "flrpreferences_form_view",
-        "data": {
-            "name": "Preferences",
-            "model": "FlrPreferences",
-            "view_type": "form",
-            "definition": {
-                "structure": [
-                    {"section": "Información general"},
-                    {"section": "Cambiar contraseña"}
-                ],
-                "Información general": [
-                    {"field": "user", "readonly": true}
-                ],
-                "Cambiar contraseña": [
-                    {"field": "old_password", "password": true, "viewpassword": true},
-                    {"field": "new_password", "password": true, "viewpassword": true},
-                    {"field": "confirm_new_password", "password": true, "viewpassword": true}
-                ]
-            }
         }
     }
 ]

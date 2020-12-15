@@ -1,0 +1,45 @@
+[
+    {
+        "model": "FlrMenu",
+        "meta_id": "menu_company",
+        "data": {
+            "name": "Company",
+            "sequence": 10,
+            "section_id_META_ID": "menu_section_admin"
+        }
+    },
+    {
+        "model": "FlrView",
+        "meta_id": "company_list_view",
+        "data": {
+            "name": "Compañía",
+            "model": "FlrCompany",
+            "view_type": "list",
+            "definition": {
+                "structure": [
+                    {"field": "name"},
+                    {"field": "image"}
+                ]
+            },
+            "menu_id_META_ID": "menu_company",
+            "sequence": 1
+        }
+    },
+    {
+        "model": "FlrView",
+        "meta_id": "company_form_view",
+        "data": {
+            "name": "Form Compañía",
+            "model": "FlrCompany",
+            "view_type": "form",
+            "definition": {
+                "structure": [
+                    {"field": "name"},
+                    {"field": "image"}
+                ]
+            },
+            "menu_id_META_ID": "menu_company",
+            "sequence": 2
+        }
+    }
+]

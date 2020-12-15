@@ -1,0 +1,30 @@
+[
+    {
+        "model": "FlrView",
+        "meta_id": "flrpreferences_form_view",
+        "data": {
+            "name": "Preferences",
+            "model": "FlrPreferences",
+            "view_type": "form",
+            "definition": {
+                "structure": [
+                    {"section": "Información general"},
+                    {"section": "Cambiar contraseña"},
+                    {"section": "Cambiar compañía"}
+                ],
+                "Información general": [
+                    {"field": "user", "readonly": true}
+                ],
+                "Cambiar contraseña": [
+                    {"field": "old_password", "password": true, "viewpassword": true},
+                    {"field": "new_password", "password": true, "viewpassword": true},
+                    {"field": "confirm_new_password", "password": true, "viewpassword": true}
+                ],
+                "Cambiar compañía": [
+                    {"field": "old_company", "readonly": true},
+                    {"field": "new_company"}
+                ]
+            }
+        }
+    }
+]

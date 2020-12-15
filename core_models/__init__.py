@@ -5,3 +5,5 @@ from . import menu
 from . import view
 from . import file
 from . import report
+from . import company
+from . import preferences

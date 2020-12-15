@@ -12,7 +12,7 @@ APP = os.environ.get("app")
 
 class AttachmentsMixin:
     @property
-    def attachments(self): 
+    def attachments(self):
         return FlrFile.read(["name"], [['rec_id','=',self.id], ['model','=',self.__class__.__name__]])
 
     def update_attachments(self, new_ids):
@@ -92,7 +92,7 @@ def flr_attach():
                 })
             created = FlrFile.create(**vals)
             return jsonify({
-                'result': created.id 
+                'result': created.id
             })
     except Exception as ex:
         print(traceback.format_exc())

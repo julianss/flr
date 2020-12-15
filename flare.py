@@ -231,16 +231,14 @@ class BaseModel(pw.Model):
         fields["created_on"] = datetime.now()
         if request and hasattr(request, "uid"):
             fields["created_by"] = request.uid
+            if hasattr(cls, "company_id"):
+                fields["company_id"] = Registry["FlrUser"].get_by_id(request.uid).company_id.id
         return super(BaseModel, cls).create(**fields)
 
     @classmethod
     def flr_create(cls, **fields):
         #Check ACL and rules
         FlrUser = Registry["FlrUser"]
-        if not (cls.__name__ == "FlrUser" or\
-                cls.__name__ == "FlrCompany" or\
-                cls.__name__ == "FlrPreferences"):
-            fields.update({'company_id': FlrUser.get_by_id(request.uid).company_id.id})
         FlrUser.check_access(cls.__name__, "create")
         FlrUser.check_rules(cls.__name__, "create", [], fields)
         #Attachments may be present (files that have already been created)

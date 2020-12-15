@@ -32,6 +32,13 @@ Meta = Registry["FlrMeta"]
 
 #Initialize empty database
 if Registry["FlrUser"].read([], count=True) == 0:
+    #Create default company
+    company_id = Registry["FlrCompany"].flr_create(name="Default company")
+    Meta.flr_create(
+        meta_id="flrcompany_default",
+        model="FlrCompany",
+        rec_id=company_id
+    )
     #Create administrator
     if not os.environ.get("admin_pass"):
         admin_passwd = input("Superuser password: ")
@@ -43,7 +50,8 @@ if Registry["FlrUser"].read([], count=True) == 0:
         login="admin",
         email="admin",
         password=admin_passwd,
-        groups=[gid])
+        groups=[gid],
+        company_id=company_id)
     Meta.flr_create(
         meta_id="flgroup_admin",
         model="FlrGroup",
@@ -129,7 +137,7 @@ with db.atomic() as transaction:
                         Model.flr_update(data, [('id','=',existing.rec_id)])
         #Delete records that are in the meta table but are not present in the files (were deleted from the file)
         for meta_id in all_meta_ids:
-            if meta_id not in read_meta_ids and meta_id not in ("fluser_admin","flgroup_admin"):
+            if meta_id not in read_meta_ids and meta_id not in ("fluser_admin","flgroup_admin","flrcompany_default"):
                 print("deleting", meta_id)
                 meta_rec = Meta.get_or_none(Meta.meta_id==meta_id)
                 if meta_rec:

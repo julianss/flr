@@ -614,18 +614,6 @@ def call():
                 }
             }), 500)
 
-@app.route("/report/download", methods=["GET"])
-def download_report():
-    token = request.args["reqToken"]
-    decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
-    with open(decoded.get("path"), "rb") as f:
-        data = f.read()
-    os.unlink(decoded.get("path"))
-    response = Response(data, mimetype="application/pdf")
-    filename = decoded.get("filename")
-    response.headers["Content-Disposition"] = "attachment; filename=%s"%filename
-    return response
-
 @app.route("/recoverypassword", methods=["POST"])
 def recoverypassword():
     params = request.get_json()

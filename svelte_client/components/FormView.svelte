@@ -364,7 +364,7 @@
                                     password={item.password || false}
                                     viewpassword={item.viewpassword || false}
                                     model={fieldsDescription[item.field].model}
-                                    options={fieldsDescription[item.field].options}
+                                    choices={fieldsDescription[item.field].options}
                                     required={item.required || fieldsDescription[item.field].required}
                                     relatedFields={item.related_fields}
                                     relatedFieldsDesc={fieldsDescription[item.field].related_fields}
@@ -374,6 +374,7 @@
                                     remove={item.remove}
                                     readonly={item.readonly || false}
                                     viewtype={'form'}
+                                    options={item.options || {}}
                                 />
                             </div>
                         {:else if item.tag}

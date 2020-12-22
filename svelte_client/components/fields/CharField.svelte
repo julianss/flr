@@ -7,6 +7,7 @@
     export let password = false;
     export let viewpassword;
     export let readonly;
+    export let options;
     let uniqueId = Date.now().toString() + "-" + Math.random().toString().substring(2);
 
     function changed(){
@@ -52,6 +53,8 @@
             <input class="form-control" type="text" bind:value={value} on:change={changed}/>
         {:else if password}
             <p>*****</p>
+        {:else if options && options.html}
+            {@html (value || '')}
         {:else}
             <p>{value || ''}</p>
         {/if}

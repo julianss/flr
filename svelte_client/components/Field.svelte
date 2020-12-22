@@ -21,7 +21,7 @@
     export let viewpassword;
     export let model;
     export let filters = [];
-    export let options = [];
+    export let choices = [];
     export let required;
     export let relatedFields;
     export let relatedFieldsDesc;
@@ -30,6 +30,7 @@
     export let remove;
     export let readonly;
     export let viewtype;
+    export let options;
 
     function changed(){
         dispatch("change", {});
@@ -58,6 +59,7 @@
                 viewpassword={viewpassword}
                 on:change={changed}
                 readonly={readonly}
+                options={options}
             />
         {:else if type === "boolean"}
             <BooleanField
@@ -74,6 +76,7 @@
                 edit={edit}
                 on:change={changed}
                 readonly={readonly}
+                options={options}
             />
         {:else if type === "integer"}
             <IntegerField
@@ -115,7 +118,7 @@
                 label={label}
                 bind:value={value}
                 edit={edit}
-                options={options}
+                choices={choices}
                 on:change={changed}
                 readonly={readonly}
             />

@@ -50,7 +50,12 @@ class BaseModel(pw.Model):
 
     @classmethod
     def get_default(cls):
-        return {}
+        defaults = {}
+        for k in cls._meta.fields.keys():
+            field = cls._meta.fields[k]
+            if type(field) in (pw.IntegerField, pw.FloatField):
+                defaults[k] = 0
+        return defaults
 
     def get_dict_id_and_name(self):
         return {

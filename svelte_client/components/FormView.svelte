@@ -8,7 +8,9 @@
         publish
     } from './../services/writables.js';
     import Field from './Field.svelte';
+    import ActionButton from './ActionButton.svelte';
     import Element from './Element.svelte';
+    import { setContext } from 'svelte';
 
     let view = null;
     let sections = [];
@@ -193,7 +195,8 @@
             }
         }
         if (validations.length === 0){
-            call(view.model, method, args, kwargs).then(
+            var promise = call(view.model, method, args, kwargs)
+            promise.then(
                 (resp) => {
                     if(!resp.error){
                         publish({
@@ -205,9 +208,10 @@
                     }
                 }
             )
+            return promise;
         }
     }
-
+    
     function edit(){
         editMode = true;
     }
@@ -251,6 +255,10 @@
         invisibles = invisibles;
     }
 
+    setContext('formViewFunctions', {
+        'save': () => save()
+    });
+
 </script>
 
 <div hidden={!visible}>
@@ -288,6 +296,18 @@
             {/if}
         </div>
         <div class="col-md top-left-buttons">
+            {#if view && record && record.id && view.definition.buttons}
+                {#each view.definition.buttons as button}
+                    <ActionButton
+                        action={button.action}
+                        text={button.text}
+                        options={button.options}
+                        model={view.model}
+                        bind:record
+                        view={this}
+                    />
+                {/each}
+            {/if}
             {#if record && reports && record.id && reports.length>0}
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="actionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -363,6 +383,14 @@
                                     text={item.text}
                                 />
                             </div>
+                        {:else if item.button}
+                            <ActionButton
+                                action={item.button.action}
+                                text={item.button.text}
+                                options={item.button.options}
+                                model={view.model}
+                                bind:record
+                            />
                         {/if}
                     {/each}
                 {/each}

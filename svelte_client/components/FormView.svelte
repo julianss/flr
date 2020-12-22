@@ -20,9 +20,11 @@
     let fieldsDescription = null;
     let editMode = false;
     let onChanges = {};
+    let invisibles = {};
     let reports = [];
     let validations = [];
     let isWizard = false;
+
 
     activeViewStore.subscribe((event) => {
         if(event){
@@ -30,6 +32,7 @@
             visible = type === "form";
             editMode = false;
             validations = [];
+            refreshInvisibles();
         }
     });
 
@@ -46,10 +49,15 @@
                 view = views["form"];
                 sections = [];
                 onChanges = [];
+                invisibles = [];
                 for(let k in view.definition){
                     for(let item of view.definition[k]){
                         if(item.field && item.onchange){
                             onChanges[item.field] = item.onchange;
+                            invisibles[item.field] = {condition: item.invisible, result: false};
+                        }
+                        if(item.field && item.invisible){
+                            invisibles[item.field] = {condition: item.invisible, result: false};
                         }
                     }
                 }
@@ -119,6 +127,7 @@
                             (resp) => {
                                 record = resp[0];
                                 notDirty = JSON.parse(JSON.stringify(resp[0]));
+                                refreshInvisibles();
                             }
                         );
                     }else{
@@ -134,6 +143,7 @@
                                 record = blankRecord;
                                 notDirty = JSON.parse(JSON.stringify(blankRecord));
                                 editMode = true;
+                                refreshInvisibles();
                             }
                         )
 
@@ -223,6 +233,22 @@
                 }
             )
         }
+        refreshInvisibles();
+    }
+
+    function refreshInvisibles(){
+        if(!record){
+            return;
+        }
+        for(let field in invisibles){
+            if(!invisibles[field].condition){
+                invisibles[field].result = false;
+            }else {
+                let code = "return " + invisibles[field].condition;
+                invisibles[field].result = new Function(code).call(record);
+            }
+        }
+        invisibles = invisibles;
     }
 
 </script>
@@ -309,7 +335,7 @@
                 {#each sections as section}
                     {#each view.definition[section] as item}
                         {#if item.field && item.field in fieldsDescription }
-                            <div hidden={section != activeSection || item.invisible && record[item.invisible]}>
+                            <div hidden={section != activeSection || invisibles[item.field] && invisibles[item.field].result}>
                                 <Field
                                     type={fieldsDescription[item.field].type}
                                     label={item.label || fieldsDescription[item.field].label}

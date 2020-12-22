@@ -32,6 +32,9 @@ if os.environ.get("enable_cors") == "True":
     from flask_cors import CORS
     CORS(app)
 
+def prettifyName(field_name):
+    return field_name.capitalize().replace("_", " ")
+
 class BaseModel(pw.Model):
     _transient = False
 
@@ -101,7 +104,7 @@ class BaseModel(pw.Model):
                 continue
             field = cls._meta.fields[k]
             desc = {
-                'label': field.verbose_name or field.help_text,
+                'label': field.verbose_name or field.help_text or prettifyName(k),
                 'type': field.__class__.__name__.replace("Field", "").lower(),
                 'required': not field.null
             }
@@ -120,7 +123,7 @@ class BaseModel(pw.Model):
             verbose_name = field.verbose_name if hasattr(field, "verbose_name") else False
             help_text = field.help_text if hasattr(field, "help_text") else False
             fields[k] = {
-                'label': verbose_name or help_text,
+                'label': verbose_name or help_text or prettifyName(k),
                 'type': 'manytomany',
                 'model': field.rel_model.__name__,
                 'related_fields': []
@@ -137,11 +140,14 @@ class BaseModel(pw.Model):
                 continue
             tattr = type(getattr(cls, k))
             if tattr == property:
-                fields[k] = {}
+                fields[k] = {
+                    'label': getattr(cls, k).__doc__,
+                    'type': 'char'
+                }
             if tattr == pw.BackrefAccessor:
                 field = getattr(cls, k)
                 fields[k] = {
-                    'label': k.capitalize(),
+                    'label': prettifyName(k),
                     'type': 'backref',
                     'model': field.rel_model.__name__,
                     'related_fields': []

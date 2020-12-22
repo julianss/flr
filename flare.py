@@ -421,6 +421,10 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_delete(cls, ids):
+        for k in cls._meta.manytomany.keys():
+            field = cls._meta.manytomany[k]
+            for rec in cls.select().where(getattr(cls, "id").in_(ids)):
+                getattr(rec, k).clear()
         query = cls.delete().where(cls.id.in_(ids))
         deleted = query.execute()
         return deleted

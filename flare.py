@@ -599,6 +599,7 @@ def call():
         try:
             Registry["FlrUser"].decode_jwt(request)
             params = request.get_json()
+            request.flr_globals = params.get("$globals", {})
             model_name = params.get("model")
             method_name = params.get("method")
             if method_name in ("create", "update", "delete"):

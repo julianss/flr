@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
-import { get_store_value } from 'svelte/internal'
+import { get_store_value } from 'svelte/internal';
+import { globalsStore } from './writables';
 
 if(localStorage.getItem("flare_yourappname_jwt")){
     var initial_jwt = localStorage.getItem("flare_yourappname_jwt");
@@ -58,7 +59,8 @@ export function call(model, method, args, kwargs){
             'model': model,
             'method': method,
             'args': args,
-            'kwargs': kwargs
+            'kwargs': kwargs,
+            '$globals': get_store_value(globalsStore)
         })
     })
     .then(async function(_resp) {

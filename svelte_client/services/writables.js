@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 import { get_store_value } from 'svelte/internal'
 
+export const globalsStore = writable({})
 export const viewsStore = writable(null);
 export const activeRecordIdStore = writable();
 export const activeViewStore = writable(null);
@@ -26,4 +27,10 @@ export function publish(event) {
 
 export function getValue(store){
     return get_store_value(store);
+}
+
+export function updateGlobals(key, value){
+    let globals = get_store_value(globalsStore);
+    globals[key] = value;
+    globalsStore.set(globals);
 }

@@ -20,6 +20,7 @@
         }else{
             save().then((resp) => {
                 doAction(resp);
+                history.back();
             })
         }
     }

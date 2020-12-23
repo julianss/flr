@@ -139,6 +139,10 @@
         if(!("form" in getValue(viewsStore).views)){
             return;
         }
+        utils.updateHash({
+            type: 'form',
+            id: recordId
+        })
         publish({
             'event': 'activeViewChanged',
             'type': 'form'
@@ -285,7 +289,7 @@
                             on:click|stopPropagation/>
                     </td>
                     {#each view.definition.structure as item}
-                        {#if item.field && item.field in fieldsDescription}
+                        {#if item.field && fieldsDescription && item.field in fieldsDescription}
                             <td>
                                 <Field
                                     type={fieldsDescription[item.field].type}

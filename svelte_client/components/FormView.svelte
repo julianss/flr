@@ -1,6 +1,7 @@
 <script>
     import { call } from './../services/service.js';
     import { requestReport } from './../services/report.js';
+    import { updateHash } from './../services/utils.js';
     import {
         viewsStore,
         activeViewStore,
@@ -93,6 +94,10 @@
     })
 
     function back(){
+        updateHash({
+            type: null,
+            id: null
+        })
         publish({
             'event': 'activeViewChanged',
             'type': 'list'

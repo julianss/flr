@@ -44,6 +44,7 @@
     viewsStore.subscribe((event) => {
         if(event){
             fetchedRecords = [];
+            filters = [];
             page = 1;
             fieldsDescription = null;
             let views = event.views;

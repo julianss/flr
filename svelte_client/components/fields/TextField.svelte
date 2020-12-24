@@ -5,6 +5,7 @@
     export let value;
     export let edit;
     export let readonly;
+    export let options;
 
     function changed(){
         dispatch("change", {});
@@ -15,7 +16,10 @@
     <label>{label}</label>
     {#if edit && !readonly}
         <textarea class="form-control" bind:value={value} on:change={changed}/>
+    {:else if options && options.html}
+        {@html (value || '')}
     {:else}
         <pre>{value || ''}</pre>
     {/if}
+
 </div>

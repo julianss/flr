@@ -31,6 +31,8 @@
     viewsStore.subscribe((event) => {
         if(event){
             fieldsDescription = null;
+            selectedOperators = {};
+            selectedValues = {};
             let views = event.views;
             if(views != null && views["search"]){
                 view = views["search"];
@@ -110,7 +112,7 @@
                 <div class="form-group">
                     {#if fieldsDescription && view}
                         {#each view.definition.fields || view.definition.structure as item}
-                            {#if item.field && item.field in fieldsDescription }
+                            {#if item.field && item.field in fieldsDescription && !['manytomany','backref'].includes(fieldsDescription[item.field].type) }
                                 <div class="search-row">
                                     <span style="width:30%">
                                         <label>{item.label || fieldsDescription[item.field].label}</label>

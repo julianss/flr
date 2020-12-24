@@ -4,11 +4,11 @@
     export let label = "";
     export let value;
     export let edit;
-    export let options = [];
+    export let choices = [];
     export let readonly;
 
     function getLabel(value){
-        for(let o of options){
+        for(let o of choices){
             if(o[0] === value){
                 return o[1];
             }
@@ -24,9 +24,9 @@
 <div class="form-group">
     <label>{label}</label>
     {#if edit && !readonly}
-        <select class="form-control" bind:value={value} on:blur={changed}>
+        <select class="form-control" bind:value={value} on:click={changed}>
             <option value={false}></option>
-            {#each options as option}
+            {#each choices as option}
                 <option value={option[0]}>{option[1]}</option>
             {/each}
         </select>

@@ -2,6 +2,8 @@
   import { getUserName, logout } from './../services/session.js'
   import { getMenus, getViews, openViews } from './../services/menu.js'
   import { onMount } from 'svelte';
+  import { parseHash, updateHash, replaceHash } from './../services/utils.js';
+  import { publish } from './../services/writables.js';
 
   let sections = [];
   let username = "";
@@ -9,16 +11,51 @@
   onMount(async () => {
     sections = await getMenus();
     username = await getUserName();
-    clickMenu(sections[0].menus[0]);
+    var params = parseHash();
+    if(params.menu_id){
+      clickMenu(parseInt(params.menu_id), params.type, params.id);
+    }else{
+      clickMenu(sections[0].menus[0].id);
+    }
   })
 
-  function clickMenu(menu) {
-    getViews(menu.id).then((resp) => openViews(resp))
+  function clickMenu(menuId, type, id) {
+    if(menuId){
+      getViews(menuId).then(
+        (resp) => {
+          openViews(resp);
+          if(type == 'form' && id){
+            updateHash({
+              menu_id: menuId,
+              type: 'form',
+              id: id
+            })
+            publish({
+              event: 'activeViewChanged',
+              type: 'form'
+            })
+            publish({
+              event: 'activeRecordIdChanged',
+              id: parseInt(id)
+            })
+          }else{
+            replaceHash({menu_id: menuId})
+          }
+        }
+      )
+    }
   }
 
   function loadView(view){
     getViews(view).then((resp) => openViews(resp))
   }
+
+  window.addEventListener('popstate', function(e){
+    var params = parseHash();
+    if(params.menu_id){
+      clickMenu(parseInt(params.menu_id), params.type, params.id);
+    }
+  })
 
 </script>
 
@@ -40,7 +77,7 @@
             </button>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               {#each section.menus as menu}
-                <button class="dropdown-item" type="button" on:click={()=>clickMenu(menu)}>{menu.name}</button>
+                <button class="dropdown-item" type="button" on:click={()=>clickMenu(menu.id)}>{menu.name}</button>
               {/each}
             </div>
           </li>

@@ -32,6 +32,9 @@ if os.environ.get("enable_cors") == "True":
     from flask_cors import CORS
     CORS(app)
 
+def prettifyName(field_name):
+    return field_name.capitalize().replace("_", " ")
+
 class BaseModel(pw.Model):
     _transient = False
 
@@ -50,7 +53,12 @@ class BaseModel(pw.Model):
 
     @classmethod
     def get_default(cls):
-        return {}
+        defaults = {}
+        for k in cls._meta.fields.keys():
+            field = cls._meta.fields[k]
+            if type(field) in (pw.IntegerField, pw.FloatField):
+                defaults[k] = 0
+        return defaults
 
     def get_dict_id_and_name(self):
         return {
@@ -96,7 +104,7 @@ class BaseModel(pw.Model):
                 continue
             field = cls._meta.fields[k]
             desc = {
-                'label': field.verbose_name or field.help_text,
+                'label': field.verbose_name or field.help_text or prettifyName(k),
                 'type': field.__class__.__name__.replace("Field", "").lower(),
                 'required': not field.null
             }
@@ -115,7 +123,7 @@ class BaseModel(pw.Model):
             verbose_name = field.verbose_name if hasattr(field, "verbose_name") else False
             help_text = field.help_text if hasattr(field, "help_text") else False
             fields[k] = {
-                'label': verbose_name or help_text,
+                'label': verbose_name or help_text or prettifyName(k),
                 'type': 'manytomany',
                 'model': field.rel_model.__name__,
                 'related_fields': []
@@ -132,11 +140,14 @@ class BaseModel(pw.Model):
                 continue
             tattr = type(getattr(cls, k))
             if tattr == property:
-                fields[k] = {}
+                fields[k] = {
+                    'label': getattr(cls, k).__doc__,
+                    'type': 'char'
+                }
             if tattr == pw.BackrefAccessor:
                 field = getattr(cls, k)
                 fields[k] = {
-                    'label': k.capitalize(),
+                    'label': prettifyName(k),
                     'type': 'backref',
                     'model': field.rel_model.__name__,
                     'related_fields': []
@@ -231,16 +242,14 @@ class BaseModel(pw.Model):
         fields["created_on"] = datetime.now()
         if request and hasattr(request, "uid"):
             fields["created_by"] = request.uid
+            if hasattr(cls, "company_id"):
+                fields["company_id"] = Registry["FlrUser"].get_by_id(request.uid).company_id.id
         return super(BaseModel, cls).create(**fields)
 
     @classmethod
     def flr_create(cls, **fields):
         #Check ACL and rules
         FlrUser = Registry["FlrUser"]
-        if not (cls.__name__ == "FlrUser" or\
-                cls.__name__ == "FlrCompany" or\
-                cls.__name__ == "FlrPreferences"):
-            fields.update({'company_id': FlrUser.get_by_id(request.uid).company_id.id})
         FlrUser.check_access(cls.__name__, "create")
         FlrUser.check_rules(cls.__name__, "create", [], fields)
         #Attachments may be present (files that have already been created)
@@ -412,6 +421,10 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_delete(cls, ids):
+        for k in cls._meta.manytomany.keys():
+            field = cls._meta.manytomany[k]
+            for rec in cls.select().where(getattr(cls, "id").in_(ids)):
+                getattr(rec, k).clear()
         query = cls.delete().where(cls.id.in_(ids))
         deleted = query.execute()
         return deleted
@@ -589,6 +602,7 @@ def call():
         try:
             Registry["FlrUser"].decode_jwt(request)
             params = request.get_json()
+            request.flr_globals = params.get("$globals", {})
             model_name = params.get("model")
             method_name = params.get("method")
             if method_name in ("create", "update", "delete"):
@@ -618,18 +632,6 @@ def call():
                     'data': traceback.format_exc()
                 }
             }), 500)
-
-@app.route("/report/download", methods=["GET"])
-def download_report():
-    token = request.args["reqToken"]
-    decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
-    with open(decoded.get("path"), "rb") as f:
-        data = f.read()
-    os.unlink(decoded.get("path"))
-    response = Response(data, mimetype="application/pdf")
-    filename = decoded.get("filename")
-    response.headers["Content-Disposition"] = "attachment; filename=%s"%filename
-    return response
 
 @app.route("/recoverypassword", methods=["POST"])
 def recoverypassword():

@@ -1,6 +1,7 @@
 <script>
     import { call } from './../services/service.js';
     import { requestReport } from './../services/report.js';
+    import { updateHash } from './../services/utils.js';
     import {
         viewsStore,
         activeViewStore,
@@ -8,7 +9,9 @@
         publish
     } from './../services/writables.js';
     import Field from './Field.svelte';
+    import ActionButton from './ActionButton.svelte';
     import Element from './Element.svelte';
+    import { setContext } from 'svelte';
 
     let view = null;
     let sections = [];
@@ -20,9 +23,11 @@
     let fieldsDescription = null;
     let editMode = false;
     let onChanges = {};
+    let invisibles = {};
     let reports = [];
     let validations = [];
     let isWizard = false;
+
 
     activeViewStore.subscribe((event) => {
         if(event){
@@ -30,6 +35,7 @@
             visible = type === "form";
             editMode = false;
             validations = [];
+            refreshInvisibles();
         }
     });
 
@@ -46,10 +52,15 @@
                 view = views["form"];
                 sections = [];
                 onChanges = [];
+                invisibles = [];
                 for(let k in view.definition){
                     for(let item of view.definition[k]){
                         if(item.field && item.onchange){
                             onChanges[item.field] = item.onchange;
+                            invisibles[item.field] = {condition: item.invisible, result: false};
+                        }
+                        if(item.field && item.invisible){
+                            invisibles[item.field] = {condition: item.invisible, result: false};
                         }
                     }
                 }
@@ -83,6 +94,10 @@
     })
 
     function back(){
+        updateHash({
+            type: null,
+            id: null
+        })
         publish({
             'event': 'activeViewChanged',
             'type': 'list'
@@ -119,6 +134,7 @@
                             (resp) => {
                                 record = resp[0];
                                 notDirty = JSON.parse(JSON.stringify(resp[0]));
+                                refreshInvisibles();
                             }
                         );
                     }else{
@@ -134,6 +150,7 @@
                                 record = blankRecord;
                                 notDirty = JSON.parse(JSON.stringify(blankRecord));
                                 editMode = true;
+                                refreshInvisibles();
                             }
                         )
 
@@ -188,7 +205,8 @@
             }
         }
         if (validations.length === 0){
-            call(view.model, method, args, kwargs).then(
+            var promise = call(view.model, method, args, kwargs)
+            promise.then(
                 (resp) => {
                     if(!resp.error){
                         publish({
@@ -200,9 +218,10 @@
                     }
                 }
             )
+            return promise;
         }
     }
-
+    
     function edit(){
         editMode = true;
     }
@@ -228,7 +247,27 @@
                 }
             )
         }
+        refreshInvisibles();
     }
+
+    function refreshInvisibles(){
+        if(!record){
+            return;
+        }
+        for(let field in invisibles){
+            if(!invisibles[field].condition){
+                invisibles[field].result = false;
+            }else {
+                let code = "return " + invisibles[field].condition;
+                invisibles[field].result = new Function(code).call(record);
+            }
+        }
+        invisibles = invisibles;
+    }
+
+    setContext('formViewFunctions', {
+        'save': () => save()
+    });
 
 </script>
 
@@ -267,6 +306,18 @@
             {/if}
         </div>
         <div class="col-md top-left-buttons">
+            {#if view && record && record.id && view.definition.buttons}
+                {#each view.definition.buttons as button}
+                    <ActionButton
+                        action={button.action}
+                        text={button.text}
+                        options={button.options}
+                        model={view.model}
+                        bind:record
+                        view={this}
+                    />
+                {/each}
+            {/if}
             {#if record && reports && record.id && reports.length>0}
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="actionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -316,7 +367,7 @@
                 {#each sections as section}
                     {#each view.definition[section] as item}
                         {#if item.field && item.field in fieldsDescription }
-                            <div hidden={section != activeSection || item.invisible && record[item.invisible]}>
+                            <div hidden={section != activeSection || invisibles[item.field] && invisibles[item.field].result}>
                                 <Field
                                     type={fieldsDescription[item.field].type}
                                     label={item.label || fieldsDescription[item.field].label}
@@ -325,7 +376,7 @@
                                     password={item.password || false}
                                     viewpassword={item.viewpassword || false}
                                     model={fieldsDescription[item.field].model}
-                                    options={fieldsDescription[item.field].options}
+                                    choices={fieldsDescription[item.field].options}
                                     required={item.required || fieldsDescription[item.field].required}
                                     relatedFields={item.related_fields}
                                     relatedFieldsDesc={fieldsDescription[item.field].related_fields}
@@ -335,6 +386,7 @@
                                     remove={item.remove}
                                     readonly={item.readonly || false}
                                     viewtype={'form'}
+                                    options={item.options || {}}
                                 />
                             </div>
                         {:else if item.tag}
@@ -344,6 +396,14 @@
                                     text={item.text}
                                 />
                             </div>
+                        {:else if item.button}
+                            <ActionButton
+                                action={item.button.action}
+                                text={item.button.text}
+                                options={item.button.options}
+                                model={view.model}
+                                bind:record
+                            />
                         {/if}
                     {/each}
                 {/each}

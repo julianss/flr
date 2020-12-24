@@ -44,6 +44,7 @@
     viewsStore.subscribe((event) => {
         if(event){
             fetchedRecords = [];
+            filters = [];
             page = 1;
             fieldsDescription = null;
             let views = event.views;
@@ -139,6 +140,10 @@
         if(!("form" in getValue(viewsStore).views)){
             return;
         }
+        utils.updateHash({
+            type: 'form',
+            id: recordId
+        })
         publish({
             'event': 'activeViewChanged',
             'type': 'form'
@@ -285,7 +290,7 @@
                             on:click|stopPropagation/>
                     </td>
                     {#each view.definition.structure as item}
-                        {#if item.field && item.field in fieldsDescription}
+                        {#if item.field && fieldsDescription && item.field in fieldsDescription}
                             <td>
                                 <Field
                                     type={fieldsDescription[item.field].type}

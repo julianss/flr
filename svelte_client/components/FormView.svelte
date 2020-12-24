@@ -155,9 +155,11 @@
     }
 
     function validate(item, value){
-        let fieldDesc = fieldsDescription[item.field];
-        if (fieldDesc.required === true && !value){
-            validations.push(item)
+        if ('field' in item){
+            let fieldDesc = fieldsDescription[item.field];
+            if (fieldDesc.required === true && !value){
+                validations.push(item)
+            }
         }
     }
     function resetValidations(){

@@ -74,6 +74,56 @@ export function call(model, method, args, kwargs){
         }
     })
     .catch((data) => {
+        loading.set(false);
         alert("Error");
     })
+}
+
+export function recoverypassword(email){
+    loading.set(true);
+    return fetch("/recoverypassword", {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify({
+            'email': email
+        })
+    })
+    .then(function(resp) {
+        loading.set(false);
+        return resp.json();
+    })
+    .catch((data) => {
+        loading.set(false);
+        alert("Error");
+    })
+}
+
+export function resetPassword(password){
+    loading.set(true);
+    return fetch("/resetPassword", {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify({
+            'password': password,
+            'token': getLocationSearch()['token'],
+        })
+    })
+    .then(function(resp) {
+        loading.set(false);
+        return resp.json();
+    })
+    .catch((data) => {
+        loading.set(false);
+        alert("Error");
+    })
+}
+function getLocationSearch(){
+    var search = window.location.search.substring(1);
+    return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
 }

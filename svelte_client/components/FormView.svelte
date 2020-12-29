@@ -172,10 +172,15 @@
     }
 
     function validate(item, value){
-        let fieldDesc = fieldsDescription[item.field];
-        if (fieldDesc.required === true && !value){
-            validations.push(item)
+        if ('field' in item){
+            let fieldDesc = fieldsDescription[item.field];
+            if (fieldDesc.required === true && !value){
+                validations.push(item)
+            }
         }
+    }
+    function resetValidations(){
+        validations = []
     }
 
     function save(){
@@ -350,7 +355,9 @@
             {/if}
             {#if view && fieldsDescription && record}
                 {#if validations.length > 0}
-                    <div class="alert alert-danger" role="alert">
+                    <div class="alert alert-dismissible alert-danger" role="alert">
+                        <button type="button" class="close" data-dismiss="alert"
+                            on:click={resetValidations}>×</button>
                         <strong>Required fields</strong><br>
                         {#each validations as item}
                             {item.label || fieldsDescription[item.field].label}<br>

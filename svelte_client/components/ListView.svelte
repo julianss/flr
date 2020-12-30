@@ -296,6 +296,7 @@
                                     type={fieldsDescription[item.field].type}
                                     edit={false}
                                     bind:value={record[item.field]}
+                                    choices={fieldsDescription[item.field].options}
                                     password={item.password || false}
                                     model={fieldsDescription[item.field].model}
                                     relatedFields={item.related_fields}

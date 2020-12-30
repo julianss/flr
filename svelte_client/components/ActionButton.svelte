@@ -1,12 +1,11 @@
 <script>
     import { getViews, openViews } from './../services/menu.js';
     import { call } from './../services/service.js';
-    import { updateGlobals } from './../services/writables.js';
+    import { updateGlobals, publish } from './../services/writables.js';
     import { requestReport } from './../services/report.js';
     import { getContext } from 'svelte';
 
     export let text;
-    export let buttonClass;
     export let options;
     export let action;
     export let model;
@@ -36,13 +35,20 @@
         if(action == "openViews"){
             getViews(options.model, options.view_types).then((resp) => openViews(resp));
         }else if(action == "method"){
-            call(`${model}:${recordId}`, options.name);
+            call(`${model}:${recordId}`, options.name).then(
+                (resp) => {
+                    publish({
+                        'event': 'activeRecordIdChanged',
+                        'id': recordId
+                     })
+                }
+            );
         }else if(action == "report"){
             requestReport(options.report_name, [recordId])
         }
     }
 </script>
 
-<button type="button" class="btn {buttonClass || 'btn-secondary'}" on:click={onClick}>
+<button type="button" class="btn {options.class || 'btn-secondary'}" on:click={onClick}>
     {text}
 </button>

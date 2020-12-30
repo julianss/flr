@@ -10,6 +10,25 @@ export function renderDate(dateString) {
     return d.toLocaleDateString();
 }
 
+export function renderDateTime(dateString) {
+    if(!dateString){
+        return '';
+    }
+    var splitted = dateString.split(" ");
+    var datePart = splitted[0];
+    var timePart = splitted[1];
+    var splittedDatePart = datePart.split("-");
+    var splittedTimePart = timePart.split(":");
+    var year = parseInt(splittedDatePart[0]);
+    var month = parseInt(splittedDatePart[1] - 1);
+    var day = parseInt(splittedDatePart[2]);
+    var hour = parseInt(splittedTimePart[0]);
+    var minute = parseInt(splittedTimePart[1]);
+    var second = parseInt(splittedTimePart[2]);
+    var d = new Date(year, month, day, hour, minute, second);
+    return d.toLocaleString();
+}
+
 export function parseHash(){
     var hash = window.location.hash.substring(1);
     var params = {}

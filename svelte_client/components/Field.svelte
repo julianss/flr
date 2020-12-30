@@ -6,6 +6,7 @@
     import FloatField from './fields/FloatField.svelte'
     import ForeignKeyField from './fields/ForeignKeyField.svelte'
     import DateField from './fields/DateField.svelte'
+    import DateTimeField from './fields/DateTimeField.svelte'
     import SelectField from './fields/SelectField.svelte'
     import ManyToManyField from './fields/ManyToManyField.svelte'
     import BackRefField from './fields/BackRefField.svelte'
@@ -107,6 +108,14 @@
             />
         {:else if type === "date"}
             <DateField
+                label={label}
+                bind:value={value}
+                edit={edit}
+                on:change={changed}
+                readonly={readonly}
+            />
+        {:else if type === "datetime"}
+            <DateTimeField
                 label={label}
                 bind:value={value}
                 edit={edit}

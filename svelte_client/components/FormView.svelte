@@ -174,8 +174,10 @@
     function validate(item, value){
         if ('field' in item){
             let fieldDesc = fieldsDescription[item.field];
-            if (fieldDesc.required === true && !value){
-                validations.push(item)
+            if(fieldDesc){
+                if (fieldDesc.required === true && !value){
+                    validations.push(item)
+                }
             }
         }
     }

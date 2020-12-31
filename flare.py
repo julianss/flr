@@ -501,6 +501,7 @@ class BaseModel(pw.Model):
         if count:
             return query.count()
         else:
+            fk_2b_named = []
             results = []
             # Add foreign key fields so model_to_dict renders the name of the related record
             if only:
@@ -508,9 +509,17 @@ class BaseModel(pw.Model):
                     if type(pw_field) == pw.ForeignKeyField or type(pw_field) == pw.FileField:
                         only.append(getattr(pw_field.rel_model, "id"))
                         if hasattr(pw_field.rel_model, "name"):
-                            only.append(getattr(pw_field.rel_model, "name"))
+                            name_attr = pw_field.rel_model.name
+                            if type(name_attr) != property:
+                                only.append(name_attr)
+                            else:
+                                #if the name of the related model is a property it will have to be computed later
+                                fk_2b_named.append(pw_field.name)
             for model in query:
                 data = model_to_dict(model, only=only, recurse=True, extra_attrs=extra_attrs)
+                if fk_2b_named:
+                    for fk_field_name in fk_2b_named:
+                        data[fk_field_name]["name"] = getattr(model, fk_field_name).name
                 # Add many-to-many and one-to-many fields. For this, the array of related records
                 # will be added one by one, creating the dicts for the records using the list
                 # of related fields (the ones that were specified using dot notation)

@@ -131,6 +131,21 @@ class FlrUser(BaseModel):
         else:
             return {'ok': True}
 
+    @classmethod
+    def groups_check_any(cls, list_of_meta_ids):
+        """Check that user belongs to at least one of the groups, which are passed as a list of meta ids"""
+        group_ids = []
+        FlrMeta = Registry["FlrMeta"]
+        for meta_id in list_of_meta_ids:
+            for rec in FlrMeta.select().where(FlrMeta.meta_id==meta_id, FlrMeta.model=="FlrGroup"):
+                group_ids.append(rec.rec_id)
+        if has_request_context():
+            user = cls.get_by_id(request.uid)
+            user_group_ids = [g.id for g in user.groups]
+            inter = set(user_group_ids).intersection(set(group_ids))
+            if len(inter):
+                return True
+        return False
 
 class FlrGroup(BaseModel):
     name = pw.CharField(help_text="Nombre")

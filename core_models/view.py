@@ -18,4 +18,27 @@ class FlrView(BaseModel):
     model = pw.CharField()
     sequence = pw.IntegerField(default=1)
 
+    #Extended to delete restricted items from the views definitions ("groups" property)
+    @classmethod
+    def read(cls, fields, ids=[], filters=[], paginate=False, order=None, count=False):
+        results = super(FlrView, cls).read(fields, ids=ids, filters=filters, paginate=paginate, order=order, count=count)
+        FlrUser = Registry["FlrUser"]
+        for result in results:
+            new_definition = {}
+            for key in result["definition"]:
+                new_definition[key] = []
+                item_list = result["definition"][key]
+                if type(item_list) == list:
+                    for item in item_list:
+                        if "groups" in item:
+                            ok = FlrUser.groups_check_any(item["groups"])
+                            if ok:
+                                new_definition[key].append(item)
+                        else:
+                            new_definition[key].append(item)
+                else:
+                    new_definition[key] = item_list
+            result["definition"] = new_definition
+        return results
+
 FlrView.r()

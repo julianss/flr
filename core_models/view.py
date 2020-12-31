@@ -13,7 +13,7 @@ class JSONField(pw.TextField):
 class FlrView(BaseModel):
     name = pw.CharField()
     definition = JSONField()
-    view_type = pw.CharField(choices=[("list","List"),("form","Form")],default="list")
+    view_type = pw.CharField(choices=[("list","List"),("form","Form"),("search","Search")],default="list")
     menu_id = pw.ForeignKeyField(Registry["FlrMenu"], null=True, backref="views")
     model = pw.CharField()
     sequence = pw.IntegerField(default=1)

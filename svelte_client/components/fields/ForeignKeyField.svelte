@@ -39,6 +39,8 @@
                 readFields.push(rf.field);
             }
         }
+        //Will throw an error if the model has no regular field called "name"
+        //(i.e. if there's no name or if it is a property)
         call(model, "read", [readFields], kwargs).then(
             (resp) => {
                 results = resp
@@ -164,7 +166,7 @@
             {/if}
         </div>
     {:else}
-        <p>{value && (value.name || '') || ''}</p>
+        <p>{value && (value.name || value.id) || ''}</p>
     {/if}
 </div>
 

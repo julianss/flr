@@ -95,7 +95,7 @@
                                         bind:value={obj[field.field]}
                                         password={false}
                                         model={relatedFieldsDesc[field.field].model}
-                                        options={relatedFieldsDesc[field.field].options}
+                                        choices={relatedFieldsDesc[field.field].options}
                                         required={relatedFieldsDesc[field.field].required}
                                         relatedFields={null}
                                         relatedFieldsDesc={null}

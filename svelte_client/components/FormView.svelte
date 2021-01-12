@@ -205,7 +205,9 @@
 
         for(let section of sections){
             for(let item of view.definition[section]){
-                validate(item, record[item.field])
+                if(item.field){
+                    validate(item, record[item.field])
+                }
             }
         }
         if (validations.length === 0){

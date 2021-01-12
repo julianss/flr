@@ -358,7 +358,7 @@
                             <li class="nav-item" hidden={invisibles[section] && invisibles[section].result}>
                                 <a
                                     class={section==activeSection?'nav-link active':'nav-link'}
-                                    on:click={()=>activeSection=section}
+                                    on:click={(e)=>{e.preventDefault();activeSection=section}}
                                     href="#">
                                     {section}
                                 </a>

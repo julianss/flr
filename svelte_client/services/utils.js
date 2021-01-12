@@ -1,3 +1,7 @@
+export function getUniqueId() {
+    return Date.now().toString() + "-" + Math.random().toString().substring(2);
+}
+
 export function renderDate(dateString) {
     if(!dateString){
         return '';

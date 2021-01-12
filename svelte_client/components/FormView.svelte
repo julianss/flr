@@ -1,7 +1,7 @@
 <script>
     import { call } from './../services/service.js';
     import { requestReport } from './../services/report.js';
-    import { updateHash } from './../services/utils.js';
+    import { updateHash, getUniqueId } from './../services/utils.js';
     import {
         viewsStore,
         activeViewStore,
@@ -57,10 +57,16 @@
                     for(let item of view.definition[k]){
                         if(item.field && item.onchange){
                             onChanges[item.field] = item.onchange;
-                            invisibles[item.field] = {condition: item.invisible, result: false};
                         }
-                        if(item.field && item.invisible){
-                            invisibles[item.field] = {condition: item.invisible, result: false};
+                        if(item.invisible){
+                            var uid;
+                            if(item.section){
+                                uid = item.section;
+                            }else{
+                                uid = getUniqueId();
+                            }
+                            invisibles[uid] = {condition: item.invisible, result: false}
+                            item.id = uid;
                         }
                     }
                 }
@@ -260,12 +266,12 @@
         if(!record){
             return;
         }
-        for(let field in invisibles){
-            if(!invisibles[field].condition){
-                invisibles[field].result = false;
-            }else {
-                let code = "return " + invisibles[field].condition;
-                invisibles[field].result = new Function(code).call(record);
+        for(let uid in invisibles){
+            if(!invisibles[uid].condition){
+                invisibles[uid].result = false;
+            }else{
+                let code = "return " + invisibles[uid].condition;
+                invisibles[uid].result = new Function(code).call(record);
             }
         }
         invisibles = invisibles;
@@ -314,14 +320,16 @@
         <div class="col-md top-left-buttons">
             {#if view && record && record.id && view.definition.buttons}
                 {#each view.definition.buttons as button}
-                    <ActionButton
-                        action={button.action}
-                        text={button.text}
-                        options={button.options}
-                        model={view.model}
-                        bind:record
-                        view={this}
-                    />
+                    <div hidden={invisibles[button.id] && invisibles[button.id].result}>
+                        <ActionButton
+                            action={button.action}
+                            text={button.text}
+                            options={button.options}
+                            model={view.model}
+                            bind:record
+                            view={this}
+                        />
+                    </div>
                 {/each}
             {/if}
             {#if record && reports && record.id && reports.length>0}
@@ -347,7 +355,7 @@
                 <div class="tabs">
                     <ul class="nav nav-tabs">
                         {#each sections as section}
-                            <li class="nav-item">
+                            <li class="nav-item" hidden={invisibles[section] && invisibles[section].result}>
                                 <a
                                     class={section==activeSection?'nav-link active':'nav-link'}
                                     on:click={()=>activeSection=section}
@@ -373,7 +381,7 @@
                 {#each sections as section}
                     {#each view.definition[section] as item}
                         {#if item.field && item.field in fieldsDescription }
-                            <div hidden={section != activeSection || invisibles[item.field] && invisibles[item.field].result}>
+                            <div hidden={section != activeSection || invisibles[item.id] && invisibles[item.id].result}>
                                 <Field
                                     type={fieldsDescription[item.field].type}
                                     label={item.label || fieldsDescription[item.field].label}
@@ -396,20 +404,22 @@
                                 />
                             </div>
                         {:else if item.tag}
-                            <div>
+                            <div hidden={invisibles[item.id] && invisibles[item.id].result}>
                                 <Element
                                     tag={item.tag}
                                     text={item.text}
                                 />
                             </div>
                         {:else if item.button}
-                            <ActionButton
-                                action={item.button.action}
-                                text={item.button.text}
-                                options={item.button.options}
-                                model={view.model}
-                                bind:record
-                            />
+                            <div hidden={invisibles[item.id] && invisibles[item.id].result}>
+                                <ActionButton
+                                    action={item.button.action}
+                                    text={item.button.text}
+                                    options={item.button.options}
+                                    model={view.model}
+                                    bind:record
+                                />
+                            </div>
                         {/if}
                     {/each}
                 {/each}

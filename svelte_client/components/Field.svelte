@@ -49,7 +49,7 @@
     }
 </script>
 
-<div class={getClass()}>
+<div class={(required || nolabel || true) && getClass()}>
     {#if type}
         {#if type === "char"}
             <CharField

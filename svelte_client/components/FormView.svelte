@@ -24,6 +24,8 @@
     let editMode = false;
     let onChanges = {};
     let invisibles = {};
+    let readonlys = {};
+    let requireds = {}
     let reports = [];
     let validations = [];
     let isWizard = false;
@@ -35,7 +37,7 @@
             visible = type === "form";
             editMode = false;
             validations = [];
-            refreshInvisibles();
+            refreshModifiers();
         }
     });
 
@@ -51,22 +53,41 @@
                 }
                 view = views["form"];
                 sections = [];
-                onChanges = [];
-                invisibles = [];
+                onChanges = {};
+                invisibles = {};
+                readonlys = {};
+                requireds = {};
                 for(let k in view.definition){
                     for(let item of view.definition[k]){
                         if(item.field && item.onchange){
                             onChanges[item.field] = item.onchange;
                         }
-                        if(item.invisible){
-                            var uid;
-                            if(item.section){
-                                uid = item.section;
-                            }else{
-                                uid = getUniqueId();
+                        let modifiers = [
+                            ["invisible", invisibles],
+                            ["readonly", readonlys],
+                            ["required", requireds],
+                        ];
+                        for(let pair of modifiers){
+                            let modifier = pair[0];
+                            let modifierState = pair[1];
+                            if(modifier in item){
+                                var uid;
+                                if(item.id){
+                                    uid = item.id;
+                                }else if(item.section){
+                                    uid = item.section;
+                                }else if(item.field){
+                                    uid = item.field;
+                                }else{
+                                    uid = getUniqueId();
+                                }
+                                let initialVal = false;
+                                if(typeof(item[modifier]) == "boolean"){
+                                    initialVal = item[modifier];
+                                }
+                                modifierState[uid] = {condition: item[modifier], result: initialVal};
+                                item.id = uid;
                             }
-                            invisibles[uid] = {condition: item.invisible, result: false}
-                            item.id = uid;
                         }
                     }
                 }
@@ -142,7 +163,7 @@
                             (resp) => {
                                 record = resp[0];
                                 notDirty = JSON.parse(JSON.stringify(resp[0]));
-                                refreshInvisibles();
+                                refreshModifiers();
                             }
                         );
                     }else{
@@ -158,7 +179,7 @@
                                 record = blankRecord;
                                 notDirty = JSON.parse(JSON.stringify(blankRecord));
                                 editMode = true;
-                                refreshInvisibles();
+                                refreshModifiers();
                             }
                         )
 
@@ -233,7 +254,7 @@
             return promise;
         }
     }
-    
+
     function edit(){
         editMode = true;
     }
@@ -259,27 +280,32 @@
                 }
             )
         }
-        refreshInvisibles();
+        refreshModifiers();
     }
 
-    function refreshInvisibles(){
+    function refreshModifiers(){
         if(!record){
             return;
         }
-        for(let uid in invisibles){
-            if(!invisibles[uid].condition){
-                invisibles[uid].result = false;
-            }else{
-                let code = "return " + invisibles[uid].condition;
-                invisibles[uid].result = new Function(code).call(record);
+        for(let modifierState of [invisibles, readonlys, requireds]){
+            for(let uid in modifierState){
+                if(typeof(modifierState[uid].condition) == "boolean"){
+                    modifierState[uid].result = modifierState[uid].condition;
+                }else{
+                    let code = "return " + modifierState[uid].condition;
+                    modifierState[uid].result = new Function(code).call(record);
+                }
             }
         }
         invisibles = invisibles;
+        readonlys = readonlys;
+        requireds = requireds;
     }
 
     setContext('formViewFunctions', {
         'save': () => save()
     });
+
 
 </script>
 
@@ -391,14 +417,20 @@
                                     viewpassword={item.viewpassword || false}
                                     model={fieldsDescription[item.field].model}
                                     choices={fieldsDescription[item.field].options}
-                                    required={item.required || fieldsDescription[item.field].required}
+                                    required={
+                                        (item.id in requireds) ?
+                                        requireds[item.id].result : fieldsDescription[item.field].required
+                                    }
                                     relatedFields={item.related_fields}
                                     relatedFieldsDesc={fieldsDescription[item.field].related_fields}
                                     on:change={()=>fieldChanged(item.field)}
                                     nolabel={item.nolabel || false}
                                     add={item.add}
                                     remove={item.remove}
-                                    readonly={item.readonly || false}
+                                    readonly={
+                                        (item.id in readonlys) ?
+                                        readonlys[item.id].result : false
+                                    }
                                     viewtype={'form'}
                                     options={item.options || {}}
                                 />

@@ -405,9 +405,11 @@
                     </div>
                 {/if}
                 {#each sections as section}
+                    <div class="fields-container">
                     {#each view.definition[section] as item}
                         {#if item.field && item.field in fieldsDescription }
-                            <div hidden={section != activeSection || invisibles[item.id] && invisibles[item.id].result}>
+                            <div style="width:{(item.options && item.options.width) || '100%'}" 
+                                hidden={section != activeSection || invisibles[item.id] && invisibles[item.id].result}>
                                 <Field
                                     type={fieldsDescription[item.field].type}
                                     label={item.label || fieldsDescription[item.field].label}
@@ -454,6 +456,7 @@
                             </div>
                         {/if}
                     {/each}
+                    </div>
                 {/each}
             {/if}
         </div>
@@ -491,5 +494,10 @@
     #form_area_wrapper {
         background: rgb(211,211,211,0.5);
         background: linear-gradient(180deg, rgba(211,211,211,1) 0%, rgba(211,211,211,1) 5%, rgba(255,255,255,0) 100%);
+    }
+    .fields-container {
+        display:flex;
+        width:100%;
+        flex-wrap: wrap
     }
 </style>

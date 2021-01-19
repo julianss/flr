@@ -5,14 +5,17 @@ export function getMenus() {
     return call("FlrMenu", "get_menus");
 }
 
-export function getViews(type) {
+export function getViews(which, types) {
     let kwargs = {}
-    if (typeof type === 'number'){
-        kwargs.filters = [['menu_id','=',type]]
+    if (typeof which === 'number'){
+        kwargs.filters = [['menu_id','=',which]]
         kwargs.order = "sequence"
     }
-    if (typeof type === 'string'){
-        kwargs.filters = [['model','=',type]]
+    if (typeof which === 'string'){
+        kwargs.filters = [['model','=',which]]
+    }
+    if(types){
+        kwargs.filters.push(['view_type','in',types])
     }
     return call("FlrView", "read", [
         ["model","definition","view_type","menu_id","name"]], kwargs)

@@ -298,6 +298,11 @@
                     let code = "return " + modifierState[uid].condition;
                     modifierState[uid].result = new Function(code).call(record);
                 }
+                if (requireds === modifierState){
+                    if (uid in modifierState && 'required' in fieldsDescription[uid]){
+                        fieldsDescription[uid].required = modifierState[uid].result
+                    }
+                }
             }
         }
         invisibles = invisibles;

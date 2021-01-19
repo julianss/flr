@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, redirect, make_response, Response
+from flask import Flask, request, has_request_context, jsonify, send_from_directory, redirect, make_response, Response
 from registry import Registry, ReportHelpers, db
 from utils import normalize_filters, combine_filters, CustomJSONEncoder, add_pages, sendmail
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -39,6 +39,21 @@ else:
 
 def prettifyName(field_name):
     return field_name.capitalize().replace("_", " ")
+
+def get_current_user():
+    if has_request_context:
+        return Registry["FlrUser"].get_by_id(request.uid)
+    else:
+        return None
+
+def get_obj_from_meta(meta_id):
+    FlrMeta = Registry["FlrMeta"]
+    meta = FlrMeta.get(FlrMeta.meta_id == meta_id)
+    return Registry[meta.model].get_by_id(meta.rec_id)
+
+u = get_current_user
+m = get_obj_from_meta
+r = Registry
 
 class BaseModel(pw.Model):
     _transient = False

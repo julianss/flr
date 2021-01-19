@@ -323,11 +323,15 @@
         border: 1px solid silver;
         background-color: white;
     }
+
     #list_view_toolbar {
         padding: 10px
     }
     table tr{
         cursor:pointer
+    }
+    tr td {
+        padding-bottom: 0px;
     }
     .top-left-controls{
         align-items:center;

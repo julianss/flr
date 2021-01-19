@@ -24,4 +24,7 @@ class FlareClient():
             'kwargs': kwargs
         })
         resp = resp.json()
-        return resp
+        if "result" in resp:
+            return resp["result"]
+        else:
+            raise Exception(resp["error"]["message"])

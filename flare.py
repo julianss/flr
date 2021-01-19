@@ -243,7 +243,8 @@ class BaseModel(pw.Model):
         if request and hasattr(request, "uid"):
             fields["created_by"] = request.uid
             if hasattr(cls, "company_id"):
-                fields["company_id"] = Registry["FlrUser"].get_by_id(request.uid).company_id.id
+                if not fields.get("company_id"):
+                    fields["company_id"] = Registry["FlrUser"].get_by_id(request.uid).company_id.id
         return super(BaseModel, cls).create(**fields)
 
     @classmethod

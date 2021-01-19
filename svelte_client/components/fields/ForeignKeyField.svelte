@@ -2,6 +2,7 @@
     import { call } from "../../services/service.js"
     import{ fade } from 'svelte/transition';
     import { createEventDispatcher } from 'svelte';
+    import {activeElement} from '../../services/writables.js'
     const dispatch = createEventDispatcher();
     export let label = "";
     export let model = "";
@@ -19,7 +20,15 @@
     let uniqueId = Date.now().toString() + "-" + Math.random().toString().substring(2);
     let offset = -1;
 
-    function search(){
+    function search(event){
+        if (event.key == "Escape"){
+            return
+        }
+        if (showResults){
+            hideResults();
+            return
+        }
+        activeElement.set(uniqueId)
         let kwargs = {paginate:[1,10]};
         if(filters.length > 0){
             kwargs.filters = filters;
@@ -50,6 +59,14 @@
         )
         showResults = true;
     }
+
+    activeElement.subscribe((value) => {
+        if(value){
+            if (!(value===uniqueId)){
+                hideResults()
+            };
+        }
+    });
 
     function selectResult(result){
         query = "";
@@ -87,6 +104,7 @@
     // }
 
     document.addEventListener('keydown', function(event){
+
         var divResults = document.getElementById(`results-dropdown-${uniqueId}`)
         if (divResults && results.length > 0){
             if (event.key === "ArrowDown"){
@@ -105,10 +123,15 @@
                 hideResults();
             }
             if (offset >= 0){
+                event.preventDefault()
                 divResults.childNodes[offset].focus()
                 if (event.key === "Enter"){
                     selectResult(results[offset])
                 }
+            }
+        }else if (divResults && results.length == 0){
+            if (event.key === "Escape"){
+                hideResults();
             }
         }
     })

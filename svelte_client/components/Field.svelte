@@ -45,6 +45,9 @@
         if(nolabel){
             classes.push("nolabel");
         }
+        if (viewtype === 'list'){
+            classes.push("nomargin");
+        }
         return classes.join(" ");
     }
 </script>
@@ -190,6 +193,9 @@
     }
     .nolabel :global(label){
         display: none
+    }
+    .nomargin :global(.form-group, .form-group .input-group p) {
+        margin-bottom: 0px
     }
 
 </style>

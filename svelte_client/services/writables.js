@@ -7,6 +7,7 @@ export const activeRecordIdStore = writable();
 export const activeViewStore = writable(null);
 export const recordCreatedStore = writable(null);
 export const searchFiltersStore = writable({});
+export const activeElement = writable();
 
 export function publish(event) {
     event.timestamp = (new Date()).getTime();

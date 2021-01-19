@@ -200,14 +200,16 @@
 
 <div hidden={!visible}>
     <div id="list_view_toolbar" class="row">
+        <div class="col-md">
         {#if view && view.definition.create !== false}
-            <div class="col-md">
-                <button type="button" class="btn btn-primary mb-2" on:click={create}>
-                    Nuevo
-                </button>
-                <strong class="ml-2" style="font-size:30px">{view.menu_view_name}</strong>
-            </div>
+            <button type="button" class="btn btn-primary mb-2" on:click={create}>
+                Nuevo
+            </button>
         {/if}
+        {#if view && view.menu_view_name}
+            <strong class="ml-2" style="font-size:30px">{view.menu_view_name}</strong>
+        {/if}
+        </div>
         <div class="col-md top-left-controls">
             {#if selectedRecords && getSelectedIds().length > 0 && batchActions.length > 0}
                 <div class="dropdown">

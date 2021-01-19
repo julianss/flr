@@ -58,35 +58,38 @@
                 readonlys = {};
                 requireds = {};
                 for(let k in view.definition){
-                    for(let item of view.definition[k]){
-                        if(item.field && item.onchange){
-                            onChanges[item.field] = item.onchange;
-                        }
-                        let modifiers = [
-                            ["invisible", invisibles],
-                            ["readonly", readonlys],
-                            ["required", requireds],
-                        ];
-                        for(let pair of modifiers){
-                            let modifier = pair[0];
-                            let modifierState = pair[1];
-                            if(modifier in item){
-                                var uid;
-                                if(item.id){
-                                    uid = item.id;
-                                }else if(item.section){
-                                    uid = item.section;
-                                }else if(item.field){
-                                    uid = item.field;
-                                }else{
-                                    uid = getUniqueId();
+                    if (typeof view.definition[k] !== 'boolean'){
+                        for(let item of view.definition[k]){
+                            if(item.field && item.onchange){
+                                onChanges[item.field] = item.onchange;
+                            }
+                            let modifiers = [
+                                ["invisible", invisibles],
+                                ["readonly", readonlys],
+                                ["required", requireds],
+                            ];
+                            for(let pair of modifiers){
+                                let modifier = pair[0];
+                                let modifierState = pair[1];
+                                if(modifier in item){
+                                    var uid;
+                                    if(item.id){
+                                        uid = item.id;
+                                    }else if(item.section){
+                                        uid = item.section;
+                                    }else if(item.field){
+                                        uid = item.field;
+                                    }else{
+                                        uid = getUniqueId();
+                                    }
+                                    let initialVal = false;
+                                    if(typeof(item[modifier]) == "boolean"){
+                                        initialVal = item[modifier];
+                                    }
+                                    modifierState[uid] = {condition: item[modifier], result: initialVal};
+                                    item.id = uid;
                                 }
-                                let initialVal = false;
-                                if(typeof(item[modifier]) == "boolean"){
-                                    initialVal = item[modifier];
-                                }
-                                modifierState[uid] = {condition: item[modifier], result: initialVal};
-                                item.id = uid;
+                                
                             }
                         }
                     }
@@ -316,10 +319,12 @@
                 <button type="button" class="btn btn-secondary mb-2" on:click={back}>
                     ≡ Listado
                 </button>
-                {#if recordId && !editMode}
-                    <button type="button" class="btn btn-primary mb-2" on:click={create}>
-                        Nuevo
-                    </button>
+                {#if view && view.definition.create !== false}
+                    {#if recordId && !editMode}
+                        <button type="button" class="btn btn-primary mb-2" on:click={create}>
+                            Nuevo
+                        </button>
+                    {/if}
                 {/if}
             {/if}
             {#if editMode}
@@ -332,11 +337,14 @@
                     </button>
                 {/if}
             {/if}
-            {#if !editMode}
-                {#if !isWizard}
-                    <button type="button" class="btn btn-primary mb-2" on:click={edit}>
-                        Editar
-                    </button>
+            {#if view && view.definition.edit !== false}
+                {#if !editMode}
+                    {#if !isWizard}
+                        <button hidden={typeof view.definition.edit === 'object' && invisibles[view.definition.edit[0].id].result}
+                            type="button" class="btn btn-primary mb-2" on:click={edit}>
+                            Editar
+                        </button>
+                    {/if}
                 {/if}
             {/if}
             {#if view}
@@ -408,7 +416,7 @@
                     <div class="fields-container">
                     {#each view.definition[section] as item}
                         {#if item.field && item.field in fieldsDescription }
-                            <div style="width:{(item.options && item.options.width) || '100%'}" 
+                            <div style="width:{(item.options && item.options.width) || '100%'}"
                                 hidden={section != activeSection || invisibles[item.id] && invisibles[item.id].result}>
                                 <Field
                                     type={fieldsDescription[item.field].type}

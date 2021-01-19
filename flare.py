@@ -32,6 +32,11 @@ if os.environ.get("enable_cors") == "True":
     from flask_cors import CORS
     CORS(app)
 
+if os.environ.get("legacy_table_names") == "False":
+    ltn = False
+else:
+    ltn = True
+
 def prettifyName(field_name):
     return field_name.capitalize().replace("_", " ")
 
@@ -40,6 +45,7 @@ class BaseModel(pw.Model):
 
     class Meta:
         database = db
+        legacy_table_names = ltn
 
     @classmethod
     def r(cls):

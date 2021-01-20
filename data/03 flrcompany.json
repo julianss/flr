@@ -5,7 +5,8 @@
         "data": {
             "name": "Company",
             "sequence": 10,
-            "section_id_META_ID": "menu_section_admin"
+            "section_id_META_ID": "menu_section_admin",
+            "groups_META_ID": ["flgroup_admin"]
         }
     },
     {

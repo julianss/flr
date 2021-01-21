@@ -1,6 +1,6 @@
 import peewee as pw
 from flask import request, has_request_context
-from flare import BaseModel, Registry, normalize_filters, combine_filters
+from flare import m, BaseModel, Registry, normalize_filters, combine_filters
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha512
 import jwt
@@ -72,6 +72,7 @@ class FlrUser(BaseModel):
             raise Exception("Invalid JWT")
 
     def get_permissions(self, model=False):
+        superuser_id = m("flruser_admin").id
         data = {}
         if not model:
             models = [model for model in Registry]
@@ -79,13 +80,15 @@ class FlrUser(BaseModel):
             models = [model]
         for model in models:
             data.setdefault(model, {
-                'perm_read': request.uid == 1,
-                'perm_update': request.uid == 1,
-                'perm_create': request.uid == 1,
-                'perm_delete': request.uid == 1,
+                'perm_read': request.uid == superuser_id,
+                'perm_update': request.uid == superuser_id,
+                'perm_create': request.uid == superuser_id,
+                'perm_delete': request.uid == superuser_id,
             })
+        ACL = Registry["FlrACL"]
+        global_acls = ACL.select().where(ACL.group_id.is_null())
         for group in self.groups:
-            for rule in group.acls:
+            for rule in group.acls + global_acls:
                 if rule.model in models:
                     model_rule = data[rule.model]
                     model_rule["perm_read"] = model_rule["perm_read"] or rule.perm_read
@@ -96,6 +99,8 @@ class FlrUser(BaseModel):
 
     @classmethod
     def check_access(cls, model, operation):
+        if Registry[model]._transient:
+            return True
         if has_request_context():
             user = cls.get_by_id(request.uid)
             permissions = user.get_permissions(model)
@@ -157,7 +162,7 @@ FlrGroup.r()
 
 class FlrACL(BaseModel):
     name = pw.CharField(verbose_name="Name")
-    group_id = pw.ForeignKeyField(FlrGroup, help_text="Group", backref="acls")
+    group_id = pw.ForeignKeyField(FlrGroup, help_text="Group", backref="acls", null=True)
     model = pw.CharField(help_text="Model")
     perm_read = pw.BooleanField(help_text="Read permission", null=True, default=False)
     perm_update = pw.BooleanField(help_text="Update permission", null=True, default=False)

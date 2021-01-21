@@ -1,0 +1,90 @@
+[
+    {
+        "model": "FlrACL",
+        "meta_id": "flruser_acl",
+        "data": {
+            "name": "access user",
+            "model": "FlrUser",
+            "perm_read": true,
+            "perm_create": false,
+            "perm_update": false,
+            "perm_delete": false
+        }
+    },
+    {
+        "model": "FlrACL",
+        "meta_id": "flruser_acl_admin",
+        "data": {
+            "name": "admin access user",
+            "model": "FlrUser",
+            "perm_read": true,
+            "perm_create": true,
+            "perm_update": true,
+            "perm_delete": true,
+            "group_id_META_ID": "flrgroup_admin"
+        }
+    },
+    {
+        "model": "FlrACL",
+        "meta_id": "flrreport_acl",
+        "data": {
+            "name": "access report",
+            "model": "FlrReport",
+            "perm_read": true,
+            "perm_create": false,
+            "perm_update": false,
+            "perm_delete": false
+        }
+    },
+    {
+        "model": "FlrACL",
+        "meta_id": "flrview_acl",
+        "data": {
+            "name": "access view",
+            "model": "FlrView",
+            "perm_read": true,
+            "perm_create": false,
+            "perm_update": false,
+            "perm_delete": false
+        }
+    },
+    {
+        "model": "FlrACL",
+        "meta_id": "flrgroup_acl_admin",
+        "data": {
+            "name": "admin access group",
+            "model": "FlrView",
+            "perm_read": true,
+            "perm_create": true,
+            "perm_update": true,
+            "perm_delete": true,
+            "group_id_META_ID": "flrgroup_admin"
+        }
+    },
+    {
+        "model": "FlrACL",
+        "meta_id": "flracl_acl_admin",
+        "data": {
+            "name": "admin access acl",
+            "model": "FlrACL",
+            "perm_read": true,
+            "perm_create": true,
+            "perm_update": true,
+            "perm_delete": true,
+            "group_id_META_ID": "flrgroup_admin"
+        }
+    },
+    {
+        "model": "FlrACL",
+        "meta_id": "flrcompany_acl_admin",
+        "data": {
+            "name": "admin access company",
+            "model": "FlrCompany",
+            "perm_read": true,
+            "perm_create": true,
+            "perm_update": true,
+            "perm_delete": true,
+            "group_id_META_ID": "flrgroup_admin"
+        }
+    }
+]

@@ -1,12 +1,24 @@
 [
     {
+        "model": "FlrUser",
+        "meta_id": "flruser_admin",
+        "data": {
+            "name": "Superuser",
+            "email": "admin",
+            "login": "admin",
+            "password": "",
+            "company_id_META_ID": "flrcompany_default",
+            "groups_META_ID": ["flrgroup_admin", "flrgroup_multicompany"]
+        }
+    },
+    {
         "model": "FlrMenu",
         "meta_id": "menu_flruser",
         "data": {
             "name": "Usuarios",
             "sequence": 1,
             "section_id_META_ID": "menu_section_admin",
-            "groups_META_ID": ["flgroup_admin"]
+            "groups_META_ID": ["flrgroup_admin"]
         }
     },
     {
@@ -63,7 +75,7 @@
             "name": "Roles",
             "sequence": 2,
             "section_id_META_ID": "menu_section_admin",
-            "groups_META_ID": ["flgroup_admin"]
+            "groups_META_ID": ["flrgroup_admin"]
         }
     },
     {
@@ -107,7 +119,7 @@
             "name": "Listas de control de acceso (ACL)",
             "sequence": 3,
             "section_id_META_ID": "menu_section_admin",
-            "groups_META_ID": ["flgroup_admin"]
+            "groups_META_ID": ["flrgroup_admin"]
         }
     },
     {
@@ -161,7 +173,7 @@
             "name": "Reglas de seguridad",
             "sequence": 4,
             "section_id_META_ID": "menu_section_admin",
-            "groups_META_ID": ["flgroup_admin"]
+            "groups_META_ID": ["flrgroup_admin"]
         }
     },
     {

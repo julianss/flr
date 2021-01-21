@@ -6,7 +6,7 @@ else:
     load_dotenv()
 
 from registry import Registry, db
-from flare import app, scheduler
+from flare import app, scheduler, m
 import json
 import os
 import core_models
@@ -29,39 +29,6 @@ for model in sorted(list(Registry.keys())):
     print(model)
 
 Meta = Registry["FlrMeta"]
-
-#Initialize empty database
-if Registry["FlrUser"].read([], count=True) == 0:
-    #Create default company
-    company_id = Registry["FlrCompany"].flr_create(name="Default company")
-    Meta.flr_create(
-        meta_id="flrcompany_default",
-        model="FlrCompany",
-        rec_id=company_id
-    )
-    #Create administrator
-    if not os.environ.get("admin_pass"):
-        admin_passwd = input("Superuser password: ")
-    else:
-        admin_passwd = os.environ["admin_pass"]
-    gid = Registry["FlrGroup"].flr_create(name="Administrator")
-    uid = Registry["FlrUser"].flr_create(
-        name="Administrator",
-        login="admin",
-        email="admin",
-        password=admin_passwd,
-        groups=[gid],
-        company_id=company_id)
-    Meta.flr_create(
-        meta_id="flgroup_admin",
-        model="FlrGroup",
-        rec_id=gid
-    )
-    Meta.flr_create(
-        meta_id="fluser_admin",
-        model="FlrUser",
-        rec_id=uid
-    )
 
 with db.atomic() as transaction:
 #Load records from "data" directory
@@ -137,7 +104,7 @@ with db.atomic() as transaction:
                         Model.flr_update(data, [('id','=',existing.rec_id)])
         #Delete records that are in the meta table but are not present in the files (were deleted from the file)
         for meta_id in all_meta_ids:
-            if meta_id not in read_meta_ids and meta_id not in ("fluser_admin","flgroup_admin","flrcompany_default"):
+            if meta_id not in read_meta_ids:
                 print("deleting", meta_id)
                 meta_rec = Meta.get_or_none(Meta.meta_id==meta_id)
                 if meta_rec:
@@ -147,6 +114,10 @@ with db.atomic() as transaction:
     except:
         transaction.rollback()
         raise
+
+#Set superuser password
+superuser = m("flruser_admin")
+Registry["FlrUser"].flr_update({'password': os.environ["admin_pass"]}, [('id','=',superuser.id)])
 
 print("Starting scheduler")
 scheduler.start()

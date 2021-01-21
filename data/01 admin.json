@@ -3,8 +3,15 @@
         "model": "FlrMenuSection",
         "meta_id": "menu_section_admin",
         "data": {
-            "name": "Administración",
+            "name": "System settings",
             "sequence": "999"
+        }
+    },
+    {
+        "model": "FlrGroup",
+        "meta_id": "flrgroup_admin",
+        "data": {
+            "name": "System administration"
         }
     }
 ]

@@ -1,12 +1,26 @@
 [
     {
+        "model": "FlrGroup",
+        "meta_id": "flrgroup_multicompany",
+        "data": {
+            "name": "Multicompany"
+        }
+    },
+    {
         "model": "FlrMenu",
         "meta_id": "menu_company",
         "data": {
             "name": "Company",
             "sequence": 10,
             "section_id_META_ID": "menu_section_admin",
-            "groups_META_ID": ["flgroup_admin"]
+            "groups_META_ID": ["flrgroup_admin"]
+        }
+    },
+    {
+        "model": "FlrCompany",
+        "meta_id": "flrcompany_default",
+        "data": {
+            "name": "Default company"
         }
     },
     {

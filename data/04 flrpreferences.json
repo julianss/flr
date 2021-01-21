@@ -10,7 +10,7 @@
                 "structure": [
                     {"section": "Información general"},
                     {"section": "Cambiar contraseña"},
-                    {"section": "Cambiar compañía"}
+                    {"section": "Cambiar compañía", "groups": ["multicompany_group"]}
                 ],
                 "Información general": [
                     {"field": "user", "readonly": true}

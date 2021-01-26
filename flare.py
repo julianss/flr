@@ -552,7 +552,7 @@ class BaseModel(pw.Model):
                         for relr in related_records:
                             rendered = relr.get_dict_id_and_name()
                             for related_field in related_fields_m2m.get(field_name, []):
-                                if type(getattr(relr.__class__, related_field)) == pw.ForeignKeyField:
+                                if type(getattr(relr.__class__, related_field)) in (pw.ForeignKeyField, pw.FileField):
                                     rel = getattr(relr, related_field)
                                     rendered[related_field] = rel.get_dict_id_and_name()
                                 else:

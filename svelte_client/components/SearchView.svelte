@@ -122,13 +122,13 @@
                                             on:blur={updateFilters}>
                                             <option value="=">es</option>
                                             <option value="!=">no es</option>
-                                            {#if ["integer","float","date"].includes(fieldsDescription[item.field].type)}
+                                            {#if ["integer","float","date","datetime"].includes(fieldsDescription[item.field].type)}
                                                 <option value="&gt;">mayor que</option>
                                                 <option value="&gt;=">mayor o igual que</option>
                                                 <option value="&lt;">menor que</option>
                                                 <option value="&lt;=">menor o igual que</option>
                                             {/if}
-                                            {#if ["char","text","many2many","backref"].includes(fieldsDescription[item.field].type)}
+                                            {#if ["char","text","manytomany","backref"].includes(fieldsDescription[item.field].type)}
                                                 <option value="ilike">contiene</option>
                                                 <option value="not ilike">no contiene</option>
                                             {/if}
@@ -144,7 +144,7 @@
                                             edit={true}
                                             bind:value={selectedValues[item.field]}
                                             model={fieldsDescription[item.field].model}
-                                            options={fieldsDescription[item.field].options}
+                                            choices={fieldsDescription[item.field].options}
                                             required={false}
                                             nolabel={true}
                                             on:change={updateFilters}
@@ -156,7 +156,6 @@
                                                 edit={true}
                                                 bind:value={selectedValues2[item.field]}
                                                 model={fieldsDescription[item.field].model}
-                                                options={fieldsDescription[item.field].options}
                                                 required={false}
                                                 nolabel={true}
                                                 on:change={updateFilters}

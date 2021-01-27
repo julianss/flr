@@ -178,6 +178,7 @@
                 bind:value={value}
                 edit={edit}
                 readonly={readonly}
+                on:change={changed}
             />
         {/if}
     {/if}
@@ -196,6 +197,9 @@
     }
     .nomargin :global(.form-group, .form-group .input-group p) {
         margin-bottom: 0px
+    }
+    :global(.form-group label){
+        font-weight: bold;
     }
 
 </style>

@@ -84,28 +84,24 @@
                 {#each value as obj}
                     <tr>
                         {#each relatedFields as field}
-                            {#if !edit || field.readonly}
-                                <td>{renderField(obj, field.field)}</td>
-                            {:else}
-                                <td>
-                                    <Field
-                                        type={relatedFieldsDesc[field.field].type}
-                                        label={relatedFieldsDesc[field.field].label}
-                                        edit={true}
-                                        bind:value={obj[field.field]}
-                                        password={false}
-                                        model={relatedFieldsDesc[field.field].model}
-                                        choices={relatedFieldsDesc[field.field].options}
-                                        required={relatedFieldsDesc[field.field].required}
-                                        relatedFields={null}
-                                        relatedFieldsDesc={null}
-                                        nolabel={true}
-                                        on:change={changed}
-                                        add={null}
-                                        remove={null}
-                                    />
-                                </td>
-                            {/if}
+                            <td>
+                                <Field
+                                    type={relatedFieldsDesc[field.field].type}
+                                    label={relatedFieldsDesc[field.field].label}
+                                    edit={edit && !field.readonly}
+                                    bind:value={obj[field.field]}
+                                    password={false}
+                                    model={relatedFieldsDesc[field.field].model}
+                                    choices={relatedFieldsDesc[field.field].options}
+                                    required={relatedFieldsDesc[field.field].required}
+                                    relatedFields={null}
+                                    relatedFieldsDesc={null}
+                                    nolabel={true}
+                                    on:change={changed}
+                                    add={null}
+                                    remove={null}
+                                />
+                            </td>
                         {/each}
                         <td class="basura">
                             {#if allowRemove}

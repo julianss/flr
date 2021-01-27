@@ -290,6 +290,9 @@
         if(!record){
             return;
         }
+        if(!fieldsDescription){
+            return;
+        }
         for(let modifierState of [invisibles, readonlys, requireds]){
             for(let uid in modifierState){
                 if(typeof(modifierState[uid].condition) == "boolean"){
@@ -451,14 +454,14 @@
                                 />
                             </div>
                         {:else if item.tag}
-                            <div hidden={invisibles[item.id] && invisibles[item.id].result}>
+                            <div hidden={section != activeSection || invisibles[item.id] && invisibles[item.id].result}>
                                 <Element
                                     tag={item.tag}
                                     text={item.text}
                                 />
                             </div>
                         {:else if item.button}
-                            <div hidden={invisibles[item.id] && invisibles[item.id].result}>
+                            <div hidden={section != activeSection || invisibles[item.id] && invisibles[item.id].result}>
                                 <ActionButton
                                     action={item.button.action}
                                     text={item.button.text}

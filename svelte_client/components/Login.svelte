@@ -90,7 +90,7 @@
 <div id="login-screen">
     <div id="parent">
         <div id="child">
-            <img src="/images/logo.svg" id="applogo" alt="App Logo"/>
+            <img src="/images/logo.png" id="applogo" alt="App Logo"/>
             <form>
                 {#if incorrect}
                     <div class="alert alert-dismissible alert-danger">

@@ -15,6 +15,7 @@ mv apps/$1/client/src/index.html apps/$1/client/public/index.html
 sed -i "s/flare_yourappname_jwt/flare_$1_jwt/g" apps/$1/client/src/services/service.js
 sed -i "s/flare_yourappname_jwt/flare_$1_jwt/g" apps/$1/client/src/services/session.js
 sed -i "s/yourappname/$1/g" apps/$1/client/public/index.html
-echo ".form-group label {
-    font-weight: bold;
-}" >> apps/$1/client/src/public/global.css
+cp svelte_client/public/bootstrap.min.css apps/$1/client/public
+cp -r svelte_client/public/icons apps/$1/client/public
+cp -r svelte_client/public/images apps/$1/client/public
+echo "" > apps/$1/client/public/global.css

@@ -233,7 +233,7 @@
                 </div>
             {/if}
             <button type="button" on:click={openSearch}
-                class="btn btn-secondary">
+                class="btn btn-outline-secondary">
                 <img src="icons/search.svg" alt="Filtros" />
             </button>
             <button type="button"

@@ -158,8 +158,6 @@
             call(view.model, "get_fields_desc", [fields]).then(
                 (resp) => {
                     fieldsDescription = resp;
-                    fieldsDescription["id"].required = false;
-                    fieldsDescription["id"].readonly = true;
                     if(recordId){
                         call(view.model, "read", [fields], {filters:[['id','=',recordId]]}).then(
                             (resp) => {
@@ -457,7 +455,7 @@
                                     remove={item.remove}
                                     readonly={
                                         (item.id in readonlys) ?
-                                        readonlys[item.id].result : false
+                                        readonlys[item.id].result : fieldsDescription[item.field].readonly || false
                                     }
                                     viewtype={'form'}
                                     options={item.options || {}}

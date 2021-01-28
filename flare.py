@@ -180,7 +180,11 @@ class BaseModel(pw.Model):
                         rfs.append(child)
                 if rfs:
                     fields[k]["related_fields"] = field.rel_model.get_fields_desc(rfs)
-        fields["id"]["label"] = "ID"
+        fields["id"].update({
+            "label": "ID",
+            "required": False,
+            "readonly": True
+        })
         return fields
 
     @classmethod

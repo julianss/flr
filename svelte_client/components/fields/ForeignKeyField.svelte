@@ -19,14 +19,24 @@
     let selectedName = "";
     let uniqueId = Date.now().toString() + "-" + Math.random().toString().substring(2);
     let offset = -1;
+    let highlightedResult = -1;
+    let inputElement;
+    let resultsDropdownElement;
 
-    function search(event){
-        if (event.key == "Escape"){
-            return
-        }
-        if (showResults){
+    function caretDownClicked(event) {
+        if(showResults){
             hideResults();
-            return
+        }else{
+            inputElement.focus();
+            search(event, {doNotFilterInput: true});
+        }
+    }
+
+    function search(event, options={}){
+        if(event){
+            if (["ArrowDown", "ArrowUp", "Escape", "Enter"].includes(event.key)){
+                return keyboardNavigation(event);
+            }
         }
         activeElement.set(uniqueId)
         let kwargs = {paginate:[1,10]};
@@ -35,7 +45,7 @@
         }else{
             kwargs.filters = [];
         }
-        if(query){
+        if(query && !options.doNotFilterInput){
             kwargs.filters.push(['name','ilike',query])
         }
         loaded = false;
@@ -69,12 +79,21 @@
     });
 
     function selectResult(result){
-        query = "";
         value = result;
-        results = [];
         hideResults();
         dispatch('change', result);
         //document.getElementById("modal-close-"+uniqueId).click()
+    }
+
+    function onBlur(){
+        //The input loses focus and no selection was made, but the user may have written something.
+        //Either clear it or revert it to the correct value
+        if(!value){
+            query = "";
+        }else{
+            query = value.name
+        }
+        hideResults();
     }
 
     function clear(){
@@ -96,6 +115,8 @@
     }
 
     function hideResults() {
+        results = [];
+        highlightedResult = -1;
         showResults = false;
     }
 
@@ -103,9 +124,13 @@
     //     search();
     // }
 
-    document.addEventListener('keydown', function(event){
+    function keyboardNavigation(event){
 
-        var divResults = document.getElementById(`results-dropdown-${uniqueId}`)
+        if (!showResults && event.key == "ArrowDown") {
+            return caretDownClicked();
+        }
+
+        var divResults = resultsDropdownElement;
         if (divResults && results.length > 0){
             if (event.key === "ArrowDown"){
                 if (offset + 1 < divResults.childNodes.length - 1){
@@ -124,9 +149,10 @@
             }
             if (offset >= 0){
                 event.preventDefault()
-                divResults.childNodes[offset].focus()
+                highlightedResult = offset;
                 if (event.key === "Enter"){
-                    selectResult(results[offset])
+                    selectResult(results[offset]);
+                    hideResults();
                 }
             }
         }else if (divResults && results.length == 0){
@@ -134,7 +160,7 @@
                 hideResults();
             }
         }
-    })
+    }
 </script>
 
 <div class="form-group">
@@ -147,13 +173,15 @@
                     class="form-control"
                     id="query-input-{uniqueId}"
                     bind:value={query}
+                    bind:this={inputElement}
                     on:keyup={search}
+                    on:blur={onBlur}
                     placeholder={placeholder}
                 >
                 <div class="input-group-append">
                     <button
                         class="btn btn-outline-secondary"
-                        on:click={search}
+                        on:click={caretDownClicked}
                         type="button"
                         >
                         <img src="icons/caret-down-fill.svg" alt="v"/>
@@ -177,10 +205,13 @@
             {#if showResults}
                 <div
                     id="results-dropdown-{uniqueId}"
+                    bind:this={resultsDropdownElement}
                     transition:fade
                     class="dropdown-search-results">
-                    {#each results as result}
-                        <p tabindex="0" on:click={()=>selectResult(result)}>{result.name}</p>
+                    {#each results as result, i}
+                        <p class="result" tabindex="0"
+                        class:highlight={highlightedResult == i}
+                        on:click={()=>selectResult(result)}>{result.name}</p>
                     {/each}
                     {#if results.length == 0}
                         <p class="p_sin_resultados">Sin resultados qué mostrar</p>
@@ -258,5 +289,8 @@
     .p_sin_resultados{
         color:gray;
         font-style: italic
+    }
+    .highlight {
+        background-color: lightgray
     }
 </style>

@@ -18,10 +18,10 @@ export function getViews(which, types) {
         kwargs.filters.push(['view_type','in',types])
     }
     return call("FlrView", "read", [
-        ["model","definition","view_type","menu_id","name"]], kwargs)
+        ["model","definition","view_type","menu_id","name","wizard"]], kwargs)
 }
 
-export function openViews(views){
+export function openViews(views, options={}){
     let loadedViews = {};
     let firstType = null;
     for(let view of views){
@@ -34,6 +34,14 @@ export function openViews(views){
       }
       if(firstType === null && view.view_type != "search"){
         firstType = view.view_type;
+      }
+      if(view.view_type == "form"){
+        if(options.asWizard === true){
+          view.wizard = true;
+        }
+        if(options.showSaveButton === true){
+          view.showSaveButton = true
+        }
       }
     }
     publish({

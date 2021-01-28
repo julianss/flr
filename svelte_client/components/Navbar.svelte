@@ -46,8 +46,10 @@
     }
   }
 
-  function loadView(view){
-    getViews(view).then((resp) => openViews(resp))
+  function openPreferences(){
+    getViews("FlrPreferences").then(
+      (resp) => openViews(resp, {asWizard: true, showSaveButton: true})
+    )
   }
 
   window.addEventListener('popstate', function(e){
@@ -86,7 +88,7 @@
       <li class="nav-item dropdown ml-auto">
           <button class="btn btn-secondary remove-button-css dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {username} </button>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-              <a class="dropdown-item" href="#" on:click={()=>loadView('FlrPreferences')}>Preferencias</a>
+              <a class="dropdown-item" href="#" on:click={openPreferences}>Preferencias</a>
               <div class="dropdown-divider"></div>
               <a class="dropdown-item" href="#" on:click={logout}>Cerrar sesión</a>
           </div>

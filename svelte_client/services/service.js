@@ -68,6 +68,7 @@ export function call(model, method, args, kwargs){
         var resp = await _resp.json();
         if(resp.error){
             alert(resp.error.message);
+            resp.$error = resp.error;
             return resp;
         }else{
             return resp.result;

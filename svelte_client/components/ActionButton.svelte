@@ -3,6 +3,7 @@
     import { call } from './../services/service.js';
     import { updateGlobals, publish } from './../services/writables.js';
     import { requestReport } from './../services/report.js';
+    import { updateHash, parseHash } from './../services/utils.js';
     import { getContext } from 'svelte';
 
     export let text;
@@ -19,7 +20,6 @@
         }else{
             save().then((resp) => {
                 doAction(resp);
-                history.back();
             })
         }
     }
@@ -33,18 +33,34 @@
             }
         }
         if(action == "openViews"){
-            getViews(options.model, options.view_types).then((resp) => openViews(resp));
+            getViews(options.model, options.view_types).then(
+                (resp) => {
+                    openViews(resp, {
+                        asWizard: true,
+                        showSaveButton: options.saveButton
+                    })
+                    updateHash({'w': 1})
+                }
+            );
         }else if(action == "method"){
             call(`${model}:${recordId}`, options.name).then(
                 (resp) => {
-                    publish({
-                        'event': 'activeRecordIdChanged',
-                        'id': recordId
-                     })
+                    if(options.close){
+                        history.back();
+                    }else{
+                        publish({
+                            event: 'activeRecordIdChanged',
+                            id: recordId
+                        })
+                    }
                 }
             );
         }else if(action == "report"){
-            requestReport(options.report_name, [recordId])
+            requestReport(options.report_name, [recordId], function() {
+                if(options.close){
+                    history.back();
+                }
+            })
         }
     }
 </script>

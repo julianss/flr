@@ -1,17 +1,22 @@
 import { call } from './service.js';
 
-export function requestReport(reportName, recIds) {
+export function requestReport(reportName, recIds, callback) {
     call("FlrReport", "request_report", [reportName, recIds]).then(
         (resp) => {
-            console.log(resp);
             var requestToken = resp.token;
             if(requestToken){
                 downloadReport(requestToken);
+                if(callback){
+                    callback();
+                }
             }
         }
     )
 }
 
 export function downloadReport(requestToken) {
-    window.location = "/report/download?reqToken=" + requestToken;
+    let a = document.createElement("a");
+    a.href = "/report/download?reqToken=" + requestToken;
+    a.target = "blank";
+    a.click();
 }

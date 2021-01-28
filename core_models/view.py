@@ -17,6 +17,7 @@ class FlrView(BaseModel):
     menu_id = pw.ForeignKeyField(Registry["FlrMenu"], null=True, backref="views")
     model = pw.CharField()
     sequence = pw.IntegerField(default=1)
+    wizard = pw.BooleanField(default=False)
 
     #Extended to delete restricted items from the views definitions ("groups" property)
     @classmethod

@@ -6,6 +6,7 @@
             "name": "Preferences",
             "model": "FlrPreferences",
             "view_type": "form",
+            "wizard": true,
             "definition": {
                 "structure": [
                     {"section": "Información general"},

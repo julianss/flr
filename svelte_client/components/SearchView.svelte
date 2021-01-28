@@ -49,6 +49,10 @@
                     selectedValues[field] = null;
                 }
             }
+            //There may be no list nor search view (eg. wizard)
+            if(!view){
+                return;
+            }
             call(view.model, "get_fields_desc", [fields]).then(
                 (resp) => {
                     fieldsDescription = resp;

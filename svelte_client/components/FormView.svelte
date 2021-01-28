@@ -29,7 +29,8 @@
     let reports = [];
     let validations = [];
     let isWizard = false;
-
+    let showSaveButton = false;
+    let listViewExists = false;
 
     activeViewStore.subscribe((event) => {
         if(event){
@@ -46,12 +47,10 @@
             fieldsDescription = null;
             let views = event.views;
             if(views != null && views["form"]){
-                if (!views["list"]){
-                    isWizard = true;
-                }else{
-                    isWizard = false;
-                }
+                listViewExists = "list" in views;
                 view = views["form"];
+                isWizard = view.wizard || false
+                showSaveButton = view.showSaveButton || false;
                 sections = [];
                 onChanges = {};
                 invisibles = {};
@@ -176,13 +175,17 @@
                         }
                         call(view.model, "get_default").then(
                             (defaults) => {
-                                for(let field in defaults){
-                                    blankRecord[field] = defaults[field];
+                                if(defaults.$error){
+                                    fieldsDescription = null;
+                                }else{
+                                    for(let field in defaults){
+                                        blankRecord[field] = defaults[field];
+                                    }
+                                    record = blankRecord;
+                                    notDirty = JSON.parse(JSON.stringify(blankRecord));
+                                    editMode = true;
+                                    refreshModifiers();
                                 }
-                                record = blankRecord;
-                                notDirty = JSON.parse(JSON.stringify(blankRecord));
-                                editMode = true;
-                                refreshModifiers();
                             }
                         )
 
@@ -323,10 +326,17 @@
 <div hidden={!visible}>
     <div id="form_view_toolbar">
         <div class="col-md">
-            {#if !isWizard}
-                <button type="button" class="btn btn-secondary mb-2" on:click={back}>
-                    ≡ Listado
+            {#if isWizard}
+                <button type="button" class="btn btn-secondary mb-2" on:click={()=>history.back()}>
+                    🡐 Regresar
                 </button>
+            {/if}
+            {#if !isWizard}
+                {#if listViewExists}
+                    <button type="button" class="btn btn-secondary mb-2" on:click={back}>
+                        ≡ Listado
+                    </button>
+                {/if}
                 {#if view && view.definition.create !== false}
                     {#if recordId && !editMode}
                         <button type="button" class="btn btn-primary mb-2" on:click={create}>
@@ -335,7 +345,7 @@
                     {/if}
                 {/if}
             {/if}
-            {#if editMode}
+            {#if editMode && (!isWizard || showSaveButton)}
                 <button type="button" class="btn btn-primary mb-2" on:click={save}>
                     Guardar
                 </button>

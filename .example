@@ -13,4 +13,4 @@ export mail_host=""
 export mail_port=""
 export mail_user=""
 export mail_pass=""
-
+export legacy_table_names="False"

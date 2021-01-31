@@ -57,7 +57,11 @@
                 readonlys = {};
                 requireds = {};
                 for(let k in view.definition){
-                    if (typeof view.definition[k] !== 'boolean'){
+                    if (typeof view.definition[k] === 'string'){
+                        var uid = getUniqueId();
+                        invisibles[uid] = {condition: view.definition[k], result: false};
+                        view.definition[k] = {id:uid}
+                    }else if (typeof view.definition[k] !== 'boolean'){
                         for(let item of view.definition[k]){
                             if(item.field && item.onchange){
                                 onChanges[item.field] = item.onchange;
@@ -359,7 +363,7 @@
             {#if view && view.definition.edit !== false}
                 {#if !editMode}
                     {#if !isWizard}
-                        <button hidden={typeof view.definition.edit === 'object' && invisibles[view.definition.edit[0].id].result}
+                        <button hidden={view.definition.edit && view.definition.edit.hasOwnProperty('id') && view.definition.edit.id in invisibles && invisibles[view.definition.edit.id].result}
                             type="button" class="btn btn-primary mb-2" on:click={edit}>
                             Editar
                         </button>

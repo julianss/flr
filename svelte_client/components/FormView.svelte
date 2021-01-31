@@ -57,7 +57,11 @@
                 readonlys = {};
                 requireds = {};
                 for(let k in view.definition){
-                    if (typeof view.definition[k] !== 'boolean'){
+                    if (typeof view.definition[k] === 'string'){
+                        var uid = getUniqueId();
+                        invisibles[uid] = {condition: view.definition[k], result: false};
+                        view.definition[k] = {id:uid}
+                    }else if (typeof view.definition[k] !== 'boolean'){
                         for(let item of view.definition[k]){
                             if(item.field && item.onchange){
                                 onChanges[item.field] = item.onchange;
@@ -88,7 +92,6 @@
                                     modifierState[uid] = {condition: item[modifier], result: initialVal};
                                     item.id = uid;
                                 }
-                                
                             }
                         }
                     }
@@ -143,10 +146,14 @@
     function getRecord(){
         if(view){
             let fields = [];
+            let options = {'name_field': {}}
             for(let section of sections){
                 for(let item of view.definition[section]){
                     if (item.field){
                         fields.push(item.field);
+                        if (item.options && item.options.name_field){
+                            options.name_field[item.field] = item.options.name_field
+                        }
                         if(item.related_fields){
                             for(let rf of item.related_fields){
                                 fields.push(item.field + "." + rf.field);
@@ -159,7 +166,7 @@
                 (resp) => {
                     fieldsDescription = resp;
                     if(recordId){
-                        call(view.model, "read", [fields], {filters:[['id','=',recordId]]}).then(
+                        call(view.model, "read", [fields], {filters:[['id','=',recordId]], options: options}).then(
                             (resp) => {
                                 record = resp[0];
                                 notDirty = JSON.parse(JSON.stringify(resp[0]));
@@ -303,7 +310,7 @@
                     modifierState[uid].result = new Function(code).call(record);
                 }
                 if (requireds === modifierState){
-                    if (uid in modifierState && 'required' in fieldsDescription[uid]){
+                    if (uid in modifierState && fieldsDescription && 'required' in fieldsDescription[uid]){
                         fieldsDescription[uid].required = modifierState[uid].result
                     }
                 }
@@ -356,7 +363,7 @@
             {#if view && view.definition.edit !== false}
                 {#if !editMode}
                     {#if !isWizard}
-                        <button hidden={typeof view.definition.edit === 'object' && invisibles[view.definition.edit[0].id].result}
+                        <button hidden={view.definition.edit && view.definition.edit.hasOwnProperty('id') && view.definition.edit.id in invisibles && invisibles[view.definition.edit.id].result}
                             type="button" class="btn btn-primary mb-2" on:click={edit}>
                             Editar
                         </button>

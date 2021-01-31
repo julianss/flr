@@ -24,7 +24,7 @@
 <div class="form-group">
     <label>{label}</label>
     {#if edit && !readonly}
-        <select class="form-control" bind:value={value} on:click={changed}>
+        <select class="form-control" bind:value={value} on:click={changed} on:keyup={changed}>
             <option value={false}></option>
             {#each choices as option}
                 <option value={option[0]}>{option[1]}</option>

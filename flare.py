@@ -456,7 +456,7 @@ class BaseModel(pw.Model):
         return deleted
 
     @classmethod
-    def read(cls, fields, ids=[], filters=[], paginate=False, order=None, count=False):
+    def read(cls, fields, ids=[], filters=[], paginate=False, order=None, count=False, options={}):
         #Check ACL and rules
         FlrUser = Registry["FlrUser"]
         FlrUser.check_access(cls.__name__, "read")
@@ -541,6 +541,12 @@ class BaseModel(pw.Model):
                             else:
                                 #if the name of the related model is a property it will have to be computed later
                                 fk_2b_named.append(pw_field.name)
+                        # Add other name attr passed through options
+                        other_name = options.get('name_field', {}).get(pw_field.name)
+                        if other_name:
+                            if hasattr(pw_field.rel_model, other_name):
+                                other_name = getattr(pw_field.rel_model, other_name)
+                                only.append(other_name)
             for model in query:
                 data = model_to_dict(model, only=only, recurse=True, extra_attrs=extra_attrs)
                 if fk_2b_named:

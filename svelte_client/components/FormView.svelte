@@ -88,7 +88,6 @@
                                     modifierState[uid] = {condition: item[modifier], result: initialVal};
                                     item.id = uid;
                                 }
-                                
                             }
                         }
                     }
@@ -143,10 +142,14 @@
     function getRecord(){
         if(view){
             let fields = [];
+            let options = {'name_field': {}}
             for(let section of sections){
                 for(let item of view.definition[section]){
                     if (item.field){
                         fields.push(item.field);
+                        if (item.options && item.options.name_field){
+                            options.name_field[item.field] = item.options.name_field
+                        }
                         if(item.related_fields){
                             for(let rf of item.related_fields){
                                 fields.push(item.field + "." + rf.field);
@@ -159,7 +162,7 @@
                 (resp) => {
                     fieldsDescription = resp;
                     if(recordId){
-                        call(view.model, "read", [fields], {filters:[['id','=',recordId]]}).then(
+                        call(view.model, "read", [fields], {filters:[['id','=',recordId]], options: options}).then(
                             (resp) => {
                                 record = resp[0];
                                 notDirty = JSON.parse(JSON.stringify(resp[0]));

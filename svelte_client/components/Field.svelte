@@ -106,8 +106,11 @@
                 model={model}
                 filters={filters}
                 on:change={changed}
-                query={value?value.name:''}
+                query={
+                    value&&options&&options.name_field?
+                    value[options.name_field]:value?value.name:''}
                 readonly={readonly}
+                options={options}
             />
         {:else if type === "date"}
             <DateField

@@ -9,10 +9,10 @@
     export let filters = [];
     export let value;
     export let edit;
-    export let relatedFields = [];
     export let placeholder = "";
     export let query = "";
     export let readonly;
+    export let options;
     let loaded = false;
     let results = [];
     let showResults = false;
@@ -32,7 +32,7 @@
         }
     }
 
-    function search(event, options={}){
+    function search(event, opts={}){
         if(event){
             if (["ArrowDown", "ArrowUp", "Escape", "Enter"].includes(event.key)){
                 return keyboardNavigation(event);
@@ -45,18 +45,20 @@
         }else{
             kwargs.filters = [];
         }
-        if(query && !options.doNotFilterInput){
-            kwargs.filters.push(['name','ilike',query])
+        if(query && !opts.doNotFilterInput){
+            if (options && options.name_field){
+                kwargs.filters.push([options.name_field,'ilike',query])
+            }else{
+                kwargs.filters.push(['name','ilike',query])
+            }
         }
         loaded = false;
         let readFields;
-        if(!relatedFields || relatedFields.length == 0){
-            readFields = ["id", "name"];
+        readFields = ["id"];
+        if (options && options.name_field){
+            readFields.push(options.name_field)
         }else{
-            readFields = [];
-            for(let rf of relatedFields){
-                readFields.push(rf.field);
-            }
+            readFields.push("name")
         }
         //Will throw an error if the model has no regular field called "name"
         //(i.e. if there's no name or if it is a property)
@@ -91,7 +93,11 @@
         if(!value){
             query = "";
         }else{
-            query = value.name
+            if (options && options.name_field){
+                query = value[options.name_field]
+            }else{
+                query = value.name
+            }
         }
         hideResults();
     }
@@ -108,7 +114,11 @@
         if(typeof(value)==="number"){
             return selectedName;
         }else if(value){
-            return value.name || model + "," + value.id;
+            if (options && options.name_field){
+                return value[options.name_field];
+            }else{
+                return value.name || model + "," + value.id;
+            }
         }else{
             return ""
         }
@@ -211,7 +221,9 @@
                     {#each results as result, i}
                         <p class="result" tabindex="0"
                         class:highlight={highlightedResult == i}
-                        on:click={()=>selectResult(result)}>{result.name}</p>
+                        on:click={()=>selectResult(result)}>{
+                            result&&options&&options.name_field?
+                            result[options.name_field]:result.name}</p>
                     {/each}
                     {#if results.length == 0}
                         <p class="p_sin_resultados">Sin resultados qué mostrar</p>
@@ -220,7 +232,11 @@
             {/if}
         </div>
     {:else}
-        <p>{value && (value.name || value.id) || ''}</p>
+        {#if options && options.name_field && value}
+            <p>{value[options.name_field] || value.id || ''}</p>
+        {:else}
+            <p>{value && (value.name || value.id) || ''}</p>
+        {/if}
     {/if}
 </div>
 

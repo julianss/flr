@@ -63,7 +63,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
   <span class="navbar-brand">
-    <img src="images/logo_navbar.png" style="width:45px" alt="Logo"/>
+    <img src="images/logo_navbar.png" alt="Logo"/>
   </span>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>

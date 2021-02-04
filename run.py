@@ -108,9 +108,8 @@ with db.atomic() as transaction:
                 print("deleting", meta_id)
                 meta_rec = Meta.get_or_none(Meta.meta_id==meta_id)
                 if meta_rec:
+                    Registry[meta_rec.model].flr_delete([meta_rec.rec_id])
                     meta_rec.delete_instance()
-                    rec = Registry[meta_rec.model].get_by_id(meta_rec.rec_id)
-                    rec.delete_instance()
     except:
         transaction.rollback()
         raise

@@ -55,6 +55,12 @@
             <p>*****</p>
         {:else if options && options.html}
             {@html (value || '')}
+        {:else if options && options.url}
+            {#if options.url === true}
+                <a target="blank" href={value}>{value}</a>
+            {:else}
+                <a target="blank" href={value}>{options.url}</a>
+            {/if}
         {:else}
             <p>{value || ''}</p>
         {/if}

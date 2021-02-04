@@ -553,9 +553,9 @@ class BaseModel(pw.Model):
         #If model has active attribute read only those that are active
         if hasattr(cls, "active"):
             query = query.where(getattr(cls, 'active') == True)
+        #Filter only records from current company
         if hasattr(cls, "company_id"):
-            if not cls == FlrUser:
-                query = query.where(getattr(cls, 'company_id') == FlrUser.get_by_id(request.uid).company_id)
+            query = query.where(getattr(cls, 'company_id') == FlrUser.get_by_id(request.uid).company_id)
         if filters or paginate:
             query = cls.filter_query(query, filters, paginate)
         if count:

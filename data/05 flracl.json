@@ -86,5 +86,17 @@
             "perm_delete": true,
             "group_id_META_ID": "flrgroup_admin"
         }
+    },
+    {
+        "model": "FlrACL",
+        "meta_id": "flrcompany_acl",
+        "data": {
+            "name": "access company",
+            "model": "FlrCompany",
+            "perm_read": true,
+            "perm_create": false,
+            "perm_update": false,
+            "perm_delete": false
+        }
     }
 ]

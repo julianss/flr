@@ -11,7 +11,7 @@
                 "structure": [
                     {"section": "Información general"},
                     {"section": "Cambiar contraseña"},
-                    {"section": "Cambiar compañía", "groups": ["multicompany_group"]}
+                    {"section": "Cambiar compañía", "groups": ["flrgroup_multicompany"]}
                 ],
                 "Información general": [
                     {"field": "user", "readonly": true}

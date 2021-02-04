@@ -49,18 +49,33 @@
             "view_type": "form",
             "definition": {
                 "structure": [
+                    {"section": "General"},
+                    {"section": "Roles"},
+                    {"section": "Allowed companies"}
+                ],
+                "General": [
                     {"field": "name"},
                     {"field": "email"},
                     {"field": "password", "password": true},
                     {"field": "company_id"},
-                    {"field": "active"},
+                    {"field": "active"}
+                ],
+                "Roles": [
                     {
                         "add": true,
                         "remove": true,
                         "field": "groups",
                         "related_fields": [{"field": "name"}],
                         "label": "Roles"
-
+                    }
+                ],
+                "Allowed companies": [
+                    {
+                        "add": true,
+                        "remove": true,
+                        "field": "allowed_companies",
+                        "related_fields": [{"field": "name"}],
+                        "label": "Allowed companies"
                     }
                 ]
             },

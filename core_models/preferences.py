@@ -14,8 +14,8 @@ class FlrPreferences(BaseModel):
     old_password = pw.CharField(help_text="Password anterior", null=True)
     new_password = pw.CharField(help_text="Password nuevo", null=True)
     confirm_new_password = pw.CharField(help_text="Password confirmación", null=True)
-    old_company = pw.ForeignKeyField(r["FlrCompany"], help_text="Compañía anterior", null=True)
-    new_company = pw.ForeignKeyField(r["FlrCompany"], help_text="Nueva compañía", null=True)
+    old_company = pw.ForeignKeyField(r["FlrCompany"], help_text="Current company", null=True)
+    new_company = pw.ForeignKeyField(r["FlrCompany"], help_text="Change to", null=True)
 
     @classmethod
     def get_default(cls):

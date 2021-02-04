@@ -439,7 +439,7 @@
                     <div class="fields-container">
                     {#each view.definition[section] as item}
                         {#if item.field && item.field in fieldsDescription }
-                            <div style="width:{(item.options && item.options.width) || '100%'}"
+                            <div class="field-wrapper" style="width:{(item.options && item.options.width) || '100%'}"
                                 hidden={section != activeSection || invisibles[item.id] && invisibles[item.id].result}>
                                 <Field
                                     type={fieldsDescription[item.field].type}
@@ -530,5 +530,9 @@
         display:flex;
         width:100%;
         flex-wrap: wrap
+    }
+    .field-wrapper {
+        padding-right: 10px;
+        padding-left: 10px
     }
 </style>

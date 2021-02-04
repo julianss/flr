@@ -57,6 +57,7 @@ r = Registry
 
 class BaseModel(pw.Model):
     _transient = False
+    _rbac = {}
 
     class Meta:
         database = db
@@ -200,6 +201,44 @@ class BaseModel(pw.Model):
         return actions
 
     @classmethod
+    def get_rbac_read_filters(cls):
+        if not cls._rbac.get("read"):
+            return []
+        user = u()
+        user_groups = [g.id for g in user.groups]
+        or_filters = []
+        and_filters = []
+        for group_meta_id in cls._rbac["read"]:
+            spec = cls._rbac["read"][group_meta_id]
+            if type(spec) == list:
+                filters = spec
+            elif type(spec) == str:
+                filters = getattr(cls, spec)()
+            else:
+                filters = spec()
+            if not filters:
+                continue
+            filters = normalize_filters(filters)
+            if group_meta_id == "*":
+                and_filters.append(filters)
+            elif m(group_meta_id).id in user_groups:
+                or_filters.append(filters)
+        or_filters = combine_filters("|", or_filters)
+        and_filters = combine_filters("&", and_filters)
+        if and_filters and not or_filters:
+            final = and_filters
+        elif or_filters and not and_filters:
+            final = or_filters
+        elif and_filters and or_filters:
+            all_filters = []
+            all_filters.append(and_filters)
+            all_filters.append(or_filters)
+            final = combine_filters("&", all_filters)
+        else:
+            final = []
+        return final
+
+    @classmethod
     def filter_query(cls, query, filters=[], paginate=False):
         operator_table = {
             '=':     __operator__.eq,
@@ -277,7 +316,6 @@ class BaseModel(pw.Model):
         #Check ACL and rules
         FlrUser = Registry["FlrUser"]
         FlrUser.check_access(cls.__name__, "create")
-        FlrUser.check_rules(cls.__name__, "create", [], fields)
         #Attachments may be present (files that have already been created)
         #Attach them to the created model at the end
         attachments = []
@@ -460,14 +498,11 @@ class BaseModel(pw.Model):
         #Check ACL and rules
         FlrUser = Registry["FlrUser"]
         FlrUser.check_access(cls.__name__, "read")
-        result = FlrUser.check_rules(cls.__name__, "read", fields, {
-            "ids": ids, "filters": filters, "paginate": paginate, "order": order, "count": count
-        })
+        forced_filters = cls.get_rbac_read_filters()
         #If the shorthand 'ids' parameter was used append the ids to the filters
         if ids:
             filters.append(("id","in",ids))
-        #If there are forced filters because of security rules combine them into the existing filters
-        forced_filters = result.get("force_filter", [])
+        #If there are forced filters because of rbac rules combine them into the existing filters
         if forced_filters:
             if not filters:
                 filters = forced_filters
@@ -477,7 +512,6 @@ class BaseModel(pw.Model):
         #If no order is specified and model has a default order defined, use it
         if order is None and hasattr(cls, "_order"):
             order = cls._order
-
         only = None
         extra_attrs = []
         related_fields_m2m = {}

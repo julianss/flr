@@ -165,53 +165,5 @@
             "menu_id_META_ID": "menu_flracl",
             "sequence": 2
         }
-    },
-    {
-        "model": "FlrMenu",
-        "meta_id": "menu_flrrule",
-        "data": {
-            "name": "Reglas de seguridad",
-            "sequence": 4,
-            "section_id_META_ID": "menu_section_admin",
-            "groups_META_ID": ["flrgroup_admin"]
-        }
-    },
-    {
-        "model": "FlrView",
-        "meta_id": "flrrule_list_view",
-        "data": {
-            "name": "Rules list view",
-            "model": "FlrRule",
-            "view_type": "list",
-            "definition": {
-                "structure": [
-                    {"field": "name"},
-                    {"field": "model"},
-                    {"field": "group_id"},
-                    {"field": "method"}
-                ]
-            },
-            "menu_id_META_ID": "menu_flrrule",
-            "sequence": 1
-        }
-    },
-    {
-        "model": "FlrView",
-        "meta_id": "flrrule_form_view",
-        "data": {
-            "name": "Rules form view",
-            "model": "FlrRule",
-            "view_type": "form",
-            "definition": {
-                "structure": [
-                    {"field": "name"},
-                    {"field": "model"},
-                    {"field": "group_id"},
-                    {"field": "method"}
-                ]
-            },
-            "menu_id_META_ID": "menu_flrrule",
-            "sequence": 2
-        }
     }
 ]

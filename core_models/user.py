@@ -110,33 +110,6 @@ class FlrUser(BaseModel):
             return True
 
     @classmethod
-    def check_rules(cls, model, operation, args, kwargs):
-        if has_request_context():
-            user = Registry["FlrUser"].get_by_id(request.uid)
-            user_groups = [g.id for g in user.groups]
-            FlrRule = Registry["FlrRule"]
-            rules = FlrRule.select().where(
-                FlrRule.group_id.in_(user_groups),
-                FlrRule.model == model
-            )
-            total_result = {'ok': True, 'force_filter': []}
-            for rule in rules:
-                validator = getattr(Registry[model], rule.method)
-                result = validator(operation, args, kwargs)
-                if not result["ok"]:
-                    msg = "Access denied for operation %s on model %s by Security Rule"%(operation, model)
-                    if result.get("msg", ""):
-                        msg += "\n" + result["msg"]
-                    raise Exception(msg)
-                if result.get('force_filter', []):
-                    total_result["force_filter"].append(normalize_filters(result["force_filter"]))
-            if total_result["force_filter"]:
-                total_result["force_filter"] = combine_filters("|", total_result["force_filter"])
-            return total_result
-        else:
-            return {'ok': True}
-
-    @classmethod
     def groups_check_any(cls, list_of_meta_ids):
         """Check that user belongs to at least one of the groups, which are passed as a list of meta ids"""
         group_ids = []
@@ -170,11 +143,3 @@ class FlrACL(BaseModel):
     perm_delete = pw.BooleanField(help_text="Delete permission", null=True, default=False)
 
 FlrACL.r()
-
-class FlrRule(BaseModel):
-    group_id = pw.ForeignKeyField(FlrGroup, verbose_name="Group", backref="rules")
-    name = pw.CharField(verbose_name="Rule name")
-    model = pw.CharField(verbose_name="Model")
-    method = pw.CharField(verbose_name="Model method", help_text="Method in model that performs the access validation")
-
-FlrRule.r()

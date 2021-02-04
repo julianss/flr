@@ -62,11 +62,6 @@
 <div class="form-group">
     <label>{label}</label>
     {#if viewtype === 'form'}
-        {#if edit && allowAdd}
-            <button type="button" class="btn btn-secondary new-element" on:click={newElement}>
-                + Agregar elemento
-            </button>
-        {/if}
         <table class="table table-sm">
             <thead class="thead-light">
                 <tr>
@@ -120,6 +115,11 @@
                 </tr>
             {/if}
         </table>
+        {#if edit && allowAdd}
+            <button type="button" class="btn btn-secondary new-element" on:click={newElement}>
+                + Agregar elemento
+            </button>
+        {/if}
     {:else if viewtype==='list'}
         {#if (value || []).length>0}
             {#each value as obj}

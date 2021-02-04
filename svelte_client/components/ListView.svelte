@@ -30,7 +30,7 @@
         if(event){
             filters = event.filters;
             fetchedRecords = [];
-            fetchRecords();
+            gotoPage(1);
         }
     })
 

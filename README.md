@@ -25,11 +25,12 @@ Install the Python dependencies
 Install wkhtmltopdf for report support
     [wkhtmltopdf](https://wkhtmltopdf.org/downloads.html)
     
-Install svelte
+Install the modules needed by Svelte and build the frontend app
 
     cd svelte_client
     npm install
-
+    npm run build
+    
 Make the new_app script executable
 
     chmod a+x new_app
@@ -57,4 +58,4 @@ The new app script also creates a dot file in the flare/ folder named **.YourApp
 - [Flask](https://flask.palletsprojects.com/)
 
 
-Work in progress.
+Work in progress. Documentation coming soon

@@ -333,30 +333,30 @@
         <div class="col-md">
             {#if isWizard}
                 <button type="button" class="btn btn-secondary mb-2" on:click={()=>history.back()}>
-                    🡐 Regresar
+                    <img src="icons/arrow-left.svg" style="filter:invert(1)" title="Regresar" alt="Regresar">
                 </button>
             {/if}
             {#if !isWizard}
                 {#if listViewExists}
                     <button type="button" class="btn btn-secondary mb-2" on:click={back}>
-                        ≡ Listado
+                        <img src="icons/arrow-left.svg" style="filter:invert(1)" title="Regresar" alt="Regresar">
                     </button>
                 {/if}
                 {#if view && view.definition.create !== false}
                     {#if recordId && !editMode}
                         <button type="button" class="btn btn-primary mb-2" on:click={create}>
-                            Nuevo
+                            <img src="icons/plus.svg" style="filter:invert(1)" title="Nuevo" alt="Nuevo">
                         </button>
                     {/if}
                 {/if}
             {/if}
             {#if editMode && (!isWizard || showSaveButton)}
                 <button type="button" class="btn btn-primary mb-2" on:click={save}>
-                    Guardar
+                    <img src="icons/check2.svg" style="filter:invert(1)" title="Guardar" alt="Guardar">
                 </button>
                 {#if !isWizard}
-                    <button type="button" class="btn btn-light mb-2" on:click={discard}>
-                        Descartar
+                    <button type="button" class="btn btn-outline-secondary mb-2" on:click={discard}>
+                        <img src="icons/x.svg" title="Descartar" alt="Descartar">
                     </button>
                 {/if}
             {/if}
@@ -365,7 +365,7 @@
                     {#if !isWizard}
                         <button hidden={view.definition.edit && view.definition.edit.hasOwnProperty('id') && view.definition.edit.id in invisibles && invisibles[view.definition.edit.id].result}
                             type="button" class="btn btn-primary mb-2" on:click={edit}>
-                            Editar
+                            <img src="icons/pencil-square.svg" style="filter:invert(1)" title="Editar" alt="Editar">
                         </button>
                     {/if}
                 {/if}
@@ -392,7 +392,7 @@
             {#if record && reports && record.id && reports.length>0}
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="actionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Imprimir
+                        <img src="icons/download.svg" style="filter:invert(1)" title="Descargar" alt="Descargar">
                     </button>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="actionsDropdown">
                         {#each reports as report}

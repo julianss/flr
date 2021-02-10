@@ -203,7 +203,7 @@
         <div class="col-md">
         {#if view && view.definition.create !== false}
             <button type="button" class="btn btn-primary mb-2" on:click={create}>
-                Nuevo
+                <img src="icons/plus.svg" style="filter:invert(1)" title="Nuevo" alt="Nuevo">
             </button>
         {/if}
         {#if view && view.menu_view_name}
@@ -233,20 +233,20 @@
                 </div>
             {/if}
             <button type="button" on:click={openSearch}
-                class="btn btn-outline-secondary">
-                <img src="icons/search.svg" alt="Filtros" />
+                class="btn btn-secondary">
+                <img src="icons/search.svg" style="filter:invert(1)" title="Buscar" alt="Buscar"/>
             </button>
             <button type="button"
                 class="btn btn-secondary btn-sm"
                 disabled={fetching || page==1}
                 on:click={()=>gotoPage(1)}>
-                &lt;&lt;
+                <img src="icons/chevron-double-left.svg" style="filter:invert(1)" title="Primera" alt="Primera">
             </button>
             <button type="button"
                 class="btn btn-secondary btn-sm"
                 disabled={fetching || page==1}
                 on:click={()=>changePage(-1)}>
-                &lt;
+                <img src="icons/chevron-left.svg" style="filter:invert(1)" title="Anterior" alt="Anterior">
             </button>
                 {(1 + (page-1) * pageSize) || ''}
                 -
@@ -257,13 +257,13 @@
                 class="btn btn-secondary btn-sm"
                 disabled={fetching || page==numberOfPages}
                 on:click={()=>changePage(1)}>
-                &gt;
+                <img src="icons/chevron-right.svg" style="filter:invert(1)" title="Anterior" alt="Anterior">
             </button>
             <button type="button"
                 class="btn btn-secondary btn-sm"
                 disabled={fetching || page==numberOfPages}
                 on:click={()=>gotoPage(numberOfPages)}>
-                &gt;&gt;
+                <img src="icons/chevron-double-right.svg" style="filter:invert(1)" title="Última" alt="Última">
             </button>
         </div>
     </div>

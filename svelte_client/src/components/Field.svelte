@@ -18,17 +18,12 @@
     export let label;
     export let value;
     export let edit;
-    export let password;
-    export let viewpassword;
     export let model;
     export let filters = [];
     export let choices = [];
     export let required;
-    export let relatedFields;
     export let relatedFieldsDesc;
     export let nolabel;
-    export let add;
-    export let remove;
     export let readonly;
     export let viewtype;
     export let options;
@@ -59,8 +54,6 @@
                 label={label}
                 bind:value={value}
                 edit={edit}
-                password={password}
-                viewpassword={viewpassword}
                 on:change={changed}
                 readonly={readonly}
                 options={options}
@@ -144,12 +137,10 @@
                 edit={edit}
                 model={model}
                 filters={filters}
-                relatedFields={relatedFields}
                 relatedFieldsDesc={relatedFieldsDesc}
-                allowAdd={add}
-                allowRemove={remove}
                 on:change={changed}
                 readonly={readonly}
+                options={options}
                 viewtype={viewtype}
             />
         {:else if type === "backref"}
@@ -159,12 +150,10 @@
                 edit={edit}
                 model={model}
                 filters={filters}
-                relatedFields={relatedFields}
                 relatedFieldsDesc={relatedFieldsDesc}
-                allowAdd={add}
-                allowRemove={remove}
                 on:change={changed}
                 readonly={readonly}
+                options={options}
                 viewtype={viewtype}
             />
         {:else if type === "file"}

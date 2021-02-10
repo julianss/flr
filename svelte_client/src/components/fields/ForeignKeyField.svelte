@@ -57,6 +57,11 @@
         readFields = ["id"];
         if (options && options.name_field){
             readFields.push(options.name_field)
+        }else if(options && options.related_fields){
+            readFields = [];
+            for(let rf of options.related_fields){
+                readFields.push(rf.field);
+            }
         }else{
             readFields.push("name")
         }

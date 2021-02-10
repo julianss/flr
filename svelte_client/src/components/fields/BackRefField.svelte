@@ -8,11 +8,9 @@
     export let filters = [];
     export let value = [];
     export let edit;
-    export let relatedFields = [];
     export let relatedFieldsDesc = {};
-    export let allowAdd;
-    export let allowRemove;
     export let viewtype;
+    export let options;
     let valueFK;
 
     function renderField(obj, field){
@@ -43,7 +41,7 @@
     function newElement(){
         let tmpId = "tmp_" + Date.now().toString() + "-" + Math.random().toString().substring(2);
         let blankRecord = {id: tmpId};
-        for(let field of relatedFields){
+        for(let field of options.related_fields){
             blankRecord[field.field] = null;
         }
         if(!value){
@@ -65,7 +63,7 @@
         <table class="table table-sm">
             <thead class="thead-light">
                 <tr>
-                    {#each relatedFields as field}
+                    {#each options.related_fields || [] as field}
                         {#if !relatedFieldsDesc || !relatedFieldsDesc[field.field]}
                             <th>{field.field}</th>
                         {:else}
@@ -78,28 +76,25 @@
             {#if (value || []).length>0}
                 {#each value as obj}
                     <tr>
-                        {#each relatedFields as field}
+                        {#each options.related_fields || [] as field}
                             <td>
                                 <Field
                                     type={relatedFieldsDesc[field.field].type}
                                     label={relatedFieldsDesc[field.field].label}
                                     edit={edit && !field.readonly}
                                     bind:value={obj[field.field]}
-                                    password={false}
                                     model={relatedFieldsDesc[field.field].model}
                                     choices={relatedFieldsDesc[field.field].options}
                                     required={relatedFieldsDesc[field.field].required}
-                                    relatedFields={null}
                                     relatedFieldsDesc={null}
                                     nolabel={true}
                                     on:change={changed}
-                                    add={null}
-                                    remove={null}
+                                    options={options || {}}
                                 />
                             </td>
                         {/each}
                         <td class="basura">
-                            {#if allowRemove}
+                            {#if options && options.remove}
                                 <img
                                     hidden={!edit}
                                     on:click={()=>remove(obj.id)}
@@ -115,7 +110,7 @@
                 </tr>
             {/if}
         </table>
-        {#if edit && allowAdd}
+        {#if edit && options.allowAdd}
             <button type="button" class="btn btn-secondary new-element" on:click={newElement}>
                 + Agregar elemento
             </button>
@@ -123,7 +118,7 @@
     {:else if viewtype==='list'}
         {#if (value || []).length>0}
             {#each value as obj}
-                {#each relatedFields as field}
+                {#each options.related_fields || [] as field}
                     <p>{renderField(obj, field.field)}</p>
                 {/each}
             {/each}

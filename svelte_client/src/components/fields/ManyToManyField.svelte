@@ -6,12 +6,10 @@
     export let filters = [];
     export let value = [];
     export let edit;
-    export let relatedFields = [];
     export let relatedFieldsDesc = {};
-    export let allowAdd;
-    export let allowRemove;
     export let readonly;
     export let viewtype;
+    export let options;
     let valueFK;
 
     function renderField(obj, field){
@@ -58,7 +56,7 @@
 <div class="form-group">
     <label>{label}</label>
     {#if viewtype === 'form'}
-        {#if edit && allowAdd && !readonly}
+        {#if edit && options && options.add && !readonly}
             <ForeignKeyField
                 label=""
                 bind:value={valueFK}
@@ -66,14 +64,14 @@
                 model={model}
                 filters={filters}
                 on:change={add}
-                relatedFields={relatedFields}
                 placeholder="Agregar elemento"
+                options={options || {}}
             />
         {/if}
         <table class="table table-sm">
             <thead class="thead-light">
                 <tr>
-                    {#each relatedFields as field}
+                    {#each options.related_fields || [] as field}
                         {#if !relatedFieldsDesc || !relatedFieldsDesc[field.field]}
                             <th>{field.field}</th>
                         {:else}
@@ -86,11 +84,11 @@
             {#if (value || []).length>0}
                 {#each value as obj}
                     <tr>
-                        {#each relatedFields as field}
+                        {#each options.related_fields || [] as field}
                             <td>{renderField(obj, field.field)}</td>
                         {/each}
                         <td class="basura">
-                            {#if allowRemove}
+                            {#if options && options.remove}
                                 <img
                                     hidden={!edit}
                                     on:click={()=>remove(obj.id)}
@@ -109,7 +107,7 @@
     {:else if viewtype == 'list'}
         {#if (value || []).length>0}
             {#each value as obj}
-                {#each relatedFields as field}
+                {#each options.related_fields || [] as field}
                     <p>{renderField(obj, field.field)}</p>
                 {/each}
             {/each}

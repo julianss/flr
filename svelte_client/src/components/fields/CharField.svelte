@@ -4,8 +4,6 @@
     export let label = "";
     export let value;
     export let edit;
-    export let password = false;
-    export let viewpassword;
     export let readonly;
     export let options;
     let uniqueId = Date.now().toString() + "-" + Math.random().toString().substring(2);
@@ -34,11 +32,11 @@
 <div class="form-group">
     <label>{label}</label>
     <div class="input-group">
-        {#if edit && password && !readonly}
+        {#if edit && options && options.password && !readonly}
             <input
                 class="form-control"
                 type="password" bind:value={value} on:change={changed} id="input-{uniqueId}"/>
-            {#if viewpassword}
+            {#if options && options.viewpassword}
                 <div class="input-group-prepend border-right-0">
                     <button
                         tabindex="-1"
@@ -49,9 +47,9 @@
                     </button>
                 </div>
             {/if}
-        {:else if edit && !password && !readonly}
+        {:else if edit && !(options && options.password) && !readonly}
             <input class="form-control" type="text" bind:value={value} on:change={changed}/>
-        {:else if password}
+        {:else if options && options.password}
             <p>*****</p>
         {:else if options && options.html}
             {@html (value || '')}

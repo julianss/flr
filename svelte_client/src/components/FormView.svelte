@@ -154,8 +154,8 @@
                         if (item.options && item.options.name_field){
                             options.name_field[item.field] = item.options.name_field
                         }
-                        if(item.related_fields){
-                            for(let rf of item.related_fields){
+                        if(item.options && item.options.related_fields){
+                            for(let rf of item.options.related_fields){
                                 fields.push(item.field + "." + rf.field);
                             }
                         }
@@ -446,20 +446,15 @@
                                     label={item.label || fieldsDescription[item.field].label}
                                     edit={editMode}
                                     bind:value={record[item.field]}
-                                    password={item.password || false}
-                                    viewpassword={item.viewpassword || false}
                                     model={fieldsDescription[item.field].model}
                                     choices={fieldsDescription[item.field].options}
                                     required={
                                         (item.id in requireds) ?
                                         requireds[item.id].result : fieldsDescription[item.field].required
                                     }
-                                    relatedFields={item.related_fields}
                                     relatedFieldsDesc={fieldsDescription[item.field].related_fields}
                                     on:change={()=>fieldChanged(item.field)}
                                     nolabel={item.nolabel || false}
-                                    add={item.add}
-                                    remove={item.remove}
                                     readonly={
                                         (item.id in readonlys) ?
                                         readonlys[item.id].result : fieldsDescription[item.field].readonly || false

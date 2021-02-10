@@ -1,5 +1,5 @@
 # Flare
-Framework for creating business web applications. Basically, it's a fully functioning app in which you just define your own models and business logic.
+Framework for creating business web applications. Basically, it's a fully functioning generic app (backend and frontend, provides user management, access control, etc) and you just define your domain-specific models and business logic and the layout of the views and menus.
 
 It was inspired by [Odoo](https://odoo.com).
 

@@ -1,7 +1,7 @@
-import { call } from './service.js'
+import { call, get_jwt_token_name } from './service.js'
 
 function getUid(){
-    let token = localStorage.getItem("flare_yourappname_jwt");
+    let token = localStorage.getItem(get_jwt_token_name());
     let decoded = parseJWT(token);
     return decoded.id
 }

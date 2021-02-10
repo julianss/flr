@@ -4,18 +4,21 @@ if [ -z "$1" ]
         echo "app name missing"
         exit 1
 fi
+
+#Create configuration file
 cp ".example" ".$1"
+sed -i -e "s/yourappnamehere/$1/g" ".$1"
+sed -i -e "s/yourdatabasename/$1.db/g" ".$1"
+
+#Create folder structure
 mkdir apps/$1
 echo "from . import models" > apps/$1/__init__.py
 mkdir apps/$1/models
 touch apps/$1/models/__init__.py
-npx degit sveltejs/template apps/$1/client
-cp -r svelte_client/* apps/$1/client/src
-mv apps/$1/client/src/index.html apps/$1/client/public/index.html
-sed -i "s/flare_yourappname_jwt/flare_$1_jwt/g" apps/$1/client/src/services/service.js
-sed -i "s/flare_yourappname_jwt/flare_$1_jwt/g" apps/$1/client/src/services/session.js
-sed -i "s/yourappname/$1/g" apps/$1/client/public/index.html
-cp svelte_client/public/bootstrap.min.css apps/$1/client/public
-cp -r svelte_client/public/icons apps/$1/client/public
-cp -r svelte_client/public/images apps/$1/client/public
-echo "" > apps/$1/client/public/global.css
+mkdir apps/$1/public
+mkdir apps/$1/data
+
+#Generate random string for JWT secret
+random=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
+sed -i -e "s/randomstringhere/$random/g" ".$1"
+

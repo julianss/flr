@@ -739,6 +739,14 @@ def recoverypassword():
             }
         }), 500)
 
+@app.route("/app_name", methods=["GET"])
+def get_app_name():
+    return os.environ["app"]
+
+@app.route("/app_title", methods=["GET"])
+def get_app_title():
+    return os.environ.get("app_title", os.environ["app"])
+
 @app.route("/create_user", methods=["POST"])
 def create_user():
     try:
@@ -752,7 +760,12 @@ def create_user():
 
 # Serve static files
 def send_from_app_public_directory(file):
-    return send_from_directory(os.path.join('apps',os.environ["app"],'client','public'), file)
+    #First try to serve it from the app's public directory then from the svelte_client/public folder
+    app_public_folder = os.path.join("apps", os.environ["app"], "public")
+    if os.path.exists(os.path.join(app_public_folder, file)):
+        return send_from_directory(app_public_folder, file)
+    else:
+        return send_from_directory(os.path.join('svelte_client', 'public'), file)
 @app.route("/")
 def base():
     return send_from_app_public_directory('index.html')

@@ -2,17 +2,37 @@ import { writable } from 'svelte/store';
 import { get_store_value } from 'svelte/internal';
 import { globalsStore } from './writables';
 
-if(localStorage.getItem("flare_yourappname_jwt")){
-    var initial_jwt = localStorage.getItem("flare_yourappname_jwt");
-}else{
-    var initial_jwt = "";
-}
-
-export const jwt = writable(initial_jwt);
+export const JWT_NOT_YET_LOADED = "jwt not yet loaded";
+export const jwt = writable(JWT_NOT_YET_LOADED);
 export const loading = writable(false);
+export let appName;
+export let appTitle;
+
+fetch("/app_name")
+    .then(resp => resp.text())
+    .then(text => {
+        appName = text;
+        let tokName = get_jwt_token_name();
+        if(localStorage.getItem(tokName)){
+            jwt.set(localStorage.getItem(tokName));
+        }else{
+            jwt.set('');
+        }
+    })
+
+fetch("/app_title")
+    .then(resp => resp.text())
+    .then(text => {
+        appTitle = text;
+        document.title = appTitle;
+    })
 
 export function get_jwt_token(){
     return get_store_value(jwt);
+}
+
+export function get_jwt_token_name(){
+    return `flare_${appName}_jwt`;
 }
 
 export function auth(login, password){
@@ -38,7 +58,7 @@ export function auth(login, password){
         (resp) => {
             if(resp.result){
                 jwt.set(resp.result);
-                localStorage.setItem("flare_yourappname_jwt", resp.result);
+                localStorage.setItem(get_jwt_token_name(), resp.result);
             }
             loading.set(false);
             return resp;

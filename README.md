@@ -3,8 +3,8 @@ Framework for creating business web applications. Basically, it's a fully functi
 
 It was inspired by [Odoo](https://odoo.com).
 
-Back-end: Python (Flask and Peewee)
-Front-end: Svelte
+- Back-end: Python (Flask and Peewee)
+- Front-end: Svelte
 
 # Dependencies
 - python at least 3.5.2
@@ -24,6 +24,11 @@ Install the Python dependencies
 
 Install wkhtmltopdf for report support
     [wkhtmltopdf](https://wkhtmltopdf.org/downloads.html)
+    
+Install svelte
+
+    cd svelte_client
+    npm install
 
 Make the new_app script executable
 

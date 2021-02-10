@@ -41,7 +41,7 @@ Create the apps directory, here is where new apps will be created
 # Usage (create and run an app)
 Create a database e.g.
 
-    CREATE DATABASE YourDbName OWNER YourUser with PASSWORD
+    CREATE DATABASE YourDbName OWNER YourUser;
 
 Run the app creation script with the name of the app you want. A new folder will be created in the "apps" folder with that name
 

@@ -510,8 +510,11 @@ class BaseModel(pw.Model):
                 filters = normalize_filters(filters)
                 filters = combine_filters('&', [filters, forced_filters])
         #If no order is specified and model has a default order defined, use it
-        if order is None and hasattr(cls, "_order"):
-            order = cls._order
+        if order is None:
+            if hasattr(cls, "_order"):
+                order = cls._order
+            else:
+                order = "id"
         only = None
         extra_attrs = []
         related_fields_m2m = {}

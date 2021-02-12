@@ -11,6 +11,9 @@
         getValue
     } from './../services/writables.js';
     import Field from './Field.svelte';
+    import ejs from './../services/ejs.min.js';
+    import { getSrcWithToken } from './../services/files.js';
+import { get } from 'svelte/store';
 
     let view = null;
     let visible = false;
@@ -25,6 +28,8 @@
     let batchActions = [];
     let selectAllChecked;
     let selectedRecords = {};
+    let cardViewTemplate = false;
+    let cardViewEnabled = false;
 
     searchFiltersStore.subscribe((event) => {
         if(event){
@@ -50,6 +55,7 @@
             let views = event.views;
             if(views != null && views["list"]){
                 view = views["list"];
+                cardViewTemplate = view.card_view_template;
                 fetchRecords();
             }
         }
@@ -232,6 +238,18 @@
                     </div>
                 </div>
             {/if}
+            {#if view && cardViewTemplate && !cardViewEnabled}
+                <button type="button" on:click={()=>{cardViewEnabled=true}}
+                    class="btn btn-secondary">
+                    <img src="icons/grid-3x3-gap-fill.svg" style="filter:invert(1)" title="Card view" alt="Card view"/>
+                </button>
+            {/if}
+            {#if cardViewEnabled}
+                <button type="button" on:click={()=>{cardViewEnabled=false}}
+                    class="btn btn-secondary">
+                    <img src="icons/list.svg" style="filter:invert(1)" title="List view" alt="List view"/>
+                </button>
+            {/if}
             <button type="button" on:click={openSearch}
                 class="btn btn-secondary">
                 <img src="icons/search.svg" style="filter:invert(1)" title="Buscar" alt="Buscar"/>
@@ -268,6 +286,7 @@
         </div>
     </div>
 
+    {#if !cardViewEnabled}
     <table class="table table-sm">
         <thead class="thead-light">
             {#if fieldsDescription && view}
@@ -314,6 +333,15 @@
             {/each}
         </tbody>
     </table>
+    {:else}
+        <div class="card-view-container">
+            {#each fetchedRecords as record}
+                <div class="card-view-wrapper" on:click={() => viewEdit(record.id)}>
+                    {@html ejs.render(cardViewTemplate, {...record, getUrl: getSrcWithToken})}
+                </div>
+            {/each}
+        </div>
+    {/if}
     {#if fetchedRecords.length === 0 && !fetching }
         <p>No se encontraron registros</p>
     {/if}
@@ -341,5 +369,14 @@
     }
     .top-left-controls button {
         margin: 2px 2px 2px 2px;
+    }
+    .card-view-wrapper {
+        margin: 5px 5px 5px 5px
+    }
+    .card-view-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        cursor: pointer
     }
 </style>

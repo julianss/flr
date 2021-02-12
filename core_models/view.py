@@ -1,18 +1,9 @@
 import peewee as pw
 from flare import BaseModel, Registry
-import json
-
-class JSONField(pw.TextField):
-    def db_value(self, value):
-        return json.dumps(value)
-
-    def python_value(self, value):
-        if value is not None:
-            return json.loads(value)
 
 class FlrView(BaseModel):
     name = pw.CharField()
-    definition = JSONField()
+    definition = pw.JSONField()
     view_type = pw.CharField(choices=[("list","List"),("form","Form"),("search","Search")],default="list")
     menu_id = pw.ForeignKeyField(Registry["FlrMenu"], null=True, backref="views")
     model = pw.CharField()

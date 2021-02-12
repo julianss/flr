@@ -11,6 +11,7 @@ class FlrView(BaseModel):
     sequence = pw.IntegerField(default=1)
     wizard = pw.BooleanField(default=False)
     card_view_template = pw.CharField(null=True)
+    card_view_first = pw.BooleanField(null=True)
 
     #Extended to delete restricted items from the views definitions ("groups" property)
     #Also to load the card view templates

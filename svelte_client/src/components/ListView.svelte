@@ -56,6 +56,10 @@ import { get } from 'svelte/store';
             if(views != null && views["list"]){
                 view = views["list"];
                 cardViewTemplate = view.card_view_template;
+                cardViewEnabled = false;
+                if(cardViewTemplate && view.card_view_first){
+                    cardViewEnabled = true;
+                }
                 fetchRecords();
             }
         }

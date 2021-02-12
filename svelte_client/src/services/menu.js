@@ -18,7 +18,7 @@ export function getViews(which, types) {
         kwargs.filters.push(['view_type','in',types])
     }
     return call("FlrView", "read", [
-        ["model","definition","view_type","menu_id","name","wizard","card_view_template"]], kwargs)
+        ["model","definition","view_type","menu_id","name","wizard","card_view_template","card_view_first"]], kwargs)
 }
 
 export function openViews(views, options={}){

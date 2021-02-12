@@ -363,7 +363,7 @@
             {#if view && view.definition.edit !== false}
                 {#if !editMode}
                     {#if !isWizard}
-                        <button hidden={view.definition.edit && view.definition.edit.hasOwnProperty('id') && view.definition.edit.id in invisibles && invisibles[view.definition.edit.id].result}
+                        <button hidden={view.definition.edit && view.definition.edit.hasOwnProperty('id') && view.definition.edit.id in invisibles && !invisibles[view.definition.edit.id].result}
                             type="button" class="btn btn-primary mb-2" on:click={edit}>
                             <img src="icons/pencil-square.svg" style="filter:invert(1)" title="Editar" alt="Editar">
                         </button>

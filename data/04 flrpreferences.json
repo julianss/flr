@@ -17,9 +17,27 @@
                     {"field": "user", "readonly": true}
                 ],
                 "Cambiar contraseña": [
-                    {"field": "old_password", "password": true, "viewpassword": true},
-                    {"field": "new_password", "password": true, "viewpassword": true},
-                    {"field": "confirm_new_password", "password": true, "viewpassword": true}
+                    {
+                        "field": "old_password",
+                        "options": {
+                            "password": true,
+                            "viewpassword": true
+                        }
+                    },
+                    {
+                        "field": "new_password",
+                        "options": {
+                            "password": true,
+                            "viewpassword": true
+                        }
+                    },
+                    {
+                        "field": "confirm_new_password",
+                        "options": {
+                            "password": true,
+                            "viewpassword": true
+                        }
+                    }
                 ],
                 "Cambiar compañía": [
                     {"field": "old_company", "readonly": true},

@@ -19,7 +19,10 @@ class FlrView(BaseModel):
     def read(cls, fields, ids=[], filters=[], paginate=False, order=None, count=False):
         results = super(FlrView, cls).read(fields, ids=ids, filters=filters, paginate=paginate, order=order, count=count)
         FlrUser = Registry["FlrUser"]
+        permissions = FlrUser.get_permissions()
         for result in results:
+            perm_edit = permissions.get(result["model"])["perm_update"]
+            perm_create = permissions.get(result["model"])["perm_create"]
             if result.get("card_view_template"):
                 path = os.path.join("apps", os.environ["app"], "data", result["card_view_template"])
                 with open(path) as f:
@@ -27,17 +30,27 @@ class FlrView(BaseModel):
             new_definition = {}
             for key in result["definition"]:
                 new_definition[key] = []
-                item_list = result["definition"][key]
-                if type(item_list) == list:
-                    for item in item_list:
+                value = result["definition"][key]
+                if type(value) == list:
+                    for item in value:
                         if "groups" in item:
                             ok = FlrUser.groups_check_any(item["groups"])
                             if ok:
                                 new_definition[key].append(item)
                         else:
                             new_definition[key].append(item)
+                elif key == "create":
+                    if perm_create:
+                        new_definition[key] = value
+                elif key == "edit":
+                    if perm_edit:
+                        new_definition[key] = value
                 else:
-                    new_definition[key] = item_list
+                    new_definition[key] = value
+            if not "create" in new_definition:
+                new_definition["create"] = perm_create
+            if not "edit" in new_definition:
+                new_definition["edit"] = perm_edit
             result["definition"] = new_definition
         return results
 

@@ -1,6 +1,6 @@
 import peewee as pw
 from flask import request, has_request_context
-from flare import m, BaseModel, Registry, normalize_filters, combine_filters
+from flare import m, u, BaseModel, Registry, normalize_filters, combine_filters
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha512
 import jwt
@@ -71,7 +71,8 @@ class FlrUser(BaseModel):
         except:
             raise Exception("Invalid JWT")
 
-    def get_permissions(self, model=False):
+    @classmethod
+    def get_permissions(cls, model=False):
         superuser_id = m("flruser_admin").id
         data = {}
         if not model:
@@ -87,14 +88,19 @@ class FlrUser(BaseModel):
             })
         ACL = Registry["FlrACL"]
         global_acls = ACL.select().where(ACL.group_id.is_null())
-        for group in self.groups:
-            for rule in group.acls + global_acls:
-                if rule.model in models:
-                    model_rule = data[rule.model]
-                    model_rule["perm_read"] = model_rule["perm_read"] or rule.perm_read
-                    model_rule["perm_update"] = model_rule["perm_update"] or rule.perm_update
-                    model_rule["perm_create"] = model_rule["perm_create"] or rule.perm_create
-                    model_rule["perm_delete"] = model_rule["perm_delete"] or rule.perm_delete
+        all_acls = []
+        for group in u().groups:
+            for rule in group.acls:
+                all_acls.append(rule)
+        for rule in global_acls:
+            all_acls.append(rule)
+        for rule in all_acls:
+            if rule.model in models:
+                model_rule = data[rule.model]
+                model_rule["perm_read"] = model_rule["perm_read"] or rule.perm_read
+                model_rule["perm_update"] = model_rule["perm_update"] or rule.perm_update
+                model_rule["perm_create"] = model_rule["perm_create"] or rule.perm_create
+                model_rule["perm_delete"] = model_rule["perm_delete"] or rule.perm_delete
         return data
 
     @classmethod
@@ -102,8 +108,7 @@ class FlrUser(BaseModel):
         if Registry[model]._transient:
             return True
         if has_request_context():
-            user = cls.get_by_id(request.uid)
-            permissions = user.get_permissions(model)
+            permissions = FlrUser.get_permissions(model)
             if not permissions[model]["perm_" + operation]:
                 raise Exception("Access denied for operation %s on model %s by ACL"%(operation, model))
         else:

@@ -191,7 +191,7 @@ class BaseModel(pw.Model):
     @classmethod
     def get_batch_actions(cls):
         actions = []
-        perm = Registry["FlrUser"].get_by_id(request.uid).get_permissions(cls.__name__)
+        perm = Registry["FlrUser"].get_permissions(cls.__name__)
         if perm[cls.__name__]["perm_delete"]:
             actions.append({
                 'method': 'delete',

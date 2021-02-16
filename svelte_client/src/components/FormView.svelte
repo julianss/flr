@@ -31,6 +31,7 @@
     let isWizard = false;
     let showSaveButton = false;
     let listViewExists = false;
+    let fetchingRecord = false;
 
     activeViewStore.subscribe((event) => {
         if(event){
@@ -145,6 +146,7 @@
 
     function getRecord(){
         if(view){
+            fetchingRecord = true;
             let fields = [];
             let options = {'name_field': {}}
             for(let section of sections){
@@ -171,6 +173,7 @@
                                 record = resp[0];
                                 notDirty = JSON.parse(JSON.stringify(resp[0]));
                                 refreshModifiers();
+                                fetchingRecord = false;
                             }
                         );
                     }else{
@@ -182,6 +185,7 @@
                             (defaults) => {
                                 if(defaults.$error){
                                     fieldsDescription = null;
+                                    fetchingRecord = false;
                                 }else{
                                     for(let field in defaults){
                                         blankRecord[field] = defaults[field];
@@ -190,6 +194,7 @@
                                     notDirty = JSON.parse(JSON.stringify(blankRecord));
                                     editMode = true;
                                     refreshModifiers();
+                                    fetchingRecord = false;
                                 }
                             }
                         )
@@ -424,7 +429,7 @@
                     </ul>
                 </div>
             {/if}
-            {#if view && fieldsDescription && record}
+            {#if view && fieldsDescription && record && !fetchingRecord}
                 {#if validations.length > 0}
                     <div class="alert alert-dismissible alert-danger" role="alert">
                         <button type="button" class="close" data-dismiss="alert"

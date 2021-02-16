@@ -726,7 +726,7 @@ def recoverypassword():
         user = user.first()
         token = jwt.encode({"id":user.id}, SECRET, algorithm="HS256")
         host = os.getenv('db_host')
-        url = "http://%s:6800/resetPassword?token=%s" % (host, token.decode('ascii'))
+        url = "http://%s:%s/resetPassword?token=%s" % (host, os.environ.get("port", 6800), token.decode('ascii'))
         message = 'Haga <a href="%s"><strong>click en esta liga</strong></a>'\
                   ' para reestablecer su contraseña' % url
         fromaddrs = os.getenv('mail_user')

@@ -110,7 +110,7 @@
                 </tr>
             {/if}
         </table>
-        {#if edit && options.allowAdd}
+        {#if edit && options.add}
             <button type="button" class="btn btn-secondary new-element" on:click={newElement}>
                 + Agregar elemento
             </button>

@@ -429,7 +429,7 @@
                     </ul>
                 </div>
             {/if}
-            {#if view && fieldsDescription && record && !fetchingRecord}
+            {#if view && fieldsDescription && record && (!fetchingRecord || recordId==record.id)}
                 {#if validations.length > 0}
                     <div class="alert alert-dismissible alert-danger" role="alert">
                         <button type="button" class="close" data-dismiss="alert"

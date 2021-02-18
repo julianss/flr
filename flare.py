@@ -202,6 +202,8 @@ class BaseModel(pw.Model):
 
     @classmethod
     def get_rbac_read_filters(cls):
+        if not has_request_context():
+            return []
         if not cls._rbac.get("read"):
             return []
         user = u()
@@ -237,6 +239,32 @@ class BaseModel(pw.Model):
         else:
             final = []
         return final
+
+    @classmethod
+    def check_rbac(cls, operation, ids):
+        if not has_request_context():
+            return True
+        if not cls._rbac.get(operation):
+            return True
+        user = u()
+        user_groups = [g.id for g in user.groups]
+        ands = []
+        ors = []
+        for group_meta_id in cls._rbac[operation]:
+            spec = cls._rbac[operation][group_meta_id]
+            if type(spec) == str:
+                result = getattr(cls, spec)(ids)
+            else:
+                result = spec(ids)
+            if group_meta_id == "*":
+                ands.append(result)
+            elif m(group_meta_id).id in user_groups:
+                ors.append(result)
+        ands_ok = not ands or all(ands)
+        ors_ok = not ors or any(ors)
+        if not (ands_ok and ors_ok):
+            raise Exception("Access denied for operation %s on the selected records"%operation)
+        return True
 
     @classmethod
     def filter_query(cls, query, filters=[], paginate=False):
@@ -313,9 +341,7 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_create(cls, **fields):
-        #Check ACL and rules
-        FlrUser = Registry["FlrUser"]
-        FlrUser.check_access(cls.__name__, "create")
+        r["FlrUser"].check_access(cls.__name__, "create")
         #Attachments may be present (files that have already been created)
         #Attach them to the created model at the end
         attachments = []
@@ -377,6 +403,7 @@ class BaseModel(pw.Model):
                             getattr(created, field_name).add(to_add)
                             created.save()
         created_id = created.id
+        cls.check_rbac("create", [created_id])
         if attachments:
             Registry["FlrFile"].flr_update({
                 'model': cls.__name__,
@@ -386,11 +413,13 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_update(cls, fields, filters):
+        r["FlrUser"].check_access(cls.__name__, "update")
         #Determine which ids will be updated
         query = cls.select(cls.id)
         if filters:
             query = cls.filter_query(query, filters)
         ids = [x.id for x in query]
+        cls.check_rbac("update", ids)
         #Take out @properties, only regular fields can be updated
         #Take out also non-existing fields that could have been sent by mistake or for example
         #the "virtual" name field that is generated when a model has no name field.
@@ -485,6 +514,8 @@ class BaseModel(pw.Model):
 
     @classmethod
     def flr_delete(cls, ids):
+        r["FlrUser"].check_access(cls.__name__, "delete")
+        cls.check_rbac("delete", ids)
         for k in cls._meta.manytomany.keys():
             field = cls._meta.manytomany[k]
             for rec in cls.select().where(getattr(cls, "id").in_(ids)):

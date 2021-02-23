@@ -1,12 +1,15 @@
 from dotenv import load_dotenv
 import sys
-if len(sys.argv) > 1:
+import os
+if os.environ.get("app"):
+    load_dotenv("." + os.environ.get("app"))
+elif len(sys.argv) > 1:
     load_dotenv("." + sys.argv[1])
 else:
     load_dotenv()
 
 from registry import Registry, db
-from flare import app, scheduler, m
+from flare import scheduler, m
 import json
 import os
 import core_models
@@ -21,15 +24,7 @@ db.init(os.environ["db_name"],
     port=os.environ["db_port"])
 db_interactive_evolve = True if os.environ.get("db_interactive_evolve",'') == 'True' else False
 db.evolve(interactive=db_interactive_evolve)
-port = os.environ.get("port", 6800)
-host = os.environ.get("host", "0.0.0.0")
-flask_debug = True if os.environ.get("flask_debug",'') == 'True' else False
-print("Loaded models:")
-for model in sorted(list(Registry.keys())):
-    print(model)
-
 Meta = Registry["FlrMeta"]
-
 with db.atomic() as transaction:
 #Load records from "data" directory
     try:
@@ -121,4 +116,3 @@ Registry["FlrUser"].flr_update({'password': os.environ["admin_pass"]}, [('id','=
 print("Starting scheduler")
 scheduler.start()
 scheduler.print_jobs()
-app.run(port=port, host=host, debug=flask_debug)

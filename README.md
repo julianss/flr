@@ -11,7 +11,7 @@ It was inspired by [Odoo](https://odoo.com).
 - node 14
 
 # Database support
-Although Peewee supports more than PostgreSQL and MySQL, automatic migrations are provided by peewee-db-evolve, which supports only those two. For now, though, PostgreSQL is hardcoded into the configuration. The psycopg2 driver is included in the requirements.txt file.
+Although Peewee supports more than PostgreSQL and MySQL, automatic migrations are provided by peewee-db-evolve, which supports only those two. For now, though, PostgreSQL is hardcoded into the configuration and MySQL has not been tested. The psycopg2 driver is included in the requirements.txt file.
 
 # Installation
     cd flare
@@ -43,7 +43,7 @@ Run the app creation script with the name of the app you want. This will scaffol
 
     ./new_app <yourappname>
 
-The new app script also creates a dot file in the root folder named **.<yourappname>** (copied from the .example file). This file contains the environment variables needed to run the app. Edit it to add the database information. Finally run the server passing the app name as argument. The first time you run it, and on subsequent runs after more models are added, peewee-db-evolve will generate the sql that needs to be executed in the database to match the defined models, type yes and enter. By default the server listens on port 6800.
+The new app script also creates a dot file named the same as the app (copied from the .example file). This file contains the environment variables needed to run the app. Edit it to add the database information. Finally, run the server passing the app name as argument. The first time you run it, and on subsequent runs after more models are added or models are changed, peewee-db-evolve will generate the sql that needs to be executed in the database to match the defined models. If evolve is running on interactive mode type yes and enter. By default the server listens on port 6800.
 
     ./run.sh <yourappname>
     

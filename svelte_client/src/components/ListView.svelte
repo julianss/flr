@@ -223,8 +223,8 @@ import { get } from 'svelte/store';
         <div class="col-md top-left-controls">
             {#if selectedRecords && getSelectedIds().length > 0 && batchActions.length > 0}
                 <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="actionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Acciones
+                    <button class="btn btn-secondary" type="button" id="actionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <img src="icons/three-dots.svg" style="filter:invert(1)" title="Actions" alt="Actions">
                     </button>
                     <div class="dropdown-menu" aria-labelledby="actionsDropdown">
                         {#each batchActions as action}

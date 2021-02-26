@@ -8,12 +8,12 @@ from playhouse.shortcuts import model_to_dict
 import traceback
 import operator as __operator__
 import os
-from openpyxl import Workbook
-from openpyxl.writer.excel import save_virtual_workbook
+import xlsxwriter
 import base64
 from functools import wraps
 from datetime import datetime
 import jwt
+import tempfile
 
 SECRET = os.environ.get("jwt_secret")
 
@@ -39,6 +39,20 @@ else:
 
 def prettifyName(field_name):
     return field_name.capitalize().replace("_", " ")
+
+def get_field_verbose_name(k, obj):
+    verbose = False
+    htext = False
+    doc = False
+    pretty = prettifyName(k)
+    if obj is not None:
+        if hasattr(obj, "verbose_name"):
+            verbose = obj.verbose_name
+        if hasattr(obj, "help_text"):
+            htext = obj.help_text
+        if hasattr(obj, "__doc__"):
+            doc = obj.__doc__
+    return verbose or htext or doc or pretty
 
 def get_current_user():
     if has_request_context:
@@ -98,19 +112,27 @@ class BaseModel(pw.Model):
             return None
 
     @classmethod
-    def get_fields(cls):
-        fields = ["id"]
+    def get_fields(cls, with_verbose_name=False):
+        fields = []
+        def get_what_to_append(k, f):
+            if not with_verbose_name:
+                return k
+            else:
+                return {
+                    'verbose_name': get_field_verbose_name(k, f),
+                    'name': k
+                }
         for k in cls._meta.fields.keys():
-            fields.append(k)
+            fields.append(get_what_to_append(k, cls._meta.fields.get(k)))
         for k in cls._meta.manytomany.keys():
-            fields.append(k)
+            fields.append(get_what_to_append(k, cls._meta.manytomany.get(k)))
         for k in dir(cls):
             tattr = type(getattr(cls, k))
             if tattr == property:
                 if k not in ("dirty_fields", "_pk"):
-                    fields.append(k)
+                    fields.append(get_what_to_append(k, getattr(cls, k)))
             if tattr == pw.BackrefAccessor:
-                fields.append(k)
+                fields.append(get_what_to_append(k, None))
         return fields
 
     @classmethod
@@ -642,30 +664,51 @@ class BaseModel(pw.Model):
 
     @classmethod
     def export(cls, fields, filters=[], paginate=False, order=None):
-        results = cls.read(fields, filters, paginate, order)
-        wb = Workbook()
-        ws = wb.active
-        row = 1
-        for col,field in enumerate(fields,1):
+        fields_desc = cls.get_fields_desc(fields)
+        results = cls.read(fields, filters=filters, paginate=paginate, order=order)
+        fd, fname = tempfile.mkstemp()
+        os.close(fd)
+        wb = xlsxwriter.Workbook(fname)
+        ws = wb.add_worksheet()
+        date_format = wb.add_format({'num_format': "yyyy-mm-dd"})
+        datetime_format = wb.add_format({'num_format': "yyyy-mm-dd hh:mm AM/PM"})
+        row = 0
+        for col, field in enumerate(fields):
             f = getattr(cls, field)
-            if field == 'id':
-                label = "ID"
-            elif hasattr(f, "help_text"):
-                label = f.help_text
-            else:
-                label = f.__doc__ #get field name from property docstring
-            ws.cell(row=row, column=col, value=label)
+            label = get_field_verbose_name(field, f)
+            ws.write(row, col, label)
         row += 1
         for rec in results:
-            for col,field in enumerate(fields,1):
+            for col, field in enumerate(fields):
+                fmt = False
                 val = rec[field]
-                if type(val) == dict:
+                if fields_desc[field]["type"] == "foreignkey":
                     val = val.get("name", val["id"])
-                ws.cell(row=row, column=col, value=val)
+                elif fields_desc[field]["type"] == "select":
+                    for value, label in fields_desc[field]["options"]:
+                        if value == val:
+                            val = label
+                            break
+                elif fields_desc[field]["type"] == "date":
+                    fmt = date_format
+                elif fields_desc[field]["type"] == "datetime":
+                    fmt = datetime_format
+                elif type(val) == list:
+                    val = "[List]"
+                if fmt:
+                    ws.write(row, col, val, fmt)
+                else:
+                    ws.write(row, col, val)
             row += 1
-        datas = save_virtual_workbook(wb)
+        wb.close()
+        payload = {
+            'path': fname,
+            'filename': cls.__name__ + ".xlsx",
+            'mime_type': "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        }
+        encoded = jwt.encode(payload, SECRET, algorithm='HS256')
         return {
-            'datas': base64.b64encode(datas).decode("ascii")
+            'token': encoded.decode("ascii"),
         }
 
 @cron(minute="*/30")

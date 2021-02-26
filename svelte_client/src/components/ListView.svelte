@@ -13,9 +13,11 @@
     import Field from './Field.svelte';
     import ejs from './../services/ejs.min.js';
     import { getSrcWithToken } from './../services/files.js';
-import { get } from 'svelte/store';
+    import ExportView from './ExportView.svelte';
 
     let view = null;
+    let model;
+    let fields;
     let visible = false;
     let fetchedRecords = [];
     let fieldsDescription = null;
@@ -55,6 +57,7 @@ import { get } from 'svelte/store';
             let views = event.views;
             if(views != null && views["list"]){
                 view = views["list"];
+                model = view.model;
                 cardViewTemplate = view.card_view_template;
                 cardViewEnabled = false;
                 if(cardViewTemplate && view.card_view_first){
@@ -82,16 +85,17 @@ import { get } from 'svelte/store';
 	async function fetchRecords(){
         fetching = true;
         if(view){
-            let fields = [];
+            let fields_ = [];
             selectedRecords = {};
             for(let item of view.definition.structure){
-                fields.push(item.field);
+                fields_.push(item.field);
                 if(item.related_fields){
                     for(let rf of item.related_fields){
-                        fields.push(item.field + "." + rf.field);
+                        fields_.push(item.field + "." + rf.field);
                     }
                 }
             }
+            fields = fields_;
             if(!fieldsDescription){
                 fieldsDescription = await call(view.model, "get_fields_desc", [fields]);
             }
@@ -206,9 +210,38 @@ import { get } from 'svelte/store';
             }
         )
     }
+
+    function openExportView() {
+        document.getElementById("button-modal-export").click();
+    }
+    
 </script>
 
 <div hidden={!visible}>
+    <button id="button-modal-export" style="display:none" type="button" data-toggle="modal"
+        data-target="#export-view-modal"></button>
+    <div id="export-view-modal" class="modal fade" tabindex="-1" role="dialog"
+        aria-labelledby="exportView" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Export/Import</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ExportView
+                        model={model}
+                        selectedFields={fields}
+                        filters={filters}
+                        page={page}
+                        pageSize={pageSize}
+                        selectedRecords={selectedRecords}/>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="list_view_toolbar" class="row">
         <div class="col-md">
         {#if view && view.definition.create !== false}
@@ -242,6 +275,9 @@ import { get } from 'svelte/store';
                     </div>
                 </div>
             {/if}
+            <button on:click={openExportView} class="btn btn-secondary" type="button">
+                <img src="icons/save.svg" style="filter:invert(1)" title="Export/Import" alt="Export/Import"/>
+            </button>
             {#if view && cardViewTemplate && !cardViewEnabled}
                 <button type="button" on:click={()=>{cardViewEnabled=true}}
                     class="btn btn-secondary">

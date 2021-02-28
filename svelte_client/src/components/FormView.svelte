@@ -27,7 +27,10 @@
     let readonlys = {};
     let requireds = {}
     let reports = [];
-    let validations = [];
+    let validations = {
+        'required': [],
+        'others': []
+    };
     let isWizard = false;
     let showSaveButton = false;
     let listViewExists = false;
@@ -38,7 +41,10 @@
             let type = event.type;
             visible = type === "form";
             editMode = false;
-            validations = [];
+            validations = {
+                'required': [],
+                'others': []
+            };
             refreshModifiers();
         }
     });
@@ -161,6 +167,12 @@
                                 fields.push(item.field + "." + rf.field);
                             }
                         }
+                        if (item.options && item.options.minValError){
+                            item.options.minValError = false;
+                        }
+                        if (item.options && item.options.maxValError){
+                            item.options.maxValError = false;
+                        }
                     }
                 }
             }
@@ -216,25 +228,50 @@
         return dirtyPart;
     }
 
-    function validate(item, value){
+    function validate(item, value, section){
         if ('field' in item){
             let fieldDesc = fieldsDescription[item.field];
             if(fieldDesc){
                 if (fieldDesc.required === true && !value){
-                    validations.push(item)
+                    validations['required'].push(item)
+                }
+            }
+            if (item.options && item.options.hasOwnProperty('minVal') && value < item.options.minVal){
+                if (validations['others'].indexOf(item)===-1){
+                  validations['others'].push(item);
+                }
+                for (var i in view.definition[section]){
+                    if (view.definition[section][i] === item){
+                        view.definition[section][i].options.minValError = true;
+                    }
+                }
+            }else if (item.options && item.options.hasOwnProperty('maxVal') && value > item.options.maxVal){
+                if (validations['others'].indexOf(item)===-1){
+                    validations['others'].push(item);
+                }
+                for (var i in view.definition[section]){
+                    if (view.definition[section][i] === item){
+                        view.definition[section][i].options.maxValError = true;
+                    }
                 }
             }
         }
     }
     function resetValidations(){
-        validations = []
+        validations = {
+            'required': [],
+            'others': []
+        }
     }
 
     function save(){
         let method;
         let args;
         let kwargs;
-        validations = [];
+        validations = {
+            'required': [],
+            'others': []
+        };
         if(!record.id){
             record.id = undefined;
             method = "create";
@@ -249,11 +286,15 @@
         for(let section of sections){
             for(let item of view.definition[section]){
                 if(item.field){
-                    validate(item, record[item.field])
+                    validate(item, record[item.field], section)
                 }
             }
         }
-        if (validations.length === 0){
+        var i = 0;
+        for (var key in validations){
+            i = i + validations[key].length
+        }
+        if (i === 0){
             var promise = call(view.model, method, args, kwargs)
             promise.then(
                 (resp) => {
@@ -430,14 +471,22 @@
                 </div>
             {/if}
             {#if view && fieldsDescription && record && (!fetchingRecord || recordId==record.id)}
-                {#if validations.length > 0}
+                {#if validations['required'].length > 0 || validations['others'].length > 0}
                     <div class="alert alert-dismissible alert-danger" role="alert">
                         <button type="button" class="close" data-dismiss="alert"
                             on:click={resetValidations}>×</button>
-                        <strong>Required fields</strong><br>
-                        {#each validations as item}
-                            {item.label || fieldsDescription[item.field].label}<br>
-                        {/each}
+                        {#if validations['required'].length > 0}
+                            <strong>Required fields</strong><br>
+                            {#each validations['required'] as item}
+                                {item.label || fieldsDescription[item.field].label}<br>
+                            {/each}
+                        {/if}
+                        {#if validations['others'].length > 0}
+                            <strong>Fields has errors</strong><br>
+                            {#each validations['others'] as item}
+                                {item.label || fieldsDescription[item.field].label}<br>
+                            {/each}
+                        {/if}
                     </div>
                 {/if}
                 {#each sections as section}

@@ -56,26 +56,35 @@
                 "General": [
                     {"field": "name"},
                     {"field": "email"},
-                    {"field": "password", "password": true},
+                    {
+                        "field": "password",
+                        "options": {
+                            "password": true
+                        }
+                    },
                     {"field": "company_id"},
                     {"field": "active"}
                 ],
                 "Roles": [
                     {
-                        "add": true,
-                        "remove": true,
+                        "label": "Roles",
                         "field": "groups",
-                        "related_fields": [{"field": "name"}],
-                        "label": "Roles"
+                        "options": {
+                            "add": true,
+                            "remove": true,
+                            "related_fields": [{"field": "name"}]
+                        }
                     }
                 ],
                 "Allowed companies": [
                     {
-                        "add": true,
-                        "remove": true,
+                        "label": "Allowed companies",
                         "field": "allowed_companies",
-                        "related_fields": [{"field": "name"}],
-                        "label": "Allowed companies"
+                        "options": {
+                            "add": true,
+                            "remove": true,
+                            "related_fields": [{"field": "name"}]
+                        }
                     }
                 ]
             },

@@ -82,6 +82,7 @@
                 edit={edit}
                 on:change={changed}
                 readonly={readonly}
+                options={options}
             />
         {:else if type === "float"}
             <FloatField
@@ -90,6 +91,7 @@
                 edit={edit}
                 on:change={changed}
                 readonly={readonly}
+                options={options}
             />
         {:else if type === "foreignkey" }
             <ForeignKeyField

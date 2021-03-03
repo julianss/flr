@@ -5,6 +5,7 @@
     export let label = "";
     export let value;
     export let edit;
+    export let readonly;
 
     function changed(){
         dispatch("change", {});
@@ -13,8 +14,8 @@
 
 <div class="form-group">
     <label>{label}</label>
-    {#if edit}
-        <input class="form-control" type="date" bind:value={value} on:change={changed}/>
+    {#if edit & !readonly}
+        <input class="form-control" type="datetime-local" bind:value={value} on:change={changed}/>
     {:else}
         <p>{renderDateTime(value)}</p>
     {/if}

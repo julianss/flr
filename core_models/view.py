@@ -42,9 +42,13 @@ class FlrView(BaseModel):
                 elif key == "create":
                     if perm_create:
                         new_definition[key] = value
+                    else:
+                        del new_definition[key]
                 elif key == "edit":
                     if perm_edit:
                         new_definition[key] = value
+                    else:
+                        del new_definition[key]
                 else:
                     new_definition[key] = value
             if not "create" in new_definition:

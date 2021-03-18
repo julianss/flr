@@ -114,5 +114,5 @@ superuser = m("flruser_admin")
 Registry["FlrUser"].flr_update({'password': os.environ["admin_pass"]}, [('id','=',superuser.id)])
 
 print("Starting scheduler")
-scheduler.start()
 scheduler.print_jobs()
+scheduler.start()

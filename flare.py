@@ -1,7 +1,7 @@
 from flask import Flask, request, has_request_context, jsonify, send_from_directory, redirect, make_response, Response
 from registry import Registry, ReportHelpers, db
 from utils import normalize_filters, combine_filters, CustomJSONEncoder, add_pages, sendmail
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
 import peeweedbevolve
 import peewee as pw
 from playhouse.shortcuts import model_to_dict
@@ -20,7 +20,7 @@ SECRET = os.environ.get("jwt_secret")
 app = Flask(__name__)
 app.json_encoder = CustomJSONEncoder
 
-scheduler = BackgroundScheduler()
+scheduler = BlockingScheduler()
 
 def cron(year=None, month=None, day=None, day_of_week=None, hour=None, minute=None, second=None):
     def inner(func):

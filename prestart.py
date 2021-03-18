@@ -95,7 +95,7 @@ with db.atomic() as transaction:
                             rec_id=created_id,
                             meta_id=meta_id
                         )
-                    else:
+                    elif not record.get("noupdate"):
                         Model.flr_update(data, [('id','=',existing.rec_id)])
         #Delete records that are in the meta table but are not present in the files (were deleted from the file)
         for meta_id in all_meta_ids:

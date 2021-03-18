@@ -2,6 +2,7 @@
     {
         "model": "FlrUser",
         "meta_id": "flruser_admin",
+        "noupdate": true,
         "data": {
             "name": "Superuser",
             "email": "admin",

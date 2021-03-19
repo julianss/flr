@@ -16,8 +16,9 @@ RUN apt-get update && \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
-#Use the prestart.sh file of the meinheld-gunicorn-flask image to run the migrations and data imports
-RUN echo "python3 prestart.py" > /app/prestart.sh
+#Use the prestart.sh file of the meinheld-gunicorn-flask image to run the migrations, data imports and the scheduler
+RUN echo "python3 load_db.py" > /app/prestart.sh
+RUN echo "python3 sched.py & echo $! > scheduler.pid" >> /app/prestart.sh
 
 #Copy neccessry files
 COPY __init__.py /app
@@ -26,7 +27,8 @@ COPY registry.py /app
 COPY utils.py /app
 COPY flare.py /app
 COPY main.py /app
-COPY prestart.py /app
+COPY load_db.py /app
+COPY sched.py /app
 COPY ./data/ /app/data
 COPY ./core_models/ /app/core_models
 RUN mkdir /app/svelte_client

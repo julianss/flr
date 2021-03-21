@@ -89,7 +89,7 @@
                                     relatedFieldsDesc={null}
                                     nolabel={true}
                                     on:change={changed}
-                                    options={options || {}}
+                                    options={field.options || {}}
                                 />
                             </td>
                         {/each}

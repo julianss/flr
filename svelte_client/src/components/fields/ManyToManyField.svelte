@@ -56,7 +56,7 @@
 <div class="form-group">
     <label>{label}</label>
     {#if viewtype === 'form'}
-        {#if edit && options && options.add && !readonly}
+        {#if edit && (options||{}).add!==false && !readonly}
             <ForeignKeyField
                 label=""
                 bind:value={valueFK}
@@ -65,7 +65,6 @@
                 filters={filters}
                 on:change={add}
                 placeholder="Agregar elemento"
-                options={options || {}}
             />
         {/if}
         <table class="table table-sm">

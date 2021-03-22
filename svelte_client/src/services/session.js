@@ -15,10 +15,9 @@ function parseJWT(token){
 };
 
 export function getUserName(){
-    let uid = getUid();
-    return call("FlrUser", "read", [["name"]], {filters:[["id","=",uid]]}).then(
+    return call("FlrUser", "get_user_name_and_company").then(
         (resp) => {
-            return resp[0]["name"];
+            return resp
         }
     )
 }

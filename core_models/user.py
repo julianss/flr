@@ -130,6 +130,17 @@ class FlrUser(BaseModel):
                 return True
         return False
 
+    @classmethod
+    def get_user_name_and_company(cls):
+        user = cls.get_by_id(request.uid)
+        result = [user.name]
+        for g in user.groups:
+            if g.name == 'Multicompany':
+                if user.company_id:
+                    result.append(user.company_id.name)
+                    break
+        return ' - '.join(result)
+
 class FlrGroup(BaseModel):
     name = pw.CharField(help_text="Nombre")
 

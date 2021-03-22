@@ -1,28 +1,27 @@
 from dotenv import load_dotenv
 import sys
 import os
-if os.environ.get("app"):
-    load_dotenv("." + os.environ.get("app"))
+if os.environ.get("flr_app"):
+    load_dotenv("." + os.environ.get("flr_app"))
 elif len(sys.argv) > 1:
     load_dotenv("." + sys.argv[1])
 else:
     load_dotenv()
-
 from registry import Registry, db
 from flare import scheduler, m
 import json
 import os
 import core_models
-__import__("apps." + os.environ["app"])
-os.environ["app_path"] = os.path.abspath(os.path.join("apps", os.environ["app"]))
-print("App path", os.environ["app_path"])
+__import__("apps." + os.environ["flr_app"])
+os.environ["flr_app_path"] = os.path.abspath(os.path.join("apps", os.environ["flr_app"]))
+print("App path", os.environ["flr_app_path"])
 
-db.init(os.environ["db_name"],
-    user=os.environ["db_user"],
-    password=os.environ["db_pass"],
-    host=os.environ["db_host"],
-    port=os.environ["db_port"])
-db_interactive_evolve = True if os.environ.get("db_interactive_evolve",'') == 'True' else False
+db.init(os.environ["flr_db_name"],
+    user=os.environ["flr_db_user"],
+    password=os.environ["flr_db_pass"],
+    host=os.environ["flr_db_host"],
+    port=os.environ["flr_db_port"])
+db_interactive_evolve = True if os.environ.get("flr_db_interactive_evolve",'') == 'True' else False
 db.evolve(interactive=db_interactive_evolve)
 Meta = Registry["FlrMeta"]
 with db.atomic() as transaction:
@@ -35,7 +34,7 @@ with db.atomic() as transaction:
         files_initial = []
         files_custom  = []
         initial_data = "data"
-        custom_data = os.path.join("apps", os.environ["app"], "data")
+        custom_data = os.path.join("apps", os.environ["flr_app"], "data")
         for files, data_directory in ((files_initial,initial_data), (files_custom,custom_data)):
             if os.path.exists(data_directory):
                 for fname in os.listdir(data_directory):

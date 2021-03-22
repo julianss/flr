@@ -6,7 +6,7 @@ from passlib.hash import pbkdf2_sha512
 import jwt
 import os
 
-SECRET = os.environ.get("jwt_secret")
+SECRET = os.environ.get("flr_jwt_secret")
 
 def encrypt_password(fields):
     if 'password' in fields:
@@ -26,7 +26,7 @@ class FlrUser(BaseModel):
     @staticmethod
     def auth(login, password):
         crypt_password = CryptContext(schemes=["pbkdf2_sha512"]).encrypt(password)
-        auth_field_name = os.environ.get("auth_field", "login")
+        auth_field_name = os.environ.get("flr_auth_field", "login")
         if auth_field_name == "login":
             auth_field = FlrUser.login
         elif auth_field_name == "email":

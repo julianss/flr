@@ -9,7 +9,7 @@ from PyPDF2 import PdfFileReader, PdfFileWriter
 from io import BytesIO
 import jwt
 
-SECRET = os.environ.get("jwt_secret")
+SECRET = os.environ.get("flr_jwt_secret")
 
 class FlrReport(BaseModel):
     name = pw.CharField(verbose_name="Name", unique=True)

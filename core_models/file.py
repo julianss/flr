@@ -6,8 +6,8 @@ import os
 import traceback
 import base64
 
-FILESTORE_PATH = os.environ.get("filestore_path", "./filestore")
-APP = os.environ.get("app")
+FILESTORE_PATH = os.environ.get("flr_filestore_path", "./filestore")
+APP = os.environ.get("flr_app")
 
 
 class AttachmentsMixin:

@@ -150,7 +150,8 @@ class BaseModel(pw.Model):
             desc = {
                 'label': field.verbose_name or field.help_text or prettifyName(k),
                 'type': field.__class__.__name__.replace("Field", "").lower(),
-                'required': not field.null
+                'required': not field.null,
+                'default': field.default
             }
             if desc["type"] == "foreignkey":
                 desc["model"] = field.rel_model.__name__

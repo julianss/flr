@@ -186,7 +186,7 @@
                     }else{
                         let blankRecord = {id: null};
                         for(let field in fieldsDescription){
-                            blankRecord[field] = null;
+                            blankRecord[field] = fieldsDescription[field].default || null;
                         }
                         call(view.model, "get_default").then(
                             (defaults) => {

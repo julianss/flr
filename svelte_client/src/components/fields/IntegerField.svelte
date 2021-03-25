@@ -42,6 +42,6 @@
             </div>
         {/if}
     {:else}
-        <p>{value || ''}</p>
+        <p>{value}</p>
     {/if}
 </div>

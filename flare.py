@@ -795,7 +795,7 @@ def recoverypassword():
         if not user:
             return make_response(jsonify({
                 'error': {
-                    'message': 'email'
+                    'message': 'No es un mail válido'
                 }
             }), 500)
         user = user.first()
@@ -812,10 +812,11 @@ def recoverypassword():
     except Exception as ex:
         return make_response(jsonify({
             'error': {
-                'message': str(ex),
-                'data': traceback.format_exc()
+                'message': 'Error al enviar el mail'
             }
         }), 500)
+
+
 
 @app.route("/app_name", methods=["GET"])
 def get_app_name():

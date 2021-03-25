@@ -49,6 +49,19 @@
             "model": "FlrUser",
             "view_type": "form",
             "definition": {
+                "buttons": [
+                    {
+                        "text": "Cambiar password",
+                        "action": "openViews",
+                        "options": {
+                            "model": "FlrUserChangePassword",
+                            "view_types": ["form"],
+                            "globals": {"user_id": "this.id"},
+                            "saveButton": true,
+                            "class": "btn-primary"
+                        }
+                    }
+                ],
                 "structure": [
                     {"section": "General"},
                     {"section": "Roles"},
@@ -58,13 +71,14 @@
                     {"field": "name"},
                     {"field": "email"},
                     {
-                        "field": "password",
+                        "field": "password", "readonly": "this.password",
                         "options": {
                             "password": true
                         }
                     },
                     {"field": "company_id"},
-                    {"field": "active"}
+                    {"field": "active"},
+                    {"field": "email_notifications"}
                 ],
                 "Roles": [
                     {
@@ -189,6 +203,21 @@
             },
             "menu_id_META_ID": "menu_flracl",
             "sequence": 2
+        }
+    },
+    {
+        "model": "FlrView",
+        "meta_id": "flruser_change_password_form_view",
+        "data": {
+            "name": "Change password",
+            "model": "FlrUserChangePassword",
+            "view_type": "form",
+            "definition": {
+                "structure": [
+                    {"field": "user_id", "readonly": true},
+                    {"field": "password", "options": {"width": "20%"}}
+                ]
+            }
         }
     }
 ]

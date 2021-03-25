@@ -54,6 +54,7 @@
             filters = [];
             page = 1;
             fieldsDescription = null;
+            selectAllChecked = false;
             let views = event.views;
             if(views != null && views["list"]){
                 view = views["list"];

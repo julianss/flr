@@ -168,12 +168,6 @@
                                 fields.push(item.field + "." + rf.field);
                             }
                         }
-                        if (item.options && item.options.minValError){
-                            item.options.minValError = false;
-                        }
-                        if (item.options && item.options.maxValError){
-                            item.options.maxValError = false;
-                        }
                     }
                 }
             }

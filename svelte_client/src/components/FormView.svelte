@@ -35,6 +35,7 @@
     let showSaveButton = false;
     let listViewExists = false;
     let fetchingRecord = false;
+    let disabled = false;
 
     activeViewStore.subscribe((event) => {
         if(event){
@@ -264,7 +265,10 @@
         }
     }
 
-    function save(){
+    function save(event){
+        if (event && !(event.detail === 1)){
+            return
+        }
         let method;
         let args;
         let kwargs;
@@ -282,7 +286,6 @@
             args = [getRecordDirtyPart()];
             kwargs = {filters: [["id","=",record.id]]}
         }
-
         for(let section of sections){
             for(let item of view.definition[section]){
                 if(item.field){
@@ -309,6 +312,15 @@
                 }
             )
             return promise;
+        }
+    }
+    function wrapFunctionSave(event){
+        disabled = true;
+        try {
+            save(event)
+        }
+        finally {
+            disabled = false;
         }
     }
 
@@ -397,7 +409,7 @@
                 {/if}
             {/if}
             {#if editMode && (!isWizard || showSaveButton)}
-                <button type="button" class="btn btn-primary mb-2" on:click={save}>
+                <button type="button" class="btn btn-primary mb-2" on:click={wrapFunctionSave} disabled="{disabled}">
                     <img src="icons/check2.svg" style="filter:invert(1)" title="Guardar" alt="Guardar">
                 </button>
                 {#if !isWizard}

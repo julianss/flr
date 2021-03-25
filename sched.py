@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 import sys
 import os
-if os.environ.get("app"):
-    load_dotenv("." + os.environ.get("app"))
+if os.environ.get("flr_app"):
+    load_dotenv("." + os.environ.get("flr_app"))
 elif len(sys.argv) > 1:
     load_dotenv("." + sys.argv[1])
 else:
@@ -12,14 +12,14 @@ from registry import db
 from flare import scheduler
 import os
 import core_models
-__import__("apps." + os.environ["app"])
-os.environ["app_path"] = os.path.abspath(os.path.join("apps", os.environ["app"]))
+__import__("apps." + os.environ["flr_app"])
+os.environ["flr_app_path"] = os.path.abspath(os.path.join("apps", os.environ["flr_app"]))
 
-db.init(os.environ["db_name"],
-    user=os.environ["db_user"],
-    password=os.environ["db_pass"],
-    host=os.environ["db_host"],
-    port=os.environ["db_port"])
+db.init(os.environ["flr_db_name"],
+    user=os.environ["flr_db_user"],
+    password=os.environ["flr_db_pass"],
+    host=os.environ["flr_db_host"],
+    port=os.environ["flr_db_port"])
 
 print("Starting scheduler")
 scheduler.print_jobs()

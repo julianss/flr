@@ -110,4 +110,4 @@ with db.atomic() as transaction:
 
 #Set superuser password
 superuser = m("flruser_admin")
-Registry["FlrUser"].flr_update({'password': os.environ["admin_pass"]}, [('id','=',superuser.id)])
+Registry["FlrUser"].flr_update({'password': os.environ["flr_admin_pass"]}, [('id','=',superuser.id)])

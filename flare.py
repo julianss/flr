@@ -816,7 +816,24 @@ def recoverypassword():
             }
         }), 500)
 
-
+@app.route("/send_error", methods=["POST"])
+def send_error():
+    params = request.get_json()
+    try:
+        message = 'Error enviado mediante el button del alert:\n'\
+                  '%s' % params.get('data', '')
+        fromaddrs = os.getenv('flr_mail_user')
+        sendmail(fromaddrs, fromaddrs, 'Error report', message)
+        return make_response(jsonify({
+            'result': True
+        }))
+    except Exception as ex:
+        return make_response(jsonify({
+            'error': {
+                'message': str(ex),
+                'data': traceback.format_exc(),
+            }
+        }), 500)
 
 @app.route("/app_name", methods=["GET"])
 def get_app_name():

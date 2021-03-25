@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 import { get_store_value } from 'svelte/internal';
 import { globalsStore } from './writables';
+import Swal from 'sweetalert2';
 
 export const JWT_NOT_YET_LOADED = "jwt not yet loaded";
 export const jwt = writable(JWT_NOT_YET_LOADED);
@@ -66,6 +67,62 @@ export function auth(login, password){
     )
 }
 
+function SweetAlert(resp){
+    Swal.fire({
+        title: 'Error!',
+        text: resp.error.data  || 'An error has occurred',
+        buttonsStyling: false,
+        customClass: {
+            confirmButton: "btn btn-danger"
+        },
+        confirmButtonText: 'Send to administrator',
+        showCloseButton: true,
+      }).then((result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+            if (sendError(resp.error)){
+                Swal.fire({
+                    icon: "success",
+                    text: 'Error was send to administrator',
+                    timer: 4000,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                }).then(() => {
+                    history.back()
+                })
+            }else{
+                history.back()
+            }
+        }else{
+            history.back()
+        }
+    })
+
+}
+
+function sendError(error){
+    loading.set(true);
+    return fetch('/send_error', {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({
+            data: error.data
+        })
+    })
+    .then(function(resp) {
+        if(resp.error){
+            SweetAlert(resp);
+        }else{
+            return resp.json();
+        }
+    }).catch((data) => {
+        loading.set(false);
+    })
+}
+
 export function call(model, method, args, kwargs){
     loading.set(true);
     return fetch("/call", {
@@ -87,7 +144,7 @@ export function call(model, method, args, kwargs){
         loading.set(false);
         var resp = await _resp.json();
         if(resp.error){
-            alert(resp.error.message);
+            SweetAlert(resp)
             resp.$error = resp.error;
             return resp;
         }else{
@@ -96,7 +153,6 @@ export function call(model, method, args, kwargs){
     })
     .catch((data) => {
         loading.set(false);
-        alert("Error");
     })
 }
 

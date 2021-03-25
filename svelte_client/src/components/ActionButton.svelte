@@ -11,16 +11,30 @@
     export let action;
     export let model;
     export let record;
+    let disabled = false;
 
     let { save } = getContext("formViewFunctions");
 
-    function onClick() {
+    function onClick(event) {
+        if (event && !(event.detail === 1)){
+            return
+        }
         if(record.id){
             doAction(record.id);
         }else{
             save().then((resp) => {
                 doAction(resp);
             })
+        }
+    }
+
+    function wrapFunctionOnClick(event){
+        disabled = true;
+        try {
+            onClick(event)
+        }
+        finally {
+            disabled = false;
         }
     }
 
@@ -65,6 +79,6 @@
     }
 </script>
 
-<button type="button" class="btn {options.class || 'btn-secondary'}" on:click={onClick}>
+<button type="button" class="btn {options.class || 'btn-secondary'}" on:click={wrapFunctionOnClick} disabled="{disabled}">
     {text}
 </button>

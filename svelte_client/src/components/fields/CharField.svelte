@@ -31,8 +31,8 @@
 
 <div class="form-group">
     <label>{label}</label>
-    <div class="input-group">
-        {#if edit && options && options.password && !readonly}
+    {#if edit && options && options.password && !readonly}
+        <div class="input-group">
             <input
                 class="form-control"
                 type="password" bind:value={value} on:change={changed} id="input-{uniqueId}"/>
@@ -47,20 +47,20 @@
                     </button>
                 </div>
             {/if}
-        {:else if edit && !(options && options.password) && !readonly}
-            <input class="form-control" type="text" bind:value={value} on:change={changed}/>
-        {:else if options && options.password}
-            <p>*****</p>
-        {:else if options && options.html}
-            {@html (value || '')}
-        {:else if options && options.url}
-            {#if options.url === true}
-                <a target="blank" href={value}>{value}</a>
-            {:else}
-                <a target="blank" href={value}>{options.url}</a>
-            {/if}
+        </div>
+    {:else if edit && !(options && options.password) && !readonly}
+        <input class="form-control" type="text" bind:value={value} on:change={changed}/>
+    {:else if options && options.password}
+        <p>*****</p>
+    {:else if options && options.html}
+        {@html (value || '')}
+    {:else if options && options.url}
+        {#if options.url === true}
+            <a target="blank" href={value}>{value}</a>
         {:else}
-            <p>{value || ''}</p>
+            <a target="blank" href={value}>{options.url}</a>
         {/if}
-    </div>
+    {:else}
+        <p>{value || ''}</p>
+    {/if}
 </div>

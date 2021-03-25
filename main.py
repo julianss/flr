@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 import sys
 import os
-if os.environ.get("app"):
-    load_dotenv("." + os.environ.get("app"))
+if os.environ.get("flr_app"):
+    load_dotenv("." + os.environ.get("flr_app"))
 elif len(sys.argv) > 1:
     load_dotenv("." + sys.argv[1])
 else:
@@ -11,16 +11,16 @@ from flare import app
 from registry import db
 
 import core_models
-__import__("apps." + os.environ["app"])
+__import__("apps." + os.environ["flr_app"])
 
-db.init(os.environ["db_name"],
-    user=os.environ["db_user"],
-    password=os.environ["db_pass"],
-    host=os.environ["db_host"],
-    port=os.environ["db_port"])
-port = os.environ.get("port", 6800)
-host = os.environ.get("host", "0.0.0.0")
-flask_debug = True if os.environ.get("flask_debug",'') == 'True' else False
+db.init(os.environ["flr_db_name"],
+    user=os.environ["flr_db_user"],
+    password=os.environ["flr_db_pass"],
+    host=os.environ["flr_db_host"],
+    port=os.environ["flr_db_port"])
+port = os.environ.get("flr_port", 6800)
+host = os.environ.get("flr_host", "0.0.0.0")
+flask_debug = True if os.environ.get("flr_flask_debug",'') == 'True' else False
 if __name__ == "__main__":
     app.run(port=port, host=host, debug=flask_debug)
     if os.path.exists("scheduler.pid"):

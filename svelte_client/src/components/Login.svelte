@@ -16,7 +16,10 @@
             resetpassword = true;
         }
     }
-    function authenticate(){
+    function authenticate(event){
+        if (!(event.key === 'Enter' || event.type==='click')){
+           return
+        }
         auth(login, password).then(
             (resp) => {
                 if(resp.error){
@@ -36,9 +39,7 @@
                 send_message = true;
                 incorrect = false;
             }else{
-                if (resp.error.message === 'email'){
-                    incorrect = 'No es un email válido';
-                }
+                incorrect = resp.error.message;
             }
         })
     }
@@ -108,7 +109,9 @@
                         <div class="form-group">
                             <label>Contraseña</label>
                             <div class="input-group">
-                                <input class="form-control border-right-0" id="password" type="password" bind:value={password}>
+                                <input class="form-control border-right-0" id="password" type="password"
+                                    bind:value={password}
+                                    on:keyup={authenticate}>
                                 <div class="input-group-prepend border-right-0">
                                     <button tabindex="-1" type="button" class="btn border border-left-0 pb-1"
                                         on:click={() => setInputType("password", "passwordimg")}>

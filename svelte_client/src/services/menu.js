@@ -1,4 +1,4 @@
-import { call } from './service.js'
+import { call, appTitle } from './service.js'
 import { publish } from './writables.js';
 
 export function getMenus() {
@@ -28,9 +28,11 @@ export function openViews(views, options={}){
       loadedViews[view.view_type] = view;
       if (view.menu_id){
         loadedViews[view.view_type]['menu_view_name'] = view.menu_id.name;
+        document.title =  appTitle.concat(' - ', view.menu_id.name);
       }
       else {
         loadedViews[view.view_type]['menu_view_name'] = view.name;
+        document.title = appTitle.concat(' - ', view.name);
       }
       if(firstType === null && view.view_type != "search"){
         firstType = view.view_type;

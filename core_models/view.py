@@ -24,7 +24,7 @@ class FlrView(BaseModel):
             perm_edit = permissions.get(result["model"])["perm_update"]
             perm_create = permissions.get(result["model"])["perm_create"]
             if result.get("card_view_template"):
-                path = os.path.join("apps", os.environ["app"], "data", result["card_view_template"])
+                path = os.path.join("apps", os.environ["flr_app"], "data", result["card_view_template"])
                 with open(path) as f:
                     result["card_view_template"] = f.read()
             new_definition = {}

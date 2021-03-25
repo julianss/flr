@@ -15,7 +15,7 @@ from datetime import datetime
 import jwt
 import tempfile
 
-SECRET = os.environ.get("jwt_secret")
+SECRET = os.environ.get("flr_jwt_secret")
 
 app = Flask(__name__)
 app.json_encoder = CustomJSONEncoder
@@ -28,11 +28,11 @@ def cron(year=None, month=None, day=None, day_of_week=None, hour=None, minute=No
         return func
     return inner
 
-if os.environ.get("enable_cors") == "True":
+if os.environ.get("flr_enable_cors") == "True":
     from flask_cors import CORS
     CORS(app)
 
-if os.environ.get("legacy_table_names") == "False":
+if os.environ.get("flr_legacy_table_names") == "False":
     ltn = False
 else:
     ltn = True
@@ -150,7 +150,8 @@ class BaseModel(pw.Model):
             desc = {
                 'label': field.verbose_name or field.help_text or prettifyName(k),
                 'type': field.__class__.__name__.replace("Field", "").lower(),
-                'required': not field.null
+                'required': not field.null,
+                'default': field.default
             }
             if desc["type"] == "foreignkey":
                 desc["model"] = field.rel_model.__name__
@@ -794,16 +795,16 @@ def recoverypassword():
         if not user:
             return make_response(jsonify({
                 'error': {
-                    'message': 'email'
+                    'message': 'No es un mail válido'
                 }
             }), 500)
         user = user.first()
         token = jwt.encode({"id":user.id}, SECRET, algorithm="HS256")
-        host = os.getenv('db_host')
-        url = "http://%s:%s/resetPassword?token=%s" % (host, os.environ.get("port", 6800), token.decode('ascii'))
+        host = os.getenv('flr_db_host')
+        url = "http://%s:%s/resetPassword?token=%s" % (host, os.environ.get("flr_port", 6800), token.decode('ascii'))
         message = 'Haga <a href="%s"><strong>click en esta liga</strong></a>'\
                   ' para reestablecer su contraseña' % url
-        fromaddrs = os.getenv('mail_user')
+        fromaddrs = os.getenv('flr_mail_user')
         sendmail(fromaddrs, email, 'Reestablecer contraseña', message)
         return make_response(jsonify({
             'result': True
@@ -811,18 +812,36 @@ def recoverypassword():
     except Exception as ex:
         return make_response(jsonify({
             'error': {
+                'message': 'Error al enviar el mail'
+            }
+        }), 500)
+
+@app.route("/send_error", methods=["POST"])
+def send_error():
+    params = request.get_json()
+    try:
+        message = 'Error enviado mediante el button del alert:\n'\
+                  '%s' % params.get('data', '')
+        fromaddrs = os.getenv('flr_mail_user')
+        sendmail(fromaddrs, fromaddrs, 'Error report', message)
+        return make_response(jsonify({
+            'result': True
+        }))
+    except Exception as ex:
+        return make_response(jsonify({
+            'error': {
                 'message': str(ex),
-                'data': traceback.format_exc()
+                'data': traceback.format_exc(),
             }
         }), 500)
 
 @app.route("/app_name", methods=["GET"])
 def get_app_name():
-    return os.environ["app"]
+    return os.environ["flr_app"]
 
 @app.route("/app_title", methods=["GET"])
 def get_app_title():
-    return os.environ.get("app_title", os.environ["app"])
+    return os.environ.get("flr_app_title", os.environ["flr_app"])
 
 @app.route("/create_user", methods=["POST"])
 def create_user():
@@ -838,7 +857,7 @@ def create_user():
 # Serve static files
 def send_from_app_public_directory(file):
     #First try to serve it from the app's public directory then from the svelte_client/public folder
-    app_public_folder = os.path.join("apps", os.environ["app"], "public")
+    app_public_folder = os.path.join("apps", os.environ["flr_app"], "public")
     if os.path.exists(os.path.join(app_public_folder, file)):
         return send_from_directory(app_public_folder, file)
     else:

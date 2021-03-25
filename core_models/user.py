@@ -1,12 +1,12 @@
 import peewee as pw
 from flask import request, has_request_context
-from flare import m, u, BaseModel, Registry, normalize_filters, combine_filters
+from flare import m, u, BaseModel, Registry, normalize_filters, combine_filters, sendmail
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha512
 import jwt
 import os
 
-SECRET = os.environ.get("jwt_secret")
+SECRET = os.environ.get("flr_jwt_secret")
 
 def encrypt_password(fields):
     if 'password' in fields:
@@ -17,16 +17,17 @@ def encrypt_password(fields):
 
 class FlrUser(BaseModel):
     name = pw.CharField(help_text="Nombre")
-    active = pw.BooleanField(help_text="Activo", default=True)
+    active = pw.BooleanField(help_text="Activo", null=True, default=True)
     login = pw.CharField(help_text="Login", unique=True, null=True)
     email = pw.CharField(help_text="Email", unique=True, null=True)
     password = pw.CharField(help_text="Password")
     role = pw.CharField(help_text="Perfil", null=True)
+    email_notifications = pw.BooleanField(help_text="¿Notificaciones por email?", null=True, default=True)
 
     @staticmethod
     def auth(login, password):
         crypt_password = CryptContext(schemes=["pbkdf2_sha512"]).encrypt(password)
-        auth_field_name = os.environ.get("auth_field", "login")
+        auth_field_name = os.environ.get("flr_auth_field", "login")
         if auth_field_name == "login":
             auth_field = FlrUser.login
         elif auth_field_name == "email":
@@ -130,6 +131,17 @@ class FlrUser(BaseModel):
                 return True
         return False
 
+    @classmethod
+    def get_user_name_and_company(cls):
+        user = cls.get_by_id(request.uid)
+        result = [user.name]
+        for g in user.groups:
+            if g.name == 'Multicompany':
+                if user.company_id:
+                    result.append(user.company_id.name)
+                    break
+        return ' - '.join(result)
+
 class FlrGroup(BaseModel):
     name = pw.CharField(help_text="Nombre")
 
@@ -148,3 +160,43 @@ class FlrACL(BaseModel):
     perm_delete = pw.BooleanField(help_text="Delete permission", null=True, default=False)
 
 FlrACL.r()
+
+class FlrUserChangePassword(BaseModel):
+    _transient = True
+    user_id = pw.ForeignKeyField(FlrUser, verbose_name="User")
+    password = pw.CharField(help_text="New password")
+
+    @classmethod
+    def get_default(cls):
+        defaults = super(FlrUserChangePassword, cls).get_default()
+        G = request and request.flr_globals or {}
+        if G.get("user_id"):
+            user = FlrUser.get_by_id(G["user_id"])
+            defaults.update({
+                "user_id": user.get_dict_id_and_name(),
+            })
+        return defaults
+
+    @classmethod
+    def flr_create(cls, **fields):
+        res = super(FlrUserChangePassword, cls).flr_create(**fields)
+        user = FlrUser.get_by_id(fields['user_id']['id'])
+        password = fields['password']
+        fields = {
+            'password': password
+            }
+        filters = [['id','=',user.id]]
+        FlrUser.flr_update(fields=fields, filters=filters)
+        cls.new_password_update(user, password)
+        return res
+
+    @classmethod
+    def new_password_update(cls, user, password):
+        if user.email_notifications:
+            if user.email:
+                message = "Se ha restablecido tu contraseña, es:\r\n"\
+                "<strong>{}</strong>\r\n"\
+                "Te sugerimos cambiarla al iniciar sesión"\
+                "".format(password)
+                sendmail('Notificaciones del sistema <example@domain.com>', user.email, 'Reset password', message)
+FlrUserChangePassword.r()

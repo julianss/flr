@@ -23,8 +23,8 @@ def sendmail(fromaddr, toaddrs, subject, message):
     message = message.replace('\n', '<br>')
     msg.attach(MIMEText(message, 'html'))
     # message.encode('utf-8')
-    server = smtplib.SMTP_SSL(os.getenv('mail_host'), port=int(os.getenv('mail_port', 0)))
-    server.login(os.getenv('mail_user'), os.getenv('mail_pass'))
+    server = smtplib.SMTP_SSL(os.getenv('flr_mail_host'), port=int(os.getenv('flr_mail_port', 0)))
+    server.login(os.getenv('flr_mail_user'), os.getenv('flr_mail_pass'))
     server.sendmail(fromaddr, toaddrs, msg.as_string())
     server.quit()
 

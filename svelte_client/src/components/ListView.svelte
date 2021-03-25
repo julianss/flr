@@ -54,6 +54,7 @@
             filters = [];
             page = 1;
             fieldsDescription = null;
+            selectAllChecked = false;
             let views = event.views;
             if(views != null && views["list"]){
                 view = views["list"];
@@ -327,52 +328,54 @@
     </div>
 
     {#if !cardViewEnabled}
-    <table class="table table-sm">
-        <thead class="thead-light">
-            {#if fieldsDescription && view}
-                <th>
-                    <input type="checkbox" bind:checked={selectAllChecked}
-                        on:change={onChangeSelectAll}/>
-                </th>
-                {#each view.definition.structure as item}
-                    {#if item.field && item.field in fieldsDescription}
-                        <th>{item.label || fieldsDescription[item.field].label}</th>
-                    {:else}
-                        <th></th>
+        <div class="tableFixHead">
+            <table class="table table-sm">
+                <thead class="thead-light">
+                    {#if fieldsDescription && view}
+                        <th>
+                            <input type="checkbox" bind:checked={selectAllChecked}
+                                on:change={onChangeSelectAll}/>
+                        </th>
+                        {#each view.definition.structure as item}
+                            {#if item.field && item.field in fieldsDescription}
+                                <th>{item.label || fieldsDescription[item.field].label}</th>
+                            {:else}
+                                <th></th>
+                            {/if}
+                        {/each}
                     {/if}
-                {/each}
-            {/if}
-        </thead>
-        <tbody>
-            {#each fetchedRecords as record}
-                <tr on:click={() => viewEdit(record.id)}>
-                    <td>
-                        <input type="checkbox" bind:checked={selectedRecords[record.id]}
-                            on:click|stopPropagation/>
-                    </td>
-                    {#each view.definition.structure as item}
-                        {#if item.field && fieldsDescription && item.field in fieldsDescription}
+                </thead>
+                <tbody>
+                    {#each fetchedRecords as record}
+                        <tr on:click={() => viewEdit(record.id)}>
                             <td>
-                                <Field
-                                    type={fieldsDescription[item.field].type}
-                                    edit={false}
-                                    bind:value={record[item.field]}
-                                    choices={fieldsDescription[item.field].options}
-                                    model={fieldsDescription[item.field].model}
-                                    relatedFieldsDesc={fieldsDescription[item.field].related_fields}
-                                    nolabel={true}
-                                    viewtype={'list'}
-                                    options={item.options || {}}
-                                />
+                                <input type="checkbox" bind:checked={selectedRecords[record.id]}
+                                    on:click|stopPropagation/>
                             </td>
-                        {:else}
-                            <td></td>
-                        {/if}
+                            {#each view.definition.structure as item}
+                                {#if item.field && fieldsDescription && item.field in fieldsDescription}
+                                    <td>
+                                        <Field
+                                            type={fieldsDescription[item.field].type}
+                                            edit={false}
+                                            bind:value={record[item.field]}
+                                            choices={fieldsDescription[item.field].options}
+                                            model={fieldsDescription[item.field].model}
+                                            relatedFieldsDesc={fieldsDescription[item.field].related_fields}
+                                            nolabel={true}
+                                            viewtype={'list'}
+                                            options={item.options || {}}
+                                        />
+                                    </td>
+                                {:else}
+                                    <td></td>
+                                {/if}
+                            {/each}
+                        </tr>
                     {/each}
-                </tr>
-            {/each}
-        </tbody>
-    </table>
+                </tbody>
+            </table>
+        </div>
     {:else}
         <div class="card-view-container">
             {#each fetchedRecords as record}
@@ -388,6 +391,10 @@
 </div>
 
 <style>
+    .tableFixHead thead th {
+        position: sticky;
+        top: 0;
+    }
     table{
         border: 1px solid silver;
         background-color: white;

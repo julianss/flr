@@ -233,6 +233,7 @@
                 </div>
                 <div class="modal-body">
                     <ExportView
+                        on:success={fetchRecords}
                         model={model}
                         selectedFields={fields}
                         filters={filters}

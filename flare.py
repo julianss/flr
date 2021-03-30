@@ -9,11 +9,13 @@ import traceback
 import operator as __operator__
 import os
 import xlsxwriter
+import openpyxl
 import base64
 from functools import wraps
 from datetime import datetime
 import jwt
 import tempfile
+import json
 
 SECRET = os.environ.get("flr_jwt_secret")
 
@@ -72,6 +74,7 @@ r = Registry
 class BaseModel(pw.Model):
     _transient = False
     _rbac = {}
+    _default_related_read = []
 
     class Meta:
         database = db
@@ -132,7 +135,9 @@ class BaseModel(pw.Model):
                 if k not in ("dirty_fields", "_pk"):
                     fields.append(get_what_to_append(k, getattr(cls, k)))
             if tattr == pw.BackrefAccessor:
-                fields.append(get_what_to_append(k, None))
+                if issubclass(getattr(cls, k).rel_model, BaseModel):
+                    if not getattr(cls, k).rel_model._transient:
+                        fields.append(get_what_to_append(k, None))
         return fields
 
     @classmethod
@@ -142,7 +147,8 @@ class BaseModel(pw.Model):
             if "." in field:
                 related_fields.append(field)
         fields = {}
-        which.append("id")
+        if not "id" in which:
+            which.insert(0, "id")
         for k in cls._meta.fields.keys():
             if k not in which:
                 continue
@@ -652,7 +658,12 @@ class BaseModel(pw.Model):
                         related_records_dicts = []
                         for relr in related_records:
                             rendered = relr.get_dict_id_and_name()
-                            for related_field in related_fields_m2m.get(field_name, []):
+                            related_fields = related_fields_m2m.get(field_name, [])
+                            if not related_fields and relr.__class__._default_related_read:
+                                related_fields = relr.__class__._default_related_read
+                            if related_fields and not "name" in related_fields:
+                                del rendered["name"]
+                            for related_field in related_fields:
                                 if type(getattr(relr.__class__, related_field)) in (pw.ForeignKeyField, pw.FileField):
                                     rel = getattr(relr, related_field)
                                     rendered[related_field] = rel.get_dict_id_and_name()
@@ -683,8 +694,11 @@ class BaseModel(pw.Model):
             for col, field in enumerate(fields):
                 fmt = False
                 val = rec[field]
-                if fields_desc[field]["type"] == "foreignkey":
-                    val = val.get("name", val["id"])
+                if fields_desc[field]["type"] in ("foreignkey","file"):
+                    if val:
+                        val = val.get("name", val["id"])
+                    else:
+                        val = ""
                 elif fields_desc[field]["type"] == "select":
                     for value, label in fields_desc[field]["options"]:
                         if value == val:
@@ -694,8 +708,8 @@ class BaseModel(pw.Model):
                     fmt = date_format
                 elif fields_desc[field]["type"] == "datetime":
                     fmt = datetime_format
-                elif type(val) == list:
-                    val = "[List]"
+                elif fields_desc[field]["type"] in ("backref","manytomany","json"):
+                    val = json.dumps(val)
                 if fmt:
                     ws.write(row, col, val, fmt)
                 else:
@@ -711,6 +725,78 @@ class BaseModel(pw.Model):
         return {
             'token': encoded.decode("ascii"),
         }
+
+    @classmethod
+    def import_from_file(cls, fields, file_path):
+        wb = openpyxl.load_workbook(file_path)
+        ws = wb.active
+        no_id = "id" not in fields
+        fields_desc = cls.get_fields_desc(fields)
+        if no_id:
+            fields.remove("id")
+        errors = []
+        affected_ids = []
+        num_columns = 0
+        for i,row in enumerate(ws,1):
+            if i == 1:
+                for column in row:
+                    if column.value:
+                        num_columns += 1
+                if num_columns != len(fields):
+                    errors.append("Number of columns in file (%s) doesn't match the number of fields selected (%s)"%(num_columns,len(fields)))
+                    break
+                continue
+            vals = {}
+            for n in range(0, num_columns):
+                field = fields[n]
+                column = row[n]
+                errors_row = []
+                try:
+                    if fields_desc[field]["type"] in ("auto", "integer", "float", "text", "char", "boolean", "date", "datetime"):
+                        vals[field] = column.value
+                    elif fields_desc[field]["type"] == "foreignkey":
+                        RelModel = r[fields_desc[field]["model"]]
+                        q = RelModel.select(RelModel.id).where(RelModel.name == column.value or '')
+                        if not q.exists():
+                            err = "Row %s, Field %s: record with name %s does not exist"%(i, fields_desc[field]["label"], column.value)
+                            errors_row.append(err)
+                            errors.append(err)
+                        else:
+                            vals[field] = q.first().id
+                    elif fields_desc[field]["type"] == "select":
+                        for value,label in fields_desc[field]["options"]:
+                            if label == column.value:
+                                vals[field] = value
+                                break
+                        else:
+                            error_msg = "Row %s, Field %s: %s is not a valid option"%(i, fields_desc[field]["label"], column.value)
+                            errors_row.append(error_msg)
+                            errors.append(error_msg)
+                    else:
+                        if column.value:
+                            vals[field] = json.loads(column.value)
+                        else:
+                            vals[field] = None
+                except Exception as ex:
+                    err_msg = "Row %s, Field %s: %s"%(i, fields_desc[field]["label"], str(ex))
+                    errors.append(err_msg)
+            if not errors_row:
+                try:
+                    if vals.get("id"):
+                        rec_id = vals["id"]
+                        del vals["id"]
+                        cls.flr_update(vals, [('id','=',rec_id)])
+                        affected_ids.append(rec_id)
+                    else:
+                        affected_ids.append(cls.flr_create(**vals))
+                except Exception as ex:
+                    err_msg = "Row %s: Error when creating/updating record. %s"%(i, str(ex))
+                    errors.append(err_msg)
+        if errors:
+            raise Exception("\n".join(errors))
+        return {
+            'affected_ids': affected_ids
+        }        
 
 @cron(minute="*/30")
 def delete_temporary_records():
@@ -834,6 +920,34 @@ def send_error():
                 'data': traceback.format_exc(),
             }
         }), 500)
+
+@app.route("/flrimport", methods=["POST"])
+def import_from_file():
+    with db.atomic() as transaction:
+        try:
+            token = request.form["token"]
+            Registry["FlrUser"].decode_jwt(request, token)
+            if 'file' not in request.files:
+                raise Exception("No file")
+            file = request.files['file']
+            if file.filename == '':
+                raise Exception("No file")
+            if file:
+                fd, fname = tempfile.mkstemp(".xlsx")
+                os.close(fd)
+                file.save(fname)
+                fields = request.form["fields"].split(",")
+                result = r[request.form["model"]].import_from_file(fields, fname)
+                return make_response(jsonify({'result': result}))
+        except Exception as ex:
+            transaction.rollback()
+            print(traceback.format_exc())
+            return make_response(jsonify({
+                'error': {
+                    'message': str(ex),
+                    'data': traceback.format_exc()
+                }
+            }), 500)
 
 @app.route("/app_name", methods=["GET"])
 def get_app_name():

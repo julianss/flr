@@ -156,6 +156,33 @@ export function call(model, method, args, kwargs){
     })
 }
 
+export function importData(model, fields, file) {
+    loading.set(true);
+    const data = new FormData();
+    data.append("file", file);
+    data.append("model", model);
+    data.append("fields", fields);
+    data.append("token", get_store_value(jwt))
+
+    return fetch("/flrimport", {
+        method: "POST",
+        body: data,
+    }).then(async function(_resp) {
+        loading.set(false);
+        var resp = await _resp.json();
+        if(resp.error){
+            resp.$error = resp.error;
+            return resp;
+        }else{
+            return resp.result;
+        }
+    })
+    .catch((data) => {
+        loading.set(false);
+        alert("Error");
+    })
+}
+
 export function recoverypassword(email){
     loading.set(true);
     return fetch("/recoverypassword", {
@@ -200,6 +227,7 @@ export function resetPassword(password){
         alert("Error");
     })
 }
+
 function getLocationSearch(){
     var search = window.location.search.substring(1);
     return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')

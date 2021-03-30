@@ -17,7 +17,8 @@ def sendmail(fromaddr, toaddrs, subject, message):
     if isinstance(toaddrs, str):
         toaddrs = re.split(',| ', toaddrs.strip())
     msg['Subject'] = subject
-    msg['From'] = fromaddr
+    app_name = os.environ.get("flr_app_title", os.environ.get("flr_app"))
+    msg['From'] = app_name + "<" + fromaddr + ">"
     msg['To'] = ", ".join(toaddrs)
     message = message.replace('\r\n', '<br>')
     message = message.replace('\n', '<br>')

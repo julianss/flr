@@ -136,7 +136,8 @@
     function back(){
         updateHash({
             type: null,
-            id: null
+            id: null,
+            w: null
         })
         publish({
             'event': 'activeViewChanged',

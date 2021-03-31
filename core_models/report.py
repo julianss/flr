@@ -1,6 +1,6 @@
 import peewee as pw
 from flask import request, Response
-from flare import app, BaseModel, Registry as r, ReportHelpers, add_pages
+from flare import app, BaseModel, Registry as r, ReportHelpers, add_pages, _, n_
 from jinja2 import Template
 import subprocess
 import os
@@ -12,14 +12,14 @@ import jwt
 SECRET = os.environ.get("flr_jwt_secret")
 
 class FlrReport(BaseModel):
-    name = pw.CharField(verbose_name="Name", unique=True)
-    model = pw.CharField(verbose_name="Model")
-    template_path = pw.CharField(verbose_name="Template file path", null=True)
-    report_helper = pw.CharField(verbose_name="Report helper class", null=True)
-    report_type = pw.CharField(verbose_name="Report type", default="default", choices=[
+    name = pw.CharField(unique=True)
+    model = pw.CharField()
+    template_path = pw.CharField(verbose_name=n_("Template file path"), null=True)
+    report_helper = pw.CharField(verbose_name=n_("Report helper class"), null=True)
+    report_type = pw.CharField(default="default", choices=[
         ('default','Default'), ('custom', 'Custom')])
-    renderer_method = pw.CharField(verbose_name="Renderer method", null=True)
-    mime_type = pw.CharField(verbose_name="MIME Type", default="application/pdf")
+    renderer_method = pw.CharField(null=True)
+    mime_type = pw.CharField(verbose_name=n_("MIME Type"), default="application/pdf")
 
     @classmethod
     def request_report(cls, report_name, ids):
@@ -49,7 +49,7 @@ class FlrReport(BaseModel):
         Model = r[self.model]
         report_name = self.name
         if not self.template_path:
-            raise Exception("No template provided")
+            raise Exception(_("Report has no template defined"))
         with open(self.template_path) as f:
             template = Template(f.read())
         final_pdf = PdfFileWriter()
@@ -97,7 +97,7 @@ class FlrReport(BaseModel):
         Model = r[self.model]
         report_name = self.name
         if not self.renderer_method:
-            raise Exception("No renderer method provided")
+            raise Exception(_("Report has no renderer method defined"))
         method = getattr(Model, self.renderer_method)
         filename, data = method(ids)
         return filename, data

@@ -1,18 +1,18 @@
 import peewee as pw
-from flare import BaseModel, Registry
+from flare import BaseModel, Registry, n_
 from flask import request
 
 class FlrMenuSection(BaseModel):
-    name = pw.CharField()
-    sequence = pw.IntegerField(default=1)
+    name = pw.CharField(verbose_name=n_("Name"))
+    sequence = pw.IntegerField(verbose_name=n_("Sequence"), default=1)
 
 FlrMenuSection.r()
 
 class FlrMenu(BaseModel):
     name = pw.CharField()
-    section_id = pw.ForeignKeyField(FlrMenuSection, backref="menus")
+    section_id = pw.ForeignKeyField(FlrMenuSection, verbose_name=n_("Section"), backref="menus")
     groups = pw.ManyToManyField(Registry["FlrGroup"])
-    sequence = pw.IntegerField(default=1)
+    sequence = pw.IntegerField(verbose_name=n_("Sequence"), default=1)
 
     @classmethod
     def get_menus(cls):
@@ -37,4 +37,3 @@ class FlrMenu(BaseModel):
         return result
 
 FlrMenu.r()
-FlrMenuFlrGroup = FlrMenu.groups.get_through_model()

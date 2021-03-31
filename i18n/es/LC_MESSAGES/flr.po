@@ -1,0 +1,292 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2021-03-30 18:46-0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+#: core_models/company.py:5 core_models/file.py:31 core_models/menu.py:6
+#: core_models/meta.py:5 core_models/user.py:19 core_models/user.py:147
+#: core_models/view.py:6
+msgid "Name"
+msgstr "Nombre"
+
+#: core_models/company.py:6
+msgid "Logo"
+msgstr "Logo"
+
+#: core_models/company.py:29
+msgid "Company"
+msgstr "Compañía"
+
+#: core_models/file.py:32
+msgid "Filestore Path"
+msgstr "Ruta del archivo"
+
+#: core_models/file.py:33 core_models/meta.py:6 core_models/view.py:11
+msgid "Model"
+msgstr "Modelo"
+
+#: core_models/file.py:34
+msgid "Record id"
+msgstr "Id del registro"
+
+#: core_models/file.py:69 core_models/file.py:72
+msgid "No file given"
+msgstr "No se proporcionó archivo"
+
+#: core_models/menu.py:7 core_models/menu.py:15 core_models/view.py:12
+msgid "Sequence"
+msgstr "Secuencia"
+
+#: core_models/menu.py:13
+msgid "Section"
+msgstr "Sección"
+
+#: core_models/meta.py:7
+msgid "Rec id"
+msgstr "Id del registro"
+
+#: core_models/preferences.py:13 core_models/user.py:167
+msgid "User"
+msgstr "Usuario"
+
+#: core_models/preferences.py:14
+msgid "Current password"
+msgstr "Contraseña actual"
+
+#: core_models/preferences.py:15 core_models/user.py:168
+msgid "New password"
+msgstr "Nueva contraseña"
+
+#: core_models/preferences.py:16
+msgid "Confirm new password"
+msgstr "Confirme la nueva contraseña"
+
+#: core_models/preferences.py:17
+msgid "Current company"
+msgstr "Compañía actual"
+
+#: core_models/preferences.py:18
+msgid "Change to"
+msgstr "Cambiar a"
+
+#: core_models/preferences.py:33
+msgid "Entered password is incorrect"
+msgstr "La contraseña introducida es incorrecta"
+
+#: core_models/preferences.py:36
+msgid "Password confirmation doesn't match "
+msgstr "La confirmación de la contraseña no coincide"
+
+#: core_models/preferences.py:40
+msgid "New password is empty"
+msgstr "La nueva contraseña está vacía"
+
+#: core_models/preferences.py:43
+msgid "To set a new password please enter current password"
+msgstr "Para introducir una nueva contraseña ingrese su contraseña actual"
+
+#: core_models/report.py:17
+msgid "Template file path"
+msgstr "Ruta del archivo de la plantilla"
+
+#: core_models/report.py:18
+msgid "Report helper class"
+msgstr "Clase auxiliar del reporte"
+
+#: core_models/report.py:22
+msgid "MIME Type"
+msgstr "Tipo MIME"
+
+#: core_models/report.py:52
+msgid "Report has no template defined"
+msgstr "El reporte no tiene una plantilla definida"
+
+#: core_models/report.py:100
+msgid "Report has no renderer method defined"
+msgstr "El reporte no tiene un método de rendereado definido"
+
+#: core_models/user.py:20
+msgid "Active"
+msgstr "Activo"
+
+#: core_models/user.py:21
+msgid "Login"
+msgstr "Inicio de sesión"
+
+#: core_models/user.py:22
+msgid "Email"
+msgstr "Dirección de correo electrónico"
+
+#: core_models/user.py:23
+msgid "Password"
+msgstr "Contraseña"
+
+#: core_models/user.py:24
+msgid "Role"
+msgstr "Rol"
+
+#: core_models/user.py:25
+msgid "Email notifications"
+msgstr "Notificiones por correo electrónico"
+
+#: core_models/user.py:26
+msgid "Language"
+msgstr "Idioma"
+
+#: core_models/user.py:115
+msgid "Access denied for operation %s on model %s by ACL"
+msgstr "Acceso denegado para la operación %s en el modelo %s por las reglas de control de acceso"
+
+#: core_models/user.py:156
+msgid "Group"
+msgstr "Grupo"
+
+#: core_models/user.py:158
+msgid "Read permission"
+msgstr "Permiso de lectura"
+
+#: core_models/user.py:159
+msgid "Update permission"
+msgstr "Permiso de edición"
+
+#: core_models/user.py:160
+msgid "Create permission"
+msgstr "Permiso de creación"
+
+#: core_models/user.py:161
+msgid "Delete permission"
+msgstr "Permiso de eliminación"
+
+#: core_models/user.py:198
+msgid ""
+"Your password has been reset, it is:\r\n"
+"<strong>{}</strong>\r\n"
+"We suggest you to change it the next time you login"
+msgstr ""
+"Su contraseña ha sido reestablecida, es:\r\n"
+"<strong>{}</strong>\r\n"
+"Recomendamos que la cambie en su próximo inicio de sesión"
+
+#: core_models/user.py:202 flare.py:912
+msgid "Reset password"
+msgstr "Reestablecer contraseña"
+
+#: core_models/view.py:7
+msgid "View Definition"
+msgstr "Definición de la vista"
+
+#: core_models/view.py:8
+msgid "View type"
+msgstr "Tipo de la vista"
+
+#: core_models/view.py:10
+msgid "Views"
+msgstr "Vistas"
+
+#: core_models/view.py:13
+msgid "Is wizard"
+msgstr "Es wizard"
+
+#: core_models/view.py:14
+msgid "CardView EJS template file"
+msgstr "Archivo EJS para la CardView"
+
+#: core_models/view.py:15
+msgid "Show CardView first"
+msgstr "Mostrar CardView primero"
+
+#: flare.py:104
+msgid "Created by"
+msgstr "Creado por"
+
+#: flare.py:106
+msgid "Created on"
+msgstr "Creado en"
+
+#: flare.py:108
+msgid "Last updated by"
+msgstr "Última modificación por"
+
+#: flare.py:110
+msgid "Last updated on"
+msgstr "Última actualización en"
+
+#: flare.py:246
+msgid "Delete"
+msgstr "Eliminar"
+
+#: flare.py:247
+msgid "Confirm the deletion of the selected records?"
+msgstr "¿Confirma la eliminación de los registros seleccionados?"
+
+#: flare.py:314
+msgid "Access denied for operation %s on the selected records"
+msgstr "Acceso denegado para la operación %s en los registros seleccionados"
+
+#: flare.py:765
+msgid "Number of columns in file (%s) doesn't match the number of fields selected (%s)"
+msgstr "El número de columnas en el archivo (%s) no coincide con el número de campos seleccionados (%s)"
+
+#: flare.py:780
+msgid "Row %s, Field %s: record with name %s does not exist"
+msgstr "Fila %s, Campo %s: no existe registro de nombre %s"
+
+#: flare.py:791
+msgid "Row %s, Field %s: %s is not a valid option"
+msgstr "Fila %s, Campo %s: %s no es una opción válida"
+
+#: flare.py:812
+msgid "Row %s: Error when creating/updating record. %s"
+msgstr "Fila %s: Error al crear/actualizar el registro. %s"
+
+#: flare.py:903
+msgid "The email address you entered does not correspond to any user"
+msgstr "La dirección de correo ingresada no corresponde a ningún usuario"
+
+#: flare.py:911
+msgid "Click <a href=\"%s\"><strong>here</strong></a> to reset your password"
+msgstr "Haga click <a href=\"%s\"><strong>aquí</strong> para reestablecer su contraseña"
+
+#: flare.py:920
+msgid "Sorry, an error occurred and the email couldn't be sent"
+msgstr "Lo sentimos, ocurrió un error y el correo eléctornico no pudo ser enviado"
+
+#: flare.py:928
+msgid "Error sent by the user through the web client:"
+msgstr "Error enviado por el usuario a través del cliente web"
+
+#: flare.py:929
+msgid "Error report"
+msgstr "Reporte de error"
+
+#: flare.py:1066
+msgid "Record successfully created"
+msgstr "Registro creado exitosamente"
+
+#: flare.py:1073
+msgid "Record successfully updated"
+msgstr "Registro actualizado existosamente"
+
+#: flare.py:1075
+msgid "No record was updated"
+msgstr "No se actualizó ningún registro"
+
+#: flare.py:1081
+msgid "Record successfully deleted"
+msgstr "Registro eliminado existosamente"
+
+#: flare.py:1083
+msgid "No record was deleted"
+msgstr "No se eliminó ningún registro"
+

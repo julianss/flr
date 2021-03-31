@@ -1,6 +1,6 @@
 from flask import Flask, request, has_request_context, jsonify, send_from_directory, redirect, make_response, Response
 from registry import Registry, ReportHelpers, db
-from utils import normalize_filters, combine_filters, CustomJSONEncoder, add_pages, sendmail
+from utils import normalize_filters, combine_filters, CustomJSONEncoder, add_pages, sendmail, I18n
 from apscheduler.schedulers.blocking import BlockingScheduler
 import peeweedbevolve
 import peewee as pw
@@ -39,23 +39,6 @@ if os.environ.get("flr_legacy_table_names") == "False":
 else:
     ltn = True
 
-def prettifyName(field_name):
-    return field_name.capitalize().replace("_", " ")
-
-def get_field_verbose_name(k, obj):
-    verbose = False
-    htext = False
-    doc = False
-    pretty = prettifyName(k)
-    if obj is not None:
-        if hasattr(obj, "verbose_name"):
-            verbose = obj.verbose_name
-        if hasattr(obj, "help_text"):
-            htext = obj.help_text
-        if hasattr(obj, "__doc__"):
-            doc = obj.__doc__
-    return verbose or htext or doc or pretty
-
 def get_current_user():
     if has_request_context:
         return Registry["FlrUser"].get_by_id(request.uid)
@@ -71,6 +54,38 @@ u = get_current_user
 m = get_obj_from_meta
 r = Registry
 
+#Setup translations to translate always to the user's preferred language
+#Fallback to application default language if user preferred language can't be determined
+i18n = I18n()
+def _(message):
+    if has_request_context and hasattr(request, "uid"):
+        lang = u().lang
+    else:
+        lang = os.environ.get("flr_default_lang", "en")
+    return i18n.translate(message, lang)
+#Also define a noop gettext so some strings (e.g. field names) can be marked as translatable
+#but be translated until needed
+def n_(message):
+    return message
+
+#Functions to get the 'human readable' version of field names
+def prettifyName(field_name):
+    return field_name.capitalize().replace("_", " ")
+#Note the call to _ to translate the fields name (marked with n_ upon definition)
+def get_field_verbose_name(k, obj):
+    verbose = False
+    htext = False
+    doc = False
+    pretty = prettifyName(k)
+    if obj is not None:
+        if hasattr(obj, "verbose_name"):
+            verbose = obj.verbose_name
+        if hasattr(obj, "help_text"):
+            htext = obj.help_text
+        if hasattr(obj, "__doc__"):
+            doc = obj.__doc__
+    return _(verbose or htext or doc or pretty)
+
 class BaseModel(pw.Model):
     _transient = False
     _rbac = {}
@@ -85,10 +100,14 @@ class BaseModel(pw.Model):
         if cls.__name__ in Registry:
             raise Exception(cls.__name__ + " already exists in the model registry")
         Registry[cls.__name__] = cls
-        cls._meta.add_field("created_by", pw.ForeignKeyField(Registry["FlrUser"], null=True))
-        cls._meta.add_field("created_on", pw.DateTimeField(null=True))
-        cls._meta.add_field("updated_by", pw.ForeignKeyField(Registry["FlrUser"], null=True))
-        cls._meta.add_field("updated_on", pw.DateTimeField(null=True))
+        cls._meta.add_field("created_by", pw.ForeignKeyField(Registry["FlrUser"], null=True,
+            verbose_name=n_("Created by")))
+        cls._meta.add_field("created_on", pw.DateTimeField(null=True,
+            verbose_name=n_("Created on")))
+        cls._meta.add_field("updated_by", pw.ForeignKeyField(Registry["FlrUser"], null=True,
+            verbose_name=n_("Last updated by")))
+        cls._meta.add_field("updated_on", pw.DateTimeField(null=True,
+            verbose_name=n_("Last updated on")))
 
     @classmethod
     def get_default(cls):
@@ -154,7 +173,7 @@ class BaseModel(pw.Model):
                 continue
             field = cls._meta.fields[k]
             desc = {
-                'label': field.verbose_name or field.help_text or prettifyName(k),
+                'label': get_field_verbose_name(k, getattr(cls, k)),
                 'type': field.__class__.__name__.replace("Field", "").lower(),
                 'required': not field.null,
                 'default': field.default
@@ -171,10 +190,8 @@ class BaseModel(pw.Model):
             if k not in which:
                 continue
             field = cls._meta.manytomany[k]
-            verbose_name = field.verbose_name if hasattr(field, "verbose_name") else False
-            help_text = field.help_text if hasattr(field, "help_text") else False
             fields[k] = {
-                'label': verbose_name or help_text or prettifyName(k),
+                'label': get_field_verbose_name(k, getattr(cls, k)),
                 'type': 'manytomany',
                 'model': field.rel_model.__name__,
                 'related_fields': []
@@ -224,8 +241,8 @@ class BaseModel(pw.Model):
         if perm[cls.__name__]["perm_delete"]:
             actions.append({
                 'method': 'delete',
-                'label': 'Borrar',
-                'confirm': '¿Confirmar eliminar los registros seleccionados?'
+                'label': _('Delete'),
+                'confirm': _('Confirm the deletion of the selected records?')
             })
         return actions
 
@@ -292,7 +309,7 @@ class BaseModel(pw.Model):
         ands_ok = not ands or all(ands)
         ors_ok = not ors or any(ors)
         if not (ands_ok and ors_ok):
-            raise Exception("Access denied for operation %s on the selected records"%operation)
+            raise Exception(_("Access denied for operation %s on the selected records")%operation)
         return True
 
     @classmethod
@@ -743,7 +760,7 @@ class BaseModel(pw.Model):
                     if column.value:
                         num_columns += 1
                 if num_columns != len(fields):
-                    errors.append("Number of columns in file (%s) doesn't match the number of fields selected (%s)"%(num_columns,len(fields)))
+                    errors.append(_("Number of columns in file (%s) doesn't match the number of fields selected (%s)")%(num_columns,len(fields)))
                     break
                 continue
             vals = {}
@@ -758,7 +775,7 @@ class BaseModel(pw.Model):
                         RelModel = r[fields_desc[field]["model"]]
                         q = RelModel.select(RelModel.id).where(RelModel.name == column.value or '')
                         if not q.exists():
-                            err = "Row %s, Field %s: record with name %s does not exist"%(i, fields_desc[field]["label"], column.value)
+                            err = _("Row %s, Field %s: record with name %s does not exist")%(i, fields_desc[field]["label"], column.value)
                             errors_row.append(err)
                             errors.append(err)
                         else:
@@ -769,7 +786,7 @@ class BaseModel(pw.Model):
                                 vals[field] = value
                                 break
                         else:
-                            error_msg = "Row %s, Field %s: %s is not a valid option"%(i, fields_desc[field]["label"], column.value)
+                            error_msg = _("Row %s, Field %s: %s is not a valid option")%(i, fields_desc[field]["label"], column.value)
                             errors_row.append(error_msg)
                             errors.append(error_msg)
                     else:
@@ -790,7 +807,7 @@ class BaseModel(pw.Model):
                     else:
                         affected_ids.append(cls.flr_create(**vals))
                 except Exception as ex:
-                    err_msg = "Row %s: Error when creating/updating record. %s"%(i, str(ex))
+                    err_msg = _("Row %s: Error when creating/updating record. %s")%(i, str(ex))
                     errors.append(err_msg)
         if errors:
             raise Exception("\n".join(errors))
@@ -881,24 +898,24 @@ def recoverypassword():
         if not user:
             return make_response(jsonify({
                 'error': {
-                    'message': 'No es un mail válido'
+                    'message': _('The email address you entered does not correspond to any user')
                 }
             }), 500)
         user = user.first()
+        request.uid = user.id
         token = jwt.encode({"id":user.id}, SECRET, algorithm="HS256")
         host = os.getenv('flr_db_host')
         url = "http://%s:%s/resetPassword?token=%s" % (host, os.environ.get("flr_port", 6800), token.decode('ascii'))
-        message = 'Haga <a href="%s"><strong>click en esta liga</strong></a>'\
-                  ' para reestablecer su contraseña' % url
-        fromaddrs = os.getenv('flr_mail_user')
-        sendmail(fromaddrs, email, 'Reestablecer contraseña', message)
+        message = _('Click <a href="%s"><strong>here</strong></a> to reset your password') % url
+        sendmail("", email, _('Reset password'), message)
         return make_response(jsonify({
             'result': True
         }))
     except Exception as ex:
+        print(traceback.format_exc())
         return make_response(jsonify({
             'error': {
-                'message': 'Error al enviar el mail'
+                'message': _("Sorry, an error occurred and the email couldn't be sent")
             }
         }), 500)
 
@@ -906,10 +923,8 @@ def recoverypassword():
 def send_error():
     params = request.get_json()
     try:
-        message = 'Error enviado mediante el button del alert:\n'\
-                  '%s' % params.get('data', '')
-        fromaddrs = os.getenv('flr_mail_user')
-        sendmail(fromaddrs, fromaddrs, 'Error report', message)
+        message = _('Error sent by the user through the web client:') + '\n%s' % params.get('data', '')
+        sendmail("", os.getenv('flr_mail_user'), _('Error report'), message)
         return make_response(jsonify({
             'result': True
         }))
@@ -1046,24 +1061,24 @@ class api:
     def post(model):
         params = request.get_json()
         Registry[model].flr_create(**params)
-        return {'result': 'Ítem agregado con éxito'}
+        return {'result': _('Record successfully created')}
 
     @wrapper
     def put(model, id):
         params = request.get_json()
         updated = Registry[model].flr_update(params, [('id','=',id)])
         if updated:
-            return {'result': 'Ítem actualizado con éxito'}
+            return {'result': _('Record successfully updated')}
         else:
-            return {'result': 'No se actualizó ningún ítem'}
+            return {'result': _('No record was updated')}
 
     @wrapper
     def delete(model, id):
         deleted = Registry[model].flr_delete([id])
         if deleted:
-            return {'result': 'Ítem eliminado con éxito'}
+            return {'result': _('Record successfully deleted')}
         else:
-            return {'result': 'No se eliminó ningún ítem'}
+            return {'result': _('No record was deleted')}
 
     def make_restful(name, model, post_func=False, put_func=False, specs=False, get_fields=[]):
         if not post_func:

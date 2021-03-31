@@ -1,10 +1,13 @@
 import peewee as pw
 from flask import request, has_request_context
-from flare import m, u, BaseModel, Registry, normalize_filters, combine_filters, sendmail
+from flare import m, u, BaseModel, Registry, normalize_filters, combine_filters, sendmail, _, n_, i18n
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha512
 import jwt
 import os
+from iso639 import languages
+
+LANG_CHOICES = [(l,languages.get(part1=l).name) for l in ["en"] + i18n.languages]
 
 SECRET = os.environ.get("flr_jwt_secret")
 
@@ -16,13 +19,14 @@ def encrypt_password(fields):
 
 
 class FlrUser(BaseModel):
-    name = pw.CharField(help_text="Nombre")
-    active = pw.BooleanField(help_text="Activo", null=True, default=True)
-    login = pw.CharField(help_text="Login", unique=True, null=True)
-    email = pw.CharField(help_text="Email", unique=True, null=True)
-    password = pw.CharField(help_text="Password")
-    role = pw.CharField(help_text="Perfil", null=True)
-    email_notifications = pw.BooleanField(help_text="¿Notificaciones por email?", null=True, default=True)
+    name = pw.CharField(verbose_name=n_("Name"))
+    active = pw.BooleanField(verbose_name=n_("Active"), null=True, default=True)
+    login = pw.CharField(verbose_name=n_("Login"), unique=True, null=True)
+    email = pw.CharField(verbose_name=n_("Email"), unique=True, null=True)
+    password = pw.CharField(verbose_name=n_("Password"))
+    role = pw.CharField(verbose_name=n_("Role"), null=True)
+    email_notifications = pw.BooleanField(verbose_name=n_("Email notifications"), null=True, default=True)
+    lang = pw.CharField(verbose_name=n_("Language"), null=True, choices=LANG_CHOICES)
 
     @staticmethod
     def auth(login, password):
@@ -111,7 +115,7 @@ class FlrUser(BaseModel):
         if has_request_context():
             permissions = FlrUser.get_permissions(model)
             if not permissions[model]["perm_" + operation]:
-                raise Exception("Access denied for operation %s on model %s by ACL"%(operation, model))
+                raise Exception(_("Access denied for operation %s on model %s by ACL")%(operation, model))
         else:
             return True
 
@@ -143,7 +147,7 @@ class FlrUser(BaseModel):
         return ' - '.join(result)
 
 class FlrGroup(BaseModel):
-    name = pw.CharField(help_text="Nombre")
+    name = pw.CharField(verbose_name=n_("Name"))
 
 FlrUser._meta.add_field("groups", pw.ManyToManyField(FlrGroup))
 
@@ -151,20 +155,20 @@ FlrUser.r()
 FlrGroup.r()
 
 class FlrACL(BaseModel):
-    name = pw.CharField(verbose_name="Name")
-    group_id = pw.ForeignKeyField(FlrGroup, help_text="Group", backref="acls", null=True)
-    model = pw.CharField(help_text="Model")
-    perm_read = pw.BooleanField(help_text="Read permission", null=True, default=False)
-    perm_update = pw.BooleanField(help_text="Update permission", null=True, default=False)
-    perm_create = pw.BooleanField(help_text="Create permission", null=True, default=False)
-    perm_delete = pw.BooleanField(help_text="Delete permission", null=True, default=False)
+    name = pw.CharField()
+    group_id = pw.ForeignKeyField(FlrGroup, verbose_name=n_("Group"), backref="acls", null=True)
+    model = pw.CharField()
+    perm_read = pw.BooleanField(verbose_name=n_("Read permission"), null=True, default=False)
+    perm_update = pw.BooleanField(verbose_name=n_("Update permission"), null=True, default=False)
+    perm_create = pw.BooleanField(verbose_name=n_("Create permission"), null=True, default=False)
+    perm_delete = pw.BooleanField(verbose_name=n_("Delete permission"), null=True, default=False)
 
 FlrACL.r()
 
 class FlrUserChangePassword(BaseModel):
     _transient = True
-    user_id = pw.ForeignKeyField(FlrUser, verbose_name="User")
-    password = pw.CharField(help_text="New password")
+    user_id = pw.ForeignKeyField(FlrUser, verbose_name=n_("User"))
+    password = pw.CharField(verbose_name=n_("New password"))
 
     @classmethod
     def get_default(cls):
@@ -194,9 +198,9 @@ class FlrUserChangePassword(BaseModel):
     def new_password_update(cls, user, password):
         if user.email_notifications:
             if user.email:
-                message = "Se ha restablecido tu contraseña, es:\r\n"\
+                message = _("Your password has been reset, it is:\r\n"\
                 "<strong>{}</strong>\r\n"\
-                "Te sugerimos cambiarla al iniciar sesión"\
-                "".format(password)
-                sendmail('Notificaciones del sistema <example@domain.com>', user.email, 'Reset password', message)
+                "We suggest you to change it the next time you login"\
+                "").format(password)
+                sendmail("", user.email, _('Reset password'), message)
 FlrUserChangePassword.r()

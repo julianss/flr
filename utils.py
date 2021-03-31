@@ -5,6 +5,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import re
+import gettext
 
 def sendmail(fromaddr, toaddrs, subject, message):
     """Function to send email loading enviroment variables of the AppName.
@@ -93,3 +94,23 @@ def combine_filters(operator, filters_list):
 def add_pages(from_here, to_here):
     for n in range(from_here.getNumPages()):
         to_here.addPage(from_here.getPage(n))
+
+#Wrapper for multiple gettext translation classes
+#Its translate method chooses the correct class according to the language passed as parameter
+class I18n:
+    def __init__(self, localedir="./i18n"):
+        self.localedir = localedir
+        self.translations = {}
+        self.languages = []
+        for fname in os.listdir(localedir):
+            self.languages.append(fname)
+        for lang in self.languages:
+            self.translations[lang] = gettext.translation("flr",
+                localedir=self.localedir, languages=[lang])
+
+    def translate(self, message, lang):
+        if lang == "en":
+            return message
+        else:
+            t = self.translations.get(lang)
+            return t.gettext(message) if t is not None else message

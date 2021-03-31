@@ -1,17 +1,18 @@
 import os
 import peewee as pw
-from flare import BaseModel, Registry
+from flare import BaseModel, Registry, n_
 
 class FlrView(BaseModel):
-    name = pw.CharField()
-    definition = pw.JSONField()
-    view_type = pw.CharField(choices=[("list","List"),("form","Form"),("search","Search")],default="list")
-    menu_id = pw.ForeignKeyField(Registry["FlrMenu"], null=True, backref="views")
-    model = pw.CharField()
-    sequence = pw.IntegerField(default=1)
-    wizard = pw.BooleanField(default=False)
-    card_view_template = pw.CharField(null=True)
-    card_view_first = pw.BooleanField(null=True)
+    name = pw.CharField(verbose_name=n_("Name"))
+    definition = pw.JSONField(verbose_name=n_("View Definition"))
+    view_type = pw.CharField(verbose_name=n_("View type"), default="list",
+        choices=[("list","List"),("form","Form"),("search","Search")])
+    menu_id = pw.ForeignKeyField(Registry["FlrMenu"], verbose_name=n_("Views"), null=True, backref="views")
+    model = pw.CharField(verbose_name=n_("Model"))
+    sequence = pw.IntegerField(verbose_name=n_("Sequence"), default=1)
+    wizard = pw.BooleanField(verbose_name=n_("Is wizard"), default=False)
+    card_view_template = pw.CharField(verbose_name=n_("CardView EJS template file"), null=True)
+    card_view_first = pw.BooleanField(verbose_name=n_("Show CardView first"), null=True)
 
     #Extended to delete restricted items from the views definitions ("groups" property)
     #Also to load the card view templates

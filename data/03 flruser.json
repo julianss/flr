@@ -78,6 +78,7 @@
                     },
                     {"field": "company_id"},
                     {"field": "active"},
+                    {"field": "lang"},
                     {"field": "email_notifications"}
                 ],
                 "Roles": [

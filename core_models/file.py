@@ -1,6 +1,6 @@
 import peewee as pw
-from flare import BaseModel, app, db, Registry, request
-from flask import send_file, jsonify, make_response
+from flare import BaseModel, app, db, Registry, _, n_
+from flask import send_file, jsonify, make_response, request
 import uuid
 import os
 import traceback
@@ -28,10 +28,10 @@ class AttachmentsMixin:
         return True
 
 class FlrFile(BaseModel):
-    name = pw.CharField(help_text="Name")
-    path = pw.CharField(help_text="Filestore Path")
-    model = pw.CharField(help_text="Model", null=True)
-    rec_id = pw.CharField(help_text="Record id", null=True)
+    name = pw.CharField(verbose_name=n_("Name"))
+    path = pw.CharField(verbose_name=n_("Filestore Path"))
+    model = pw.CharField(verbose_name=n_("Model"), null=True)
+    rec_id = pw.CharField(verbose_name=n_("Record id"), null=True)
 
     @classmethod
     def create_from_data(cls, data, name=False):
@@ -66,10 +66,10 @@ def flr_attach():
     try:
         Registry["FlrUser"].decode_jwt(request)
         if 'file' not in request.files:
-            raise Exception("No file")
+            raise Exception(_("No file given"))
         file = request.files['file']
         if file.filename == '':
-            raise Exception("No file")
+            raise Exception(_("No file given"))
         if file:
             generated_name = str(uuid.uuid4()).replace("-","")
             if not os.path.isdir(FILESTORE_PATH):

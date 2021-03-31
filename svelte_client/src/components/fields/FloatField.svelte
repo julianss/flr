@@ -43,7 +43,7 @@
         {/if}
     {:else}
         {#if options && options.toFixed}
-            <p>{value.toFixed(options.toFixed) || ''}</p>
+            <p>{value ? value.toFixed(options.toFixed) : ''}</p>
         {:else}
             <p>{value}</p>
         {/if}

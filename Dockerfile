@@ -30,6 +30,7 @@ COPY main.py /app
 COPY load_db.py /app
 COPY sched.py /app
 COPY ./data/ /app/data
+COPY ./i18n/ /app/i18n
 COPY ./core_models/ /app/core_models
 RUN mkdir /app/svelte_client
 COPY ./svelte_client/public/ /app/svelte_client/public

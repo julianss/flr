@@ -9,6 +9,7 @@ import re
 def sendmail(fromaddr, toaddrs, subject, message):
     """Function to send email loading enviroment variables of the AppName.
     formaddr -- str like 'System <email@domain.com>' or 'email@domain.com'
+                Defaults to AppName <email> if left blank
     toaddrs -- list or str separated by space or comma
     subject -- str
     message -- str
@@ -17,8 +18,11 @@ def sendmail(fromaddr, toaddrs, subject, message):
     if isinstance(toaddrs, str):
         toaddrs = re.split(',| ', toaddrs.strip())
     msg['Subject'] = subject
-    app_name = os.environ.get("flr_app_title", os.environ.get("flr_app"))
-    msg['From'] = app_name + "<" + fromaddr + ">"
+    if not fromaddr:
+        app_name = os.environ.get("flr_app_title", os.environ.get("flr_app"))
+        msg['From'] = app_name + "<" + os.getenv('flr_mail_user') + ">"
+    else:
+        msg["From"] = fromaddr
     msg['To'] = ", ".join(toaddrs)
     message = message.replace('\r\n', '<br>')
     message = message.replace('\n', '<br>')

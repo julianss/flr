@@ -1,9 +1,8 @@
 <script>
   import { getUserName, logout } from './../services/session.js'
-  import { getMenus, getViews, openViews } from './../services/menu.js'
+  import { getMenus, getViews, openViews, clickMenu } from './../services/menu.js'
   import { onMount } from 'svelte';
-  import { parseHash, updateHash, replaceHash } from './../services/utils.js';
-  import { publish } from './../services/writables.js';
+  import { parseHash } from './../services/utils.js';
 
   let sections = [];
   let username = "";
@@ -18,33 +17,6 @@
       clickMenu(sections[0].menus[0].id);
     }
   })
-
-  function clickMenu(menuId, type, id) {
-    if(menuId){
-      getViews(menuId).then(
-        (resp) => {
-          openViews(resp);
-          if(type == 'form' && id){
-            updateHash({
-              menu_id: menuId,
-              type: 'form',
-              id: id
-            })
-            publish({
-              event: 'activeViewChanged',
-              type: 'form'
-            })
-            publish({
-              event: 'activeRecordIdChanged',
-              id: parseInt(id)
-            })
-          }else{
-            replaceHash({menu_id: menuId})
-          }
-        }
-      )
-    }
-  }
 
   function openPreferences(){
     getViews("FlrPreferences").then(

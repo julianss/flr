@@ -1,9 +1,9 @@
 <script>
-    import { getViews, openViews } from './../services/menu.js';
+    import { getViews, openViews, clickMenu } from './../services/menu.js';
     import { call } from './../services/service.js';
     import { updateGlobals, publish } from './../services/writables.js';
     import { requestReport } from './../services/report.js';
-    import { updateHash, parseHash } from './../services/utils.js';
+    import { updateHash, parseHash, replaceHash } from './../services/utils.js';
     import { getContext } from 'svelte';
 
     export let text;
@@ -47,15 +47,21 @@
             }
         }
         if(action == "openViews"){
-            getViews(options.model, options.view_types).then(
-                (resp) => {
-                    openViews(resp, {
-                        asWizard: true,
-                        showSaveButton: options.saveButton
-                    })
-                    updateHash({'w': 1})
-                }
-            );
+            //If menu_id is present it behaves as if the menu was clicked
+            //otherwise, it behaves as a wizard
+            if(options.menu_id){
+                clickMenu(options.menu_id);
+            }else{
+                getViews(options.model, ["form"]).then(
+                    (resp) => {
+                        openViews(resp, {
+                            asWizard: true,
+                            showSaveButton: options.saveButton
+                        })
+                        updateHash({'w': 1})
+                    }
+                )
+            }
         }else if(action == "method"){
             call(`${model}:${recordId}`, options.name).then(
                 (resp) => {

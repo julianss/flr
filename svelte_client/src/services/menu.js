@@ -1,4 +1,5 @@
-import { call, appTitle } from './service.js'
+import { call, appTitle } from './service.js';
+import { updateHash, replaceHash } from './../services/utils.js';
 import { publish } from './writables.js';
 
 export function getMenus() {
@@ -58,4 +59,31 @@ export function openViews(views, options={}){
       event: 'activeViewChanged',
       type: firstType,
     })
+  }
+
+export function clickMenu(menuId, type, id) {
+    if(menuId){
+      getViews(menuId).then(
+        (resp) => {
+          openViews(resp);
+          if(type == 'form' && id){
+            updateHash({
+              menu_id: menuId,
+              type: 'form',
+              id: id
+            })
+            publish({
+              event: 'activeViewChanged',
+              type: 'form'
+            })
+            publish({
+              event: 'activeRecordIdChanged',
+              id: parseInt(id)
+            })
+          }else{
+            replaceHash({menu_id: menuId})
+          }
+        }
+      )
+    }
   }

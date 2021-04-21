@@ -1,8 +1,12 @@
 import os
 import peewee as pw
-from flare import BaseModel, Registry, n_
+from flare import BaseModel, Registry, n_, m
+import json
+import re
 
 class FlrView(BaseModel):
+    _order = "sequence"
+    
     name = pw.CharField(verbose_name=n_("Name"))
     definition = pw.JSONField(verbose_name=n_("View Definition"))
     view_type = pw.CharField(verbose_name=n_("View type"), default="list",
@@ -14,8 +18,10 @@ class FlrView(BaseModel):
     card_view_template = pw.CharField(verbose_name=n_("CardView EJS template file"), null=True)
     card_view_first = pw.BooleanField(verbose_name=n_("Show CardView first"), null=True)
 
-    #Extended to delete restricted items from the views definitions ("groups" property)
-    #Also to load the card view templates
+    #Extended to
+    # - delete restricted items from the views definitions ("groups" property)
+    # - load the card view templates
+    # - replace m(...) marks with the desired meta_id
     @classmethod
     def read(cls, fields, ids=[], filters=[], paginate=False, order=None, count=False):
         results = super(FlrView, cls).read(fields, ids=ids, filters=filters, paginate=paginate, order=order, count=count)
@@ -29,6 +35,12 @@ class FlrView(BaseModel):
                 with open(path) as f:
                     result["card_view_template"] = f.read()
             new_definition = {}
+            as_text = json.dumps(result["definition"])
+            requested_meta_ids = re.findall("m\((.*?)\)", as_text)
+            for meta_id in requested_meta_ids:
+                as_text = as_text.replace("\"m(%s)\""%meta_id, str(m(meta_id).id))
+            if requested_meta_ids:
+                result["definition"] = json.loads(as_text)
             for key in result["definition"]:
                 new_definition[key] = []
                 value = result["definition"][key]

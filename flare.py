@@ -86,6 +86,9 @@ def get_field_verbose_name(k, obj):
             doc = obj.__doc__
     return _(verbose or htext or doc or pretty)
 
+class FlrException(Exception):
+    pass
+
 class BaseModel(pw.Model):
     _transient = False
     _rbac = {}
@@ -881,13 +884,19 @@ def call():
             })
         except Exception as ex:
             transaction.rollback()
-            print(traceback.format_exc())
-            return make_response(jsonify({
-                'error': {
-                    'message': str(ex),
-                    'data': traceback.format_exc()
-                }
-            }), 500)
+            if isinstance(ex, FlrException):
+                return make_response(jsonify({
+                    'error': {
+                        'message': str(ex),
+                        'FlrException': True,
+                    }
+                }), 500)
+            else:
+                return make_response(jsonify({
+                    'error': {
+                        'message': traceback.format_exc(),
+                    }
+                }), 500)
 
 @app.route("/recoverypassword", methods=["POST"])
 def recoverypassword():

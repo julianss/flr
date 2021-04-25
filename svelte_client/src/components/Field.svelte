@@ -185,7 +185,10 @@
         content:"*";
         color:red
     }
-    .required :global(input, select.form-control, select.form-control:focus){
+    .required :global(input){
+        background-color:seashell
+    }
+    .required :global(select){
         background-color:seashell
     }
     .nolabel :global(label){

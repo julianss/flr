@@ -6,6 +6,7 @@
     const dispatch = createEventDispatcher();
     export let label = "";
     export let model = "";
+    export let model_name_field = "";
     export let filters = [];
     export let value;
     export let edit;
@@ -49,12 +50,11 @@
             if (options && options.name_field){
                 kwargs.filters.push([options.name_field,'ilike',query])
             }else{
-                kwargs.filters.push(['name','ilike',query])
+                kwargs.filters.push([model_name_field,'ilike',query])
             }
         }
         loaded = false;
-        let readFields;
-        readFields = ["id"];
+        let readFields = ["id"];
         if (options && options.name_field){
             readFields.push(options.name_field)
         }else if(options && options.related_fields){
@@ -63,7 +63,7 @@
                 readFields.push(rf.field);
             }
         }else{
-            readFields.push("name")
+            readFields.push(model_name_field)
         }
         //Will throw an error if the model has no regular field called "name"
         //(i.e. if there's no name or if it is a property)
@@ -101,7 +101,7 @@
             if (options && options.name_field){
                 query = value[options.name_field]
             }else{
-                query = value.name
+                query = value[model_name_field]
             }
         }
         hideResults();
@@ -122,7 +122,7 @@
             if (options && options.name_field){
                 return value[options.name_field];
             }else{
-                return value.name || model + "," + value.id;
+                return value[model_name_field] || model + "," + value.id;
             }
         }else{
             return ""
@@ -228,7 +228,7 @@
                         class:highlight={highlightedResult == i}
                         on:click={()=>selectResult(result)}>{
                             result&&options&&options.name_field?
-                            result[options.name_field]:result.name}</p>
+                            result[options.name_field]:result[model_name_field]}</p>
                     {/each}
                     {#if results.length == 0}
                         <p class="p_sin_resultados">Sin resultados qué mostrar</p>
@@ -240,7 +240,7 @@
         {#if options && options.name_field && value}
             <p>{value[options.name_field] || value.id || ''}</p>
         {:else}
-            <p>{value && (value.name || value.id) || ''}</p>
+            <p>{value && (value[model_name_field] || value.id) || ''}</p>
         {/if}
     {/if}
 </div>

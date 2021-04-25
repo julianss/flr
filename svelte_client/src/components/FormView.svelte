@@ -508,6 +508,7 @@
                                     edit={editMode}
                                     bind:value={record[item.field]}
                                     model={fieldsDescription[item.field].model}
+                                    model_name_field={fieldsDescription[item.field].model_name_field}
                                     choices={fieldsDescription[item.field].options}
                                     required={
                                         (item.id in requireds) ?

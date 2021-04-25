@@ -215,7 +215,7 @@
     function openExportView() {
         document.getElementById("button-modal-export").click();
     }
-    
+
 </script>
 
 <div hidden={!visible}>
@@ -362,6 +362,7 @@
                                             bind:value={record[item.field]}
                                             choices={fieldsDescription[item.field].options}
                                             model={fieldsDescription[item.field].model}
+                                            model_name_field={fieldsDescription[item.field].model_name_field}
                                             relatedFieldsDesc={fieldsDescription[item.field].related_fields}
                                             nolabel={true}
                                             viewtype={'list'}

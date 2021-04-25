@@ -102,6 +102,9 @@ class BaseModel(pw.Model):
     def r(cls):
         if cls.__name__ in Registry:
             raise Exception(cls.__name__ + " already exists in the model registry")
+        if hasattr(cls, "_rec_name"):
+            if not hasattr(cls, cls._rec_name):
+                raise Exception(cls._rec_name + " not exists in model " + cls.__name__)
         Registry[cls.__name__] = cls
         cls._meta.add_field("created_by", pw.ForeignKeyField(Registry["FlrUser"], null=True,
             verbose_name=n_("Created by")))
@@ -125,9 +128,16 @@ class BaseModel(pw.Model):
         return defaults
 
     def get_dict_id_and_name(self):
+        name = None
+        if hasattr(self, "_rec_name"):
+            name = getattr(self, self._rec_name)
+        elif hasattr(self, "name"):
+            name = self.name
+        else:
+            name = "%s,%s"%(self.__class__.__name__, self.id)
         return {
             'id': self.id,
-            'name': self.name if hasattr(self, "name") else "%s,%s"%(self.__class__.__name__, self.id)
+            'name': name
         }
 
     @classmethod
@@ -185,6 +195,10 @@ class BaseModel(pw.Model):
             }
             if desc["type"] == "foreignkey":
                 desc["model"] = field.rel_model.__name__
+                if hasattr(field.rel_model, '_rec_name'):
+                    desc["model_name_field"] = field.rel_model._rec_name
+                elif hasattr(field.rel_model, 'name'):
+                    desc["model_name_field"] = 'name'
             if field.choices:
                 desc.update({
                     'type': 'select',
@@ -657,8 +671,12 @@ class BaseModel(pw.Model):
                 for pw_field in only:
                     if type(pw_field) == pw.ForeignKeyField or type(pw_field) == pw.FileField:
                         only.append(getattr(pw_field.rel_model, "id"))
-                        if hasattr(pw_field.rel_model, "name"):
+                        name_attr = None
+                        if hasattr(pw_field.rel_model, "_rec_name"):
+                            name_attr = getattr(pw_field.rel_model, pw_field.rel_model._rec_name)
+                        elif hasattr(pw_field.rel_model, "name"):
                             name_attr = pw_field.rel_model.name
+                        if name_attr:
                             if type(name_attr) != property:
                                 only.append(name_attr)
                             else:
@@ -670,6 +688,7 @@ class BaseModel(pw.Model):
                             if hasattr(pw_field.rel_model, other_name):
                                 other_name = getattr(pw_field.rel_model, other_name)
                                 only.append(other_name)
+
             for model in query:
                 data = model_to_dict(model, only=only, recurse=True, extra_attrs=extra_attrs)
                 if fk_2b_named:
@@ -822,7 +841,7 @@ class BaseModel(pw.Model):
             raise Exception("\n".join(errors))
         return {
             'affected_ids': affected_ids
-        }        
+        }
 
 @cron(minute="*/30")
 def delete_temporary_records():

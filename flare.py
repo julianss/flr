@@ -630,11 +630,15 @@ class BaseModel(pw.Model):
         else:
             query = cls.select()
         if order is not None:
-            order = order.split(" ")
-            order_attr = getattr(cls, order[0])
-            if "desc" in order:
-                order_attr = order_attr.desc()
-            query = query.order_by(order_attr)
+            for field_order in order.split(","):
+                field = field_order.strip()
+                _order = "asc"
+                if " " in field:
+                    field, _order = field.split(" ")
+                order_attr = getattr(cls, field)
+                if "desc" in _order:
+                    order_attr = order_attr.desc()
+                query = query.order_by(order_attr)
         #If model has active attribute read only those that are active
         if hasattr(cls, "active"):
             query = query.where(getattr(cls, 'active') == True)

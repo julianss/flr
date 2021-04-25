@@ -68,15 +68,29 @@ export function auth(login, password){
 }
 
 function SweetAlert(resp){
+    var style = 'overflow-y:auto;height:auto;max-height:70vh;';
+    var message = resp.error.message  || 'An error has occurred';
+    var html = '';
+    var title = '';
+    if (!resp.error.FlrException){
+        style += 'text-align:left;font-family:monospace;';
+        html = `<div style="${style}">${message}</div>`;
+        title = 'Server Error';
+    }else{
+        html = `<div style="${style}">${message}</div>`;
+        title = 'Warning';
+    }
     Swal.fire({
-        title: 'Error!',
-        text: resp.error.data  || 'An error has occurred',
+        title: title,
+        html: html.replace(/\n/g,"<br/>"),
+        width: '70%',
         buttonsStyling: false,
         customClass: {
             confirmButton: "btn btn-danger"
         },
         confirmButtonText: 'Send to administrator',
-        showCloseButton: true,
+        showConfirmButton: sendErrorBtn,
+        showCloseButton: true
       }).then((result) => {
         /* Read more about isConfirmed, isDenied below */
         if (result.isConfirmed) {

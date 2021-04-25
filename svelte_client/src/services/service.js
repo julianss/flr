@@ -108,14 +108,8 @@ function SweetAlert(resp){
                     timer: 4000,
                     showConfirmButton: false,
                     showCloseButton: true,
-                }).then(() => {
-                    history.back()
                 })
-            }else{
-                history.back()
             }
-        }else{
-            history.back()
         }
     })
 

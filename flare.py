@@ -117,8 +117,11 @@ class BaseModel(pw.Model):
         defaults = {}
         for k in cls._meta.fields.keys():
             field = cls._meta.fields[k]
-            if type(field) in (pw.IntegerField, pw.FloatField):
-                defaults[k] = 0
+            if getattr(field, 'default'):
+                defaults[k] = field.default
+            else:
+                if type(field) in (pw.IntegerField, pw.FloatField):
+                    defaults[k] = 0
         return defaults
 
     def get_dict_id_and_name(self):
@@ -178,8 +181,7 @@ class BaseModel(pw.Model):
             desc = {
                 'label': get_field_verbose_name(k, getattr(cls, k)),
                 'type': field.__class__.__name__.replace("Field", "").lower(),
-                'required': not field.null,
-                'default': field.default
+                'required': not field.null
             }
             if desc["type"] == "foreignkey":
                 desc["model"] = field.rel_model.__name__

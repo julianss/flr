@@ -8,6 +8,7 @@ export const jwt = writable(JWT_NOT_YET_LOADED);
 export const loading = writable(false);
 export let appName;
 export let appTitle;
+export let sendErrorBtn;
 
 fetch("/app_name")
     .then(resp => resp.text())
@@ -26,6 +27,12 @@ fetch("/app_title")
     .then(text => {
         appTitle = text;
         document.title = appTitle;
+    })
+
+fetch("/send_error_btn")
+    .then(resp => resp.text())
+    .then(text => {
+        sendErrorBtn = text==='True';
     })
 
 export function get_jwt_token(){

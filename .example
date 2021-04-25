@@ -15,3 +15,4 @@ flr_mail_port=
 flr_mail_user=
 flr_mail_pass=
 flr_legacy_table_names=False
+flr_send_error_btn=False

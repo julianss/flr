@@ -981,6 +981,10 @@ def get_app_name():
 def get_app_title():
     return os.environ.get("flr_app_title", os.environ["flr_app"])
 
+@app.route("/send_error_btn", methods=["GET"])
+def get_send_error_btn():
+    return os.environ.get("flr_send_error_btn")
+
 @app.route("/create_user", methods=["POST"])
 def create_user():
     try:

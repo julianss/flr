@@ -384,6 +384,20 @@
                         </tr>
                     {/each}
                 </tbody>
+                <tfoot>
+                    {#if view}
+                        <tr>
+                            <td></td>
+                            {#each view.definition.structure as item}
+                                {#if item.field && fieldsDescription && item.field in fieldsDescription && item.options && 'sum' in item.options}
+                                    <td>{fetchedRecords.reduce((a, b) => a + (b[item.field] || 0), 0)}</td>
+                                {:else}
+                                    <td></td>
+                                {/if}
+                            {/each}
+                        </tr>
+                    {/if}
+                </tfoot>
             </table>
         </div>
     {:else}

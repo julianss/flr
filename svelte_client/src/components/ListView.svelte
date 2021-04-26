@@ -32,6 +32,7 @@
     let selectedRecords = {};
     let cardViewTemplate = false;
     let cardViewEnabled = false;
+    let groupImportExportButton;
 
     searchFiltersStore.subscribe((event) => {
         if(event){
@@ -50,6 +51,11 @@
 
     viewsStore.subscribe((event) => {
         if(event){
+            call('FlrUser', 'groups_check_any', ['flrgroup_export_import']).then(
+                (resp)=>{
+                    groupImportExportButton = resp;
+                }
+            )
             fetchedRecords = [];
             filters = [];
             page = 1;
@@ -215,7 +221,7 @@
     function openExportView() {
         document.getElementById("button-modal-export").click();
     }
-    
+
 </script>
 
 <div hidden={!visible}>
@@ -277,9 +283,11 @@
                     </div>
                 </div>
             {/if}
-            <button on:click={openExportView} class="btn btn-secondary" type="button">
-                <img src="icons/save.svg" style="filter:invert(1)" title="Export/Import" alt="Export/Import"/>
-            </button>
+            {#if groupImportExportButton}
+                <button on:click={openExportView} class="btn btn-secondary" type="button">
+                    <img src="icons/save.svg" style="filter:invert(1)" title="Export/Import" alt="Export/Import"/>
+                </button>
+            {/if}
             {#if view && cardViewTemplate && !cardViewEnabled}
                 <button type="button" on:click={()=>{cardViewEnabled=true}}
                     class="btn btn-secondary">
@@ -362,6 +370,7 @@
                                             bind:value={record[item.field]}
                                             choices={fieldsDescription[item.field].options}
                                             model={fieldsDescription[item.field].model}
+                                            model_name_field={fieldsDescription[item.field].model_name_field}
                                             relatedFieldsDesc={fieldsDescription[item.field].related_fields}
                                             nolabel={true}
                                             viewtype={'list'}
@@ -375,6 +384,20 @@
                         </tr>
                     {/each}
                 </tbody>
+                <tfoot>
+                    {#if view}
+                        <tr>
+                            <td></td>
+                            {#each view.definition.structure as item}
+                                {#if item.field && fieldsDescription && item.field in fieldsDescription && item.options && 'sum' in item.options}
+                                    <td>{fetchedRecords.reduce((a, b) => a + (b[item.field] || 0), 0)}</td>
+                                {:else}
+                                    <td></td>
+                                {/if}
+                            {/each}
+                        </tr>
+                    {/if}
+                </tfoot>
             </table>
         </div>
     {:else}

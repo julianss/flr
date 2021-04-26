@@ -8,6 +8,7 @@ export const jwt = writable(JWT_NOT_YET_LOADED);
 export const loading = writable(false);
 export let appName;
 export let appTitle;
+export let sendErrorBtn;
 
 fetch("/app_name")
     .then(resp => resp.text())
@@ -26,6 +27,12 @@ fetch("/app_title")
     .then(text => {
         appTitle = text;
         document.title = appTitle;
+    })
+
+fetch("/send_error_btn")
+    .then(resp => resp.text())
+    .then(text => {
+        sendErrorBtn = text==='True';
     })
 
 export function get_jwt_token(){
@@ -68,15 +75,29 @@ export function auth(login, password){
 }
 
 function SweetAlert(resp){
+    var style = 'overflow-y:auto;height:auto;max-height:70vh;';
+    var message = resp.error.message  || 'An error has occurred';
+    var html = '';
+    var title = '';
+    if (!resp.error.FlrException){
+        style += 'text-align:left;font-family:monospace;';
+        html = `<div style="${style}">${message}</div>`;
+        title = 'Server Error';
+    }else{
+        html = `<div style="${style}">${message}</div>`;
+        title = 'Warning';
+    }
     Swal.fire({
-        title: 'Error!',
-        text: resp.error.data  || 'An error has occurred',
+        title: title,
+        html: html.replace(/\n/g,"<br/>"),
+        width: '70%',
         buttonsStyling: false,
         customClass: {
             confirmButton: "btn btn-danger"
         },
         confirmButtonText: 'Send to administrator',
-        showCloseButton: true,
+        showConfirmButton: sendErrorBtn,
+        showCloseButton: true
       }).then((result) => {
         /* Read more about isConfirmed, isDenied below */
         if (result.isConfirmed) {
@@ -87,14 +108,8 @@ function SweetAlert(resp){
                     timer: 4000,
                     showConfirmButton: false,
                     showCloseButton: true,
-                }).then(() => {
-                    history.back()
                 })
-            }else{
-                history.back()
             }
-        }else{
-            history.back()
         }
     })
 

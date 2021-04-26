@@ -187,7 +187,7 @@
                     }else{
                         let blankRecord = {id: null};
                         for(let field in fieldsDescription){
-                            blankRecord[field] = fieldsDescription[field].default || null;
+                            blankRecord[field] = null;
                         }
                         call(view.model, "get_default").then(
                             (defaults) => {
@@ -508,6 +508,7 @@
                                     edit={editMode}
                                     bind:value={record[item.field]}
                                     model={fieldsDescription[item.field].model}
+                                    model_name_field={fieldsDescription[item.field].model_name_field}
                                     choices={fieldsDescription[item.field].options}
                                     required={
                                         (item.id in requireds) ?

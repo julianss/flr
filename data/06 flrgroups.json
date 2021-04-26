@@ -1,0 +1,9 @@
+[
+    {
+        "model": "FlrGroup",
+        "meta_id": "flrgroup_export_import",
+        "data": {
+            "name": "Export/Import button"
+        }
+    }
+]

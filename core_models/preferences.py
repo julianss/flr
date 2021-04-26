@@ -1,6 +1,6 @@
 import peewee as pw
 from flask import request, has_request_context
-from flare import BaseModel, Registry as r, normalize_filters, combine_filters, _, n_
+from flare import BaseModel, Registry as r, normalize_filters, combine_filters, _, n_, FlrException
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha512
 import jwt
@@ -30,17 +30,17 @@ class FlrPreferences(BaseModel):
         user = r["FlrUser"].get_by_id(request.uid)
         if fields.get("old_password"):
             if not pbkdf2_sha512.verify(fields.get("old_password"), user.password):
-                raise Exception(_("Entered password is incorrect"))
+                raise FlrException(_("Entered password is incorrect"))
             if fields.get('new_password') or fields.get('confirm_new_password'):
                 if not fields.get('new_password') == fields.get('confirm_new_password'):
-                    raise Exception(_("Password confirmation doesn't match "))
+                    raise FlrException(_("Password confirmation doesn't match "))
                 r["FlrUser"].flr_update({'password': fields.get('new_password')},
                     [('id','=',user.id)])
             else:
-                raise Exception(_("New password is empty"))
+                raise FlrException(_("New password is empty"))
         else:
             if fields.get('new_password') or fields.get('confirm_new_password'):
-                raise Exception(_("To set a new password please enter current password"))
+                raise FlrException(_("To set a new password please enter current password"))
         if fields.get('new_company'):
             r["FlrUser"].flr_update({'company_id': fields['new_company']},
                 [('id','=',user.id)])

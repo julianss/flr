@@ -19,6 +19,7 @@
     export let value;
     export let edit;
     export let model;
+    export let model_name_field;
     export let filters = [];
     export let choices = [];
     export let required;
@@ -99,11 +100,12 @@
                 bind:value={value}
                 edit={edit}
                 model={model}
+                model_name_field={model_name_field}
                 filters={filters}
                 on:change={changed}
                 query={
                     value&&options&&options.name_field?
-                    value[options.name_field]:value?value.name:''}
+                    value[options.name_field]:value?value[model_name_field]:''}
                 readonly={readonly}
                 options={options}
             />
@@ -183,7 +185,10 @@
         content:"*";
         color:red
     }
-    .required :global(input, select.form-control, select.form-control:focus){
+    .required :global(input){
+        background-color:seashell
+    }
+    .required :global(select){
         background-color:seashell
     }
     .nolabel :global(label){

@@ -10,12 +10,14 @@
     export let edit;
     export let relatedFieldsDesc = {};
     export let viewtype;
+    export let readonly;
     export let options;
-    let valueFK;
 
     function renderField(obj, field){
         let val = obj[field];
-        if(typeof(val) == "number" || typeof(val) == "string"){
+        if (typeof(val)=="undefined"){
+            return "";
+        }else if(typeof(val) == "number" || typeof(val) == "string"){
             return val;
         }else if(typeof(val) == "boolean"){
             return val?"✔️":"❌";
@@ -84,12 +86,15 @@
                                     edit={edit && !field.readonly}
                                     bind:value={obj[field.field]}
                                     model={relatedFieldsDesc[field.field].model}
+                                    model_name_field={relatedFieldsDesc[field.field].model_name_field}
                                     choices={relatedFieldsDesc[field.field].options}
                                     required={relatedFieldsDesc[field.field].required}
                                     relatedFieldsDesc={null}
-                                    nolabel={true}
                                     on:change={changed}
+                                    nolabel={true}
+                                    readonly={field.readonly}
                                     options={field.options || {}}
+                                    viewtype={viewtype}
                                 />
                             </td>
                         {/each}

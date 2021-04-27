@@ -64,6 +64,7 @@
                 invisibles = {};
                 readonlys = {};
                 requireds = {};
+                record = null;
                 for(let k in view.definition){
                     if (typeof view.definition[k] === 'string'){
                         var uid = getUniqueId();
@@ -437,7 +438,6 @@
                             options={button.options}
                             model={view.model}
                             bind:record
-                            view={this}
                         />
                     </div>
                 {/each}

@@ -366,13 +366,16 @@
                                     <td>
                                         <Field
                                             type={fieldsDescription[item.field].type}
+                                            label={item.label || fieldsDescription[item.field].label}
                                             edit={false}
                                             bind:value={record[item.field]}
                                             choices={fieldsDescription[item.field].options}
+                                            required={false}
                                             model={fieldsDescription[item.field].model}
                                             model_name_field={fieldsDescription[item.field].model_name_field}
                                             relatedFieldsDesc={fieldsDescription[item.field].related_fields}
                                             nolabel={true}
+                                            readonly={false}
                                             viewtype={'list'}
                                             options={item.options || {}}
                                         />

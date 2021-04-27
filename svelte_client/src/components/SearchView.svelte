@@ -4,7 +4,7 @@
         viewsStore,
         activeViewStore,
         getValue,
-        searchFiltersStore, 
+        searchFiltersStore,
         publish
     } from './../services/writables.js';
     import Field from './Field.svelte';
@@ -38,16 +38,18 @@
                 view = views["search"];
                 for(let field of view.definition.fields){
                     fields.push(field.field);
-                    selectedOperators[field] = null;
-                    selectedValues[field] = null;
+                    selectedValues[field.field] = null;
+                    selectedValues2[field.field] = null;
                 }
             }else if(views != null && views["list"]){
                 view = views["list"];
                 for(let field of view.definition.structure){
                     fields.push(field.field);
-                    selectedOperators[field] = null;
-                    selectedValues[field] = null;
+                    selectedValues[field.field] = null;
+                    selectedValues2[field.field] = null;
                 }
+            }else{
+                view = null;
             }
             //There may be no list nor search view (eg. wizard)
             if(!view){
@@ -67,7 +69,7 @@
             var operator = selectedOperators[field];
             var value = selectedValues[field];
             var value2 = selectedValues2[field];
-            if(typeof(value) === "object"){
+            if(value && typeof(value) === "object"){
                 if(value.id){
                     value = value.id;
                 }
@@ -148,10 +150,15 @@
                                             edit={true}
                                             bind:value={selectedValues[item.field]}
                                             model={fieldsDescription[item.field].model}
+                                            model_name_field={fieldsDescription[item.field].model_name_field}
                                             choices={fieldsDescription[item.field].options}
                                             required={false}
-                                            nolabel={true}
+                                            relatedFieldsDesc={fieldsDescription[item.field].related_fields}
                                             on:change={updateFilters}
+                                            nolabel={true}
+                                            readonly={false}
+                                            viewtype={'search'}
+                                            options={item.options || {}}
                                         />
                                         {#if selectedOperators[item.field] === "between"}
                                             <Field
@@ -160,9 +167,15 @@
                                                 edit={true}
                                                 bind:value={selectedValues2[item.field]}
                                                 model={fieldsDescription[item.field].model}
+                                                model_name_field={fieldsDescription[item.field].model_name_field}
+                                                choices={fieldsDescription[item.field].options}
                                                 required={false}
-                                                nolabel={true}
+                                                relatedFieldsDesc={fieldsDescription[item.field].related_fields}
                                                 on:change={updateFilters}
+                                                nolabel={true}
+                                                readonly={false}
+                                                viewtype={'search'}
+                                                options={item.options || {}}
                                             />
                                         {/if}
                                     </span>

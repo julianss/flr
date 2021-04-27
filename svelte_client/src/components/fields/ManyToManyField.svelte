@@ -10,7 +10,7 @@
     export let readonly;
     export let viewtype;
     export let options;
-    let valueFK;
+    let valueFK = null;
 
     function renderField(obj, field){
         let val = obj[field];
@@ -64,7 +64,9 @@
                 model={model}
                 filters={filters}
                 on:change={add}
+                readonly={false}
                 placeholder="Agregar elemento"
+                options={options}
             />
         {/if}
         <table class="table table-sm">

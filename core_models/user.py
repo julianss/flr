@@ -121,6 +121,8 @@ class FlrUser(BaseModel):
 
     @classmethod
     def groups_check_any(cls, list_of_meta_ids):
+        if isinstance(list_of_meta_ids, str):
+            list_of_meta_ids = [list_of_meta_ids]
         """Check that user belongs to at least one of the groups, which are passed as a list of meta ids"""
         group_ids = []
         FlrMeta = Registry["FlrMeta"]

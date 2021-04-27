@@ -87,6 +87,9 @@ def get_field_verbose_name(k, obj):
             doc = obj.__doc__
     return _(verbose or htext or doc or pretty)
 
+class FlrException(Exception):
+    pass
+
 class BaseModel(pw.Model):
     _transient = False
     _rbac = {}
@@ -100,6 +103,9 @@ class BaseModel(pw.Model):
     def r(cls):
         if cls.__name__ in Registry:
             raise Exception(cls.__name__ + " already exists in the model registry")
+        if hasattr(cls, "_rec_name"):
+            if not hasattr(cls, cls._rec_name):
+                raise Exception(cls._rec_name + " not exists in model " + cls.__name__)
         Registry[cls.__name__] = cls
         cls._meta.add_field("created_by", pw.ForeignKeyField(Registry["FlrUser"], null=True,
             verbose_name=n_("Created by")))
@@ -115,14 +121,24 @@ class BaseModel(pw.Model):
         defaults = {}
         for k in cls._meta.fields.keys():
             field = cls._meta.fields[k]
-            if type(field) in (pw.IntegerField, pw.FloatField):
-                defaults[k] = 0
+            if getattr(field, 'default'):
+                defaults[k] = field.default
+            else:
+                if type(field) in (pw.IntegerField, pw.FloatField):
+                    defaults[k] = 0
         return defaults
 
     def get_dict_id_and_name(self):
+        name = None
+        if hasattr(self, "_rec_name"):
+            name = getattr(self, self._rec_name)
+        elif hasattr(self, "name"):
+            name = self.name
+        else:
+            name = "%s,%s"%(self.__class__.__name__, self.id)
         return {
             'id': self.id,
-            'name': self.name if hasattr(self, "name") else "%s,%s"%(self.__class__.__name__, self.id)
+            'name': name
         }
 
     @classmethod
@@ -176,11 +192,14 @@ class BaseModel(pw.Model):
             desc = {
                 'label': get_field_verbose_name(k, getattr(cls, k)),
                 'type': field.__class__.__name__.replace("Field", "").lower(),
-                'required': not field.null,
-                'default': field.default
+                'required': not field.null
             }
             if desc["type"] == "foreignkey":
                 desc["model"] = field.rel_model.__name__
+                if hasattr(field.rel_model, '_rec_name'):
+                    desc["model_name_field"] = field.rel_model._rec_name
+                elif hasattr(field.rel_model, 'name'):
+                    desc["model_name_field"] = 'name'
             if field.choices:
                 desc.update({
                     'type': 'select',
@@ -626,11 +645,15 @@ class BaseModel(pw.Model):
         else:
             query = cls.select()
         if order is not None:
-            order = order.split(" ")
-            order_attr = getattr(cls, order[0])
-            if "desc" in order:
-                order_attr = order_attr.desc()
-            query = query.order_by(order_attr)
+            for field_order in order.split(","):
+                field = field_order.strip()
+                _order = "asc"
+                if " " in field:
+                    field, _order = field.split(" ")
+                order_attr = getattr(cls, field)
+                if "desc" in _order:
+                    order_attr = order_attr.desc()
+                query = query.order_by(order_attr)
         #If model has active attribute read only those that are active
         if hasattr(cls, "active"):
             query = query.where(getattr(cls, 'active') == True)
@@ -649,8 +672,12 @@ class BaseModel(pw.Model):
                 for pw_field in only:
                     if type(pw_field) == pw.ForeignKeyField or type(pw_field) == pw.FileField:
                         only.append(getattr(pw_field.rel_model, "id"))
-                        if hasattr(pw_field.rel_model, "name"):
+                        name_attr = None
+                        if hasattr(pw_field.rel_model, "_rec_name"):
+                            name_attr = getattr(pw_field.rel_model, pw_field.rel_model._rec_name)
+                        elif hasattr(pw_field.rel_model, "name"):
                             name_attr = pw_field.rel_model.name
+                        if name_attr:
                             if type(name_attr) != property:
                                 only.append(name_attr)
                             else:
@@ -662,6 +689,7 @@ class BaseModel(pw.Model):
                             if hasattr(pw_field.rel_model, other_name):
                                 other_name = getattr(pw_field.rel_model, other_name)
                                 only.append(other_name)
+
             for model in query:
                 data = model_to_dict(model, only=only, recurse=True, extra_attrs=extra_attrs)
                 if fk_2b_named:
@@ -831,7 +859,7 @@ class BaseModel(pw.Model):
             raise Exception("\n".join(errors))
         return {
             'affected_ids': affected_ids
-        }        
+        }
 
 @cron(minute="*/30")
 def delete_temporary_records():
@@ -899,13 +927,19 @@ def call():
             })
         except Exception as ex:
             transaction.rollback()
-            print(traceback.format_exc())
-            return make_response(jsonify({
-                'error': {
-                    'message': str(ex),
-                    'data': traceback.format_exc()
-                }
-            }), 500)
+            if isinstance(ex, FlrException):
+                return make_response(jsonify({
+                    'error': {
+                        'message': str(ex),
+                        'FlrException': True,
+                    }
+                }), 500)
+            else:
+                return make_response(jsonify({
+                    'error': {
+                        'message': traceback.format_exc(),
+                    }
+                }), 500)
 
 @app.route("/recoverypassword", methods=["POST"])
 def recoverypassword():
@@ -989,6 +1023,10 @@ def get_app_name():
 @app.route("/app_title", methods=["GET"])
 def get_app_title():
     return os.environ.get("flr_app_title", os.environ["flr_app"])
+
+@app.route("/send_error_btn", methods=["GET"])
+def get_send_error_btn():
+    return os.environ.get("flr_send_error_btn")
 
 @app.route("/create_user", methods=["POST"])
 def create_user():

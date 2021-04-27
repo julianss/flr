@@ -70,12 +70,6 @@
                 "_('General')": [
                     {"field": "name"},
                     {"field": "email"},
-                    {
-                        "field": "password", "readonly": "this.password",
-                        "options": {
-                            "password": true
-                        }
-                    },
                     {"field": "company_id"},
                     {"field": "active"},
                     {"field": "lang"},

@@ -1,6 +1,6 @@
 import { call, appTitle } from './service.js';
 import { updateHash, replaceHash } from './../services/utils.js';
-import { publish } from './writables.js';
+import { publish, globalsStore } from './writables.js';
 
 export function getMenus() {
     return call("FlrMenu", "get_menus");
@@ -63,6 +63,7 @@ export function openViews(views, options={}){
 
 export function clickMenu(menuId, type, id) {
     if(menuId){
+      globalsStore.set({})
       getViews(menuId).then(
         (resp) => {
           openViews(resp);

@@ -1,4 +1,5 @@
 <script>
+    import { _ } from 'svelte-i18n';
     import { call } from './../services/service.js';
     import { requestReport } from './../services/report.js';
     import { updateHash, getUniqueId } from './../services/utils.js';
@@ -36,6 +37,7 @@
     let listViewExists = false;
     let fetchingRecord = false;
     let disabled = false;
+    let reloadOnSave = false;
 
     activeViewStore.subscribe((event) => {
         if(event){
@@ -57,7 +59,8 @@
             if(views != null && views["form"]){
                 listViewExists = "list" in views;
                 view = views["form"];
-                isWizard = view.wizard || false
+                isWizard = view.wizard || false;
+                reloadOnSave = view.reloadOnSave || false;
                 showSaveButton = view.showSaveButton || false;
                 sections = [];
                 onChanges = {};
@@ -312,7 +315,11 @@
     function wrapFunctionSave(event){
         disabled = true;
         try {
-            save(event)
+            save(event).then(()=>{
+                if(reloadOnSave){
+                    location.reload();
+                }
+            })
         }
         finally {
             disabled = false;
@@ -386,30 +393,30 @@
         <div class="col-md">
             {#if isWizard}
                 <button type="button" class="btn btn-secondary mb-2" on:click={()=>history.back()}>
-                    <img src="icons/arrow-left.svg" style="filter:invert(1)" title="Regresar" alt="Regresar">
+                    <img src="icons/arrow-left.svg" style="filter:invert(1)" title="{$_('form_view.back')}" alt="{$_('form_view.back')}">
                 </button>
             {/if}
             {#if !isWizard}
                 {#if listViewExists}
                     <button type="button" class="btn btn-secondary mb-2" on:click={back}>
-                        <img src="icons/arrow-left.svg" style="filter:invert(1)" title="Regresar" alt="Regresar">
+                        <img src="icons/arrow-left.svg" style="filter:invert(1)" title="{$_('form_view.back')}" alt="{$_('form_view.back')}">
                     </button>
                 {/if}
                 {#if view && view.definition.create !== false}
                     {#if recordId && !editMode}
                         <button type="button" class="btn btn-primary mb-2" on:click={create}>
-                            <img src="icons/plus.svg" style="filter:invert(1)" title="Nuevo" alt="Nuevo">
+                            <img src="icons/plus.svg" style="filter:invert(1)" title="{$_('form_view.new')}" alt="{$_('form_view.new')}">
                         </button>
                     {/if}
                 {/if}
             {/if}
             {#if editMode && (!isWizard || showSaveButton)}
                 <button type="button" class="btn btn-primary mb-2" on:click={wrapFunctionSave} disabled="{disabled}">
-                    <img src="icons/check2.svg" style="filter:invert(1)" title="Guardar" alt="Guardar">
+                    <img src="icons/check2.svg" style="filter:invert(1)" title="{$_('form_view.save')}" alt="{$_('form_view.save')}">
                 </button>
                 {#if !isWizard}
                     <button type="button" class="btn btn-outline-secondary mb-2" on:click={discard}>
-                        <img src="icons/x.svg" title="Descartar" alt="Descartar">
+                        <img src="icons/x.svg" title="{$_('form_view.discard')}" alt="{$_('form_view.discard')}">
                     </button>
                 {/if}
             {/if}
@@ -418,7 +425,7 @@
                     {#if !isWizard}
                         <button hidden={view.definition.edit && view.definition.edit.hasOwnProperty('id') && view.definition.edit.id in invisibles && !invisibles[view.definition.edit.id].result}
                             type="button" class="btn btn-primary mb-2" on:click={edit}>
-                            <img src="icons/pencil-square.svg" style="filter:invert(1)" title="Editar" alt="Editar">
+                            <img src="icons/pencil-square.svg" style="filter:invert(1)" title="{$_('form_view.edit')}" alt="{$_('form_view.edit')}">
                         </button>
                     {/if}
                 {/if}
@@ -445,7 +452,7 @@
             {#if record && reports && record.id && reports.length>0}
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="actionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <img src="icons/download.svg" style="filter:invert(1)" title="Descargar" alt="Descargar">
+                        <img src="icons/download.svg" style="filter:invert(1)" title="{$_('form_view.download')}" alt="{$_('form_view.download')}">
                     </button>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="actionsDropdown">
                         {#each reports as report}
@@ -483,13 +490,13 @@
                         <button type="button" class="close" data-dismiss="alert"
                             on:click={resetValidations}>×</button>
                         {#if validations['required'].length > 0}
-                            <strong>Required fields</strong><br>
+                            <strong>{$_('form_view.required')}</strong><br>
                             {#each validations['required'] as item}
                                 {item.label || fieldsDescription[item.field].label}<br>
                             {/each}
                         {/if}
                         {#if validations['others'].length > 0}
-                            <strong>Fields has errors</strong><br>
+                            <strong>{$_('form_view.errors')}</strong><br>
                             {#each validations['others'] as item}
                                 {item.label || fieldsDescription[item.field].label}<br>
                             {/each}

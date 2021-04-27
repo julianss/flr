@@ -290,3 +290,50 @@ msgstr "Registro eliminado existosamente"
 msgid "No record was deleted"
 msgstr "No se eliminó ningún registro"
 
+#: data/04 flrpreferences.json
+msgid "Change password"
+msgstr "Cambiar contraseña"
+
+#: data/04 flrpreferences.json
+msgid "Change company"
+msgstr "Cambiar compañía"
+
+# data/03 flruser.json
+msgid "General"
+msgstr "General"
+
+# data/03 flruser.json
+msgid "Roles"
+msgstr "Roles"
+
+# data/03 flruser.json
+msgid "Allowed companies"
+msgstr "Compañías permitidas"
+
+# data/03 flruser.json
+msgid "Users"
+msgstr "Usuarios"
+
+# data/03 flruser.json
+msgid "Roles"
+msgstr "Roles"
+
+# data/01 admin.json
+msgid "System settings"
+msgstr "Configuración"
+
+# data/01 admin.json
+msgid "System administration"
+msgstr "Administración del sistema"
+
+# data/02 flrcompany.json
+msgid "Multicompany"
+msgstr "Multicompañía"
+
+# data/02 flrcompany.json
+msgid "Companies"
+msgstr "Compañías"
+
+# data/03 flruser.json
+msgid "Access control (ACL)"
+msgstr "Control de acceso (ACL)"

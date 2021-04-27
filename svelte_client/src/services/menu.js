@@ -45,6 +45,9 @@ export function openViews(views, options={}){
         if(options.showSaveButton === true){
           view.showSaveButton = true
         }
+        if(options.reloadOnSave === true){
+          view.reloadOnSave = true
+        }
       }
     }
     publish({

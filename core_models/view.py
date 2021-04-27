@@ -1,6 +1,6 @@
 import os
 import peewee as pw
-from flare import BaseModel, Registry, n_, m
+from flare import BaseModel, Registry, n_, _, m
 import json
 import re
 
@@ -22,6 +22,7 @@ class FlrView(BaseModel):
     # - delete restricted items from the views definitions ("groups" property)
     # - load the card view templates
     # - replace m(...) marks with the desired meta_id
+    # - replace t(...) marks with the translations
     @classmethod
     def read(cls, fields, ids=[], filters=[], paginate=False, order=None, count=False):
         results = super(FlrView, cls).read(fields, ids=ids, filters=filters, paginate=paginate, order=order, count=count)
@@ -35,12 +36,15 @@ class FlrView(BaseModel):
                 with open(path) as f:
                     result["card_view_template"] = f.read()
             new_definition = {}
-            as_text = json.dumps(result["definition"])
-            requested_meta_ids = re.findall("m\((.*?)\)", as_text)
+            definition_as_text = json.dumps(result["definition"])
+            requested_meta_ids = re.findall("m\((.*?)\)", definition_as_text)
             for meta_id in requested_meta_ids:
-                as_text = as_text.replace("\"m(%s)\""%meta_id, str(m(meta_id).id))
-            if requested_meta_ids:
-                result["definition"] = json.loads(as_text)
+                definition_as_text = definition_as_text.replace("\"m(%s)\""%meta_id, str(m(meta_id).id))
+            requested_translations = list(set(re.findall("_\('(.*?)'\)", definition_as_text)))
+            for string_to_translate in requested_translations:
+                definition_as_text = definition_as_text.replace("_('%s')"%string_to_translate, _(string_to_translate))
+            if requested_meta_ids or requested_translations:
+                result["definition"] = json.loads(definition_as_text)
             for key in result["definition"]:
                 new_definition[key] = []
                 value = result["definition"][key]

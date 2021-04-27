@@ -16,6 +16,7 @@ from datetime import datetime
 import jwt
 import tempfile
 import json
+import re
 
 SECRET = os.environ.get("flr_jwt_secret")
 
@@ -689,6 +690,23 @@ class BaseModel(pw.Model):
                             related_records_dicts.append(rendered)
                         data[field_name] = related_records_dicts
                 results.append(data)
+
+            #Translate values that consist solely of a string of the form _('...')
+            def translate(d):
+                for key in d:
+                    if type(d[key]) == str:
+                        m = re.match("_\('(.*?)'\)", d[key])
+                        if m:
+                            d[key] = _(m.group(1))
+                    elif type(d[key]) == dict:
+                        translate(d[key])
+                    elif type(d[key]) == list:
+                        for item in d[key]:
+                            if type(item) == dict:
+                                translate(item)
+            for result in results:
+                translate(result)
+
             return results
 
     @classmethod

@@ -1,4 +1,5 @@
 <script>
+    import { _ } from 'svelte-i18n';
     import { auth, recoverypassword, resetPassword } from '../services/service.js';
     let login;
     let password;
@@ -23,7 +24,7 @@
         auth(login, password).then(
             (resp) => {
                 if(resp.error){
-                    incorrect = 'Usuario o contraseña incorrectos';
+                    incorrect = $_('login.incorrect');
                 }else{
                     incorrect = false;
                 }
@@ -45,7 +46,7 @@
     }
     function doResetPassword(){
         if ((newpassword.length == 0)||(confirmpass.length == 0)){
-            incorrect = 'Llene los campos de las contraseñas'
+            incorrect = $_('login.fill_password')
         }else{
             if (newpassword === confirmpass){
                 resetPassword(confirmpass).then((resp) => {
@@ -57,7 +58,7 @@
                 })
             }
             else{
-                incorrect = 'No coinciden las contraseñas'
+                incorrect = $_('login.passwords_dont_match')
             }
         }
     }
@@ -103,11 +104,11 @@
                 {#if !resetpassword}
                     {#if !recoveryscreen}
                         <div class="form-group">
-                            <label>Usuario</label>
+                            <label>{$_('login.user')}</label>
                             <input class="form-control" type="text" bind:value={login}>
                         </div>
                         <div class="form-group">
-                            <label>Contraseña</label>
+                            <label>{$_('login.password')}</label>
                             <div class="input-group">
                                 <input class="form-control border-right-0" id="password" type="password"
                                     bind:value={password}
@@ -126,21 +127,21 @@
 
                         </div>
                         <div class="form-group">
-                            <button type="button" class="btn btn-primary" on:click={authenticate}>Iniciar sesión</button>
+                            <button type="button" class="btn btn-primary" on:click={authenticate}>{$_('login.login')}</button>
                         </div>
                         <div class="form-group">
-                            <a class="text-primary" href="#" on:click={recoveryScreen}>Olvidé mi contraseña</a>
+                            <a class="text-primary" href="#" on:click={recoveryScreen}>{$_('login.forgot')}</a>
                         </div>
                     {:else}
                         {#if !send_message}
                             <div class="form-group">
-                                <label>Ingresa tu email para reestablecer tu contraseña</label>
+                                <label>{$_('login.enter_email')}</label>
                                 <input class="form-control" type="text" bind:value={email}>
                             </div>
-                            <button type="button" class="btn btn-primary" on:click={recoveryPassword}>Enviar</button>
+                            <button type="button" class="btn btn-primary" on:click={recoveryPassword}>{$_('login.send')}</button>
                         {:else}
                             <div class="form-group">
-                                <label>Se ha enviado un correo a {email}</label>
+                                <label>{$_('login.sent')} {email}</label>
                             </div>
                         {/if}
                     {/if}
@@ -148,7 +149,7 @@
                     {#if !successreset}
 
                         <div class="form-group">
-                            <label>Nueva contraseña</label>
+                            <label>{$_('login.new_password')}</label>
                             <div class="input-group">
                                 <input class="form-control border-right-0" id="newpassword" type="password" bind:value={newpassword}>
                                 <div class="input-group-prepend border-right-0">
@@ -164,7 +165,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>Confirmar contraseña</label>
+                            <label>{$_('login.confirm_password')}</label>
                             <div class="input-group">
                                 <input class="form-control border-right-0" id="confirmpass" type="password" bind:value={confirmpass}>
                                 <div class="input-group-prepend border-right-0">
@@ -180,14 +181,14 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <button type="button" class="btn btn-primary" on:click={doResetPassword}>Cambiar contraseña</button>
+                            <button type="button" class="btn btn-primary" on:click={doResetPassword}>{$_('login.change')}</button>
                         </div>
                     {:else}
                         <div class="form-group">
-                            <label>Se ha cambiado la contraseña con éxito</label>
+                            <label>{$_('login.changed')}</label>
                         </div>
                         <div class="form-group">
-                            <button type="button" class="btn btn-primary" on:click={authscreen}>Iniciar sesión</button>
+                            <button type="button" class="btn btn-primary" on:click={authscreen}>{$_('login.login')}</button>
                         </div>
                     {/if}
                 {/if}

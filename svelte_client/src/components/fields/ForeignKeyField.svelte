@@ -62,6 +62,7 @@
             for(let rf of options.related_fields){
                 readFields.push(rf.field);
             }
+            readFields = readFields;
         }else{
             readFields.push(model_name_field)
         }
@@ -69,14 +70,29 @@
         //(i.e. if there's no name or if it is a property)
         call(model, "read", [readFields], kwargs).then(
             (resp) => {
-                results = resp
+                let selectedRecords = resp
+                for(let result of selectedRecords){
+                    FilterResultsByDefinition(result)
+                }
+                results = results;
                 loaded = true;
                 offset = -1;
             }
         )
         showResults = true;
     }
+    function FilterResultsByDefinition(result){
+        if (options && 'filters' in options){
+            let code = "return " + options.filters;
+            let res = new Function(code).call(result);
+            if (res === true){
+                results.push(result)
+            }
+        }else{
+            results.push(result)
+        }
 
+    }
     activeElement.subscribe((value) => {
         if(value){
             if (!(value===uniqueId)){
@@ -227,8 +243,10 @@
                         <p class="result" tabindex="0"
                         class:highlight={highlightedResult == i}
                         on:click={()=>selectResult(result)}>{
-                            result&&options&&options.name_field?
-                            result[options.name_field]:result[model_name_field]}</p>
+                            result&&options&&'name_field' in options?result[options.name_field]:
+                            result&&options&&'related_fields' in options?
+                                options.related_fields.map(item => result[item.field]).join('-'):
+                            result[model_name_field]}</p>
                     {/each}
                     {#if results.length == 0}
                         <p class="p_sin_resultados">Sin resultados qué mostrar</p>

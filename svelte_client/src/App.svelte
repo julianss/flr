@@ -19,7 +19,7 @@
 	jwt.subscribe((value)=>{
 	  if(value !== JWT_NOT_YET_LOADED && value != ''){
 		logged = true;
-		call("FlrUser", "get_lang").then((resp) => locale.set(resp));
+		call("FlrUser", "get_lang").then((resp) => {if(resp){locale.set(resp)}});
 	  }
 	  if(value !== JWT_NOT_YET_LOADED){
 		showApp = true;

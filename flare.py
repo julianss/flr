@@ -210,10 +210,15 @@ class BaseModel(pw.Model):
             if k not in which:
                 continue
             field = cls._meta.manytomany[k]
+            if hasattr(field.rel_model, '_rec_name'):
+                model_field_name = field.rel_model._rec_name
+            elif hasattr(field.rel_model, 'name'):
+                model_field_name = "name"
             fields[k] = {
                 'label': get_field_verbose_name(k, getattr(cls, k)),
                 'type': 'manytomany',
                 'model': field.rel_model.__name__,
+                'model_name_field': model_field_name,
                 'related_fields': []
             }
             rfs = []

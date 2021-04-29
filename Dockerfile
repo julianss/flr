@@ -22,10 +22,9 @@ RUN echo "python3 sched.py & echo $! > scheduler.pid" >> /app/prestart.sh
 
 #Copy neccessry files
 COPY __init__.py /app
-COPY flare.py /app
+COPY flr.py /app
 COPY registry.py /app
 COPY utils.py /app
-COPY flare.py /app
 COPY main.py /app
 COPY load_db.py /app
 COPY sched.py /app

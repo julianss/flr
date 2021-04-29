@@ -1,6 +1,6 @@
 import os
 import peewee as pw
-from flare import BaseModel, Registry, n_, _, m
+from flr import BaseModel, Registry, n_, _, m
 import json
 import re
 

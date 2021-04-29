@@ -1,5 +1,5 @@
 import peewee as pw
-from flare import BaseModel, Registry, n_, _
+from flr import BaseModel, Registry, n_, _
 from flask import request
 
 class FlrMenuSection(BaseModel):

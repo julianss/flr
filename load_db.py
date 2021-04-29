@@ -8,7 +8,7 @@ elif len(sys.argv) > 1:
 else:
     load_dotenv()
 from registry import Registry, db
-from flare import scheduler, m
+from flr import scheduler, m
 import json
 import os
 import core_models

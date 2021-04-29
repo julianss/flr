@@ -1,4 +1,4 @@
-from flare import Registry
+from flr import Registry
 import peewee as pw
 import json
 

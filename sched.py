@@ -9,7 +9,7 @@ else:
     load_dotenv()
 
 from registry import db
-from flare import scheduler
+from flr import scheduler
 import os
 import core_models
 __import__("apps." + os.environ["flr_app"])

@@ -1,6 +1,6 @@
 import peewee as pw
 from flask import request, has_request_context
-from flare import BaseModel, Registry as r, normalize_filters, combine_filters, _, n_, i18n, FlrException
+from flr import BaseModel, Registry as r, normalize_filters, combine_filters, _, n_, i18n, FlrException
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha512
 import jwt

@@ -1,6 +1,9 @@
 from dotenv import load_dotenv
 import sys
 import os
+os.environ["TZ"] = "UTC"
+import time
+time.tzset()
 if os.environ.get("flr_app"):
     load_dotenv("." + os.environ.get("flr_app"))
 elif len(sys.argv) > 1:

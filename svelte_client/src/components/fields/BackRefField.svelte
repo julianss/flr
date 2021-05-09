@@ -84,6 +84,7 @@
                                     edit={edit && !field.readonly}
                                     bind:value={obj[field.field]}
                                     model={relatedFieldsDesc[field.field].model}
+                                    model_name_field={relatedFieldsDesc[field.field].model_name_field}
                                     choices={relatedFieldsDesc[field.field].options}
                                     required={relatedFieldsDesc[field.field].required}
                                     relatedFieldsDesc={null}

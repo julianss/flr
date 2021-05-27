@@ -1,0 +1,70 @@
+{
+    "export_view": {
+        "title": "Export/Import",
+        "export": "Export",
+        "import": "Import",
+        "success": "Import successful",
+        "current": "Current page",
+        "all": "All pages",
+        "selection": "Selection"
+    },
+    "list_view": {
+        "new": "New record",
+        "actions": "Actions",
+        "card": "Card view",
+        "list": "List view",
+        "first": "First page",
+        "previous": "Previous page",
+        "next": "Next page",
+        "last": "Last page",
+        "search": "Search",
+        "no_records_found": "No records found"
+    },
+    "form_view": {
+        "back": "Back",
+        "new": "New",
+        "save": "Save",
+        "edit": "Edit",
+        "discard": "Discard",
+        "download": "Download",
+        "required": "These fields are required",
+        "errors": "These fields have errors"
+    },
+    "loader": {
+        "loading": "Loading",
+        "loading_long": "Still loading, please wait a moment"
+    },
+    "login": {
+        "incorrect": "Incorrect user or password",
+        "fill_password": "Please fill the password fields",
+        "passwords_dont_match": "Password confirmation doesn't match",
+        "user": "User",
+        "password": "Password",
+        "login": "Login",
+        "forgot": "Forgot my password",
+        "enter_email": "Enter your email to reset your password",
+        "send": "Send",
+        "sent": "An email was sent to",
+        "new_password": "New password",
+        "confirm_password": "Confirm password",
+        "change": "Change password",
+        "changed": "Password succesfully changed"
+    },
+    "navbar": {
+        "preferences": "Preferences",
+        "logout": "Logout"
+    },
+    "search_view": {
+        "filters":  "Filters",
+        "is": "is",
+        "is_not": "is not",
+        "gt": "greater than",
+        "gte": "greater than or equal to",
+        "lt": "less than",
+        "lte": "less than or equal to",
+        "contains": "contains",
+        "doesnt_contain": "does not contain",
+        "between": "between",
+        "apply": "Apply"
+    }
+}

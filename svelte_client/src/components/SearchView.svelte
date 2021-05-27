@@ -1,4 +1,5 @@
 <script>
+    import { _ } from 'svelte-i18n';
     import { call } from './../services/service.js';
     import {
         viewsStore,
@@ -109,7 +110,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Filtros</h5>
+                <h5 class="modal-title">{$_("search_view.filters")}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
                 </button>
@@ -126,20 +127,20 @@
                                     <span style="width:20%">
                                         <select class="form-control" bind:value={selectedOperators[item.field]}
                                             on:blur={updateFilters}>
-                                            <option value="=">es</option>
-                                            <option value="!=">no es</option>
+                                            <option value="=">{$_("search_view.is")}</option>
+                                            <option value="!=">{$_("search_view.is_not")}</option>
                                             {#if ["integer","float","date","datetime"].includes(fieldsDescription[item.field].type)}
-                                                <option value="&gt;">mayor que</option>
-                                                <option value="&gt;=">mayor o igual que</option>
-                                                <option value="&lt;">menor que</option>
-                                                <option value="&lt;=">menor o igual que</option>
+                                                <option value="&gt;">{$_("search_view.gt")}</option>
+                                                <option value="&gt;=">{$_("search_view.gte")}</option>
+                                                <option value="&lt;">{$_("search_view.lt")}</option>
+                                                <option value="&lt;=">{$_("search_view.lte")}</option>
                                             {/if}
                                             {#if ["char","text","manytomany","backref"].includes(fieldsDescription[item.field].type)}
-                                                <option value="ilike">contiene</option>
-                                                <option value="not ilike">no contiene</option>
+                                                <option value="ilike">{$_("search_view.contains")}</option>
+                                                <option value="not ilike">{$_("search_view.doesnt_contain")}</option>
                                             {/if}
                                             {#if ["date"].includes(fieldsDescription[item.field].type)}
-                                                <option value="between">entre</option>
+                                                <option value="between">{$_("search_view.between")}</option>
                                             {/if}
                                         </select>
                                     </span>
@@ -187,7 +188,7 @@
             </div>
             <div class="modal-footer">
                 <button on:click={applyFilters} type="button" data-dismiss="modal"
-                    class="btn btn-primary">Aplicar</button>
+                    class="btn btn-primary">{$_("search_view.apply")}</button>
             </div>
         </div>
     </div>

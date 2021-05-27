@@ -1,5 +1,5 @@
 import peewee as pw
-from flare import BaseModel, r, m, u, n_
+from flr import BaseModel, r, m, u, n_
 
 class FlrCompany(BaseModel):
     name = pw.CharField(verbose_name=n_("Name"))

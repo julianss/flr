@@ -16,7 +16,7 @@
         "model": "FlrMenu",
         "meta_id": "menu_flruser",
         "data": {
-            "name": "Usuarios",
+            "name": "Users",
             "sequence": 1,
             "section_id_META_ID": "menu_section_admin",
             "groups_META_ID": ["flrgroup_admin"]
@@ -51,7 +51,7 @@
             "definition": {
                 "buttons": [
                     {
-                        "text": "Cambiar password",
+                        "text": "_('Change password')",
                         "action": "openViews",
                         "options": {
                             "model": "FlrUserChangePassword",
@@ -63,11 +63,11 @@
                     }
                 ],
                 "structure": [
-                    {"section": "General"},
-                    {"section": "Roles"},
-                    {"section": "Allowed companies"}
+                    {"section": "_('General')"},
+                    {"section": "_('Roles')"},
+                    {"section": "_('Allowed companies')"}
                 ],
-                "General": [
+                "_('General')": [
                     {"field": "name"},
                     {"field": "email"},
                     {"field": "company_id"},
@@ -75,7 +75,7 @@
                     {"field": "lang"},
                     {"field": "email_notifications"}
                 ],
-                "Roles": [
+                "_('Roles')": [
                     {
                         "label": "Roles",
                         "field": "groups",
@@ -86,7 +86,7 @@
                         }
                     }
                 ],
-                "Allowed companies": [
+                "_('Allowed companies')": [
                     {
                         "label": "Allowed companies",
                         "field": "allowed_companies",
@@ -150,7 +150,7 @@
         "model": "FlrMenu",
         "meta_id": "menu_flracl",
         "data": {
-            "name": "Listas de control de acceso (ACL)",
+            "name": "Access Control (ACL)",
             "sequence": 3,
             "section_id_META_ID": "menu_section_admin",
             "groups_META_ID": ["flrgroup_admin"]

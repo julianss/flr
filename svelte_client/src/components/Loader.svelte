@@ -1,4 +1,5 @@
 <script>
+    import { _ } from 'svelte-i18n';
     import { loading } from '../services/service.js';
     import{ fade } from 'svelte/transition';
     let isLoading = false;
@@ -20,8 +21,8 @@
     })
 </script>
 
-<span transition:fade hidden={!isLoading} class="loading-flash">Cargando</span>
-<div transition:fade hidden={!isTakingLong} class="loading">Cargando, espere un momento...</div>
+<span transition:fade hidden={!isLoading} class="loading-flash">{$_('loader.loading')}</span>
+<div transition:fade hidden={!isTakingLong} class="loading">{$_('loader.loading_long')}</div>
 
 <style>
 

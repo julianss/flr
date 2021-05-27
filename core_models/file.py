@@ -1,5 +1,5 @@
 import peewee as pw
-from flare import BaseModel, app, db, Registry, _, n_
+from flr import BaseModel, app, db, Registry, _, n_
 from flask import send_file, jsonify, make_response, request
 import uuid
 import os

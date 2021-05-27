@@ -3,6 +3,7 @@
     import { call } from "../../services/service.js"
     export let label = "";
     export let model = "";
+    export let model_name_field="";
     export let filters = [];
     export let value = [];
     export let edit;
@@ -62,6 +63,7 @@
                 bind:value={valueFK}
                 edit={edit}
                 model={model}
+                model_name_field={model_name_field}
                 filters={filters}
                 on:change={add}
                 readonly={false}

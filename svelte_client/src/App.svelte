@@ -1,14 +1,25 @@
 <script>
+	import { addMessages, init, getLocaleFromNavigator, locale } from 'svelte-i18n';
+	import en from './i18n/en.json';
+	import es from './i18n/es.json';
+	addMessages('en', en);
+	addMessages('es', es);
+	init({
+	  	fallbackLocale: 'en',
+  		initialLocale: getLocaleFromNavigator(),
+	});
+
 	import Login from './components/Login.svelte';
 	import Loader from './components/Loader.svelte';
 	import Navbar from './components/Navbar.svelte';
 	import WorkArea from './components/WorkArea.svelte';
-	import { jwt, JWT_NOT_YET_LOADED } from './services/service.js'
+	import { call, jwt, JWT_NOT_YET_LOADED } from './services/service.js'
 	let logged = false;
 	let showApp = false;
 	jwt.subscribe((value)=>{
 	  if(value !== JWT_NOT_YET_LOADED && value != ''){
 		logged = true;
+		call("FlrUser", "get_lang").then((resp) => {if(resp){locale.set(resp)}});
 	  }
 	  if(value !== JWT_NOT_YET_LOADED){
 		showApp = true;

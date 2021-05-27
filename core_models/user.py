@@ -1,6 +1,6 @@
 import peewee as pw
 from flask import request, has_request_context
-from flare import m, u, BaseModel, Registry, normalize_filters, combine_filters, sendmail, _, n_, i18n
+from flr import m, u, BaseModel, Registry, normalize_filters, combine_filters, sendmail, _, n_, i18n
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha512
 import jwt
@@ -141,12 +141,16 @@ class FlrUser(BaseModel):
     def get_user_name_and_company(cls):
         user = cls.get_by_id(request.uid)
         result = [user.name]
-        for g in user.groups:
-            if g.name == 'Multicompany':
-                if user.company_id:
-                    result.append(user.company_id.name)
-                    break
+        if FlrUser.groups_check_any(["flrgroup_multicompany"]):
+            if user.company_id:
+                result.append(user.company_id.name)
         return ' - '.join(result)
+
+    @classmethod
+    def get_lang(cls):
+        user = cls.get_by_id(request.uid)
+        return user.lang
+
 
 class FlrGroup(BaseModel):
     name = pw.CharField(verbose_name=n_("Name"))

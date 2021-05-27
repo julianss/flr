@@ -1,11 +1,13 @@
 import peewee as pw
 from flask import request, has_request_context
-from flare import BaseModel, Registry as r, normalize_filters, combine_filters, _, n_, FlrException
+from flr import BaseModel, Registry as r, normalize_filters, combine_filters, _, n_, i18n, FlrException
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha512
 import jwt
 import os
+from iso639 import languages
 
+LANG_CHOICES = [(l,languages.get(part1=l).name) for l in ["en"] + i18n.languages]
 
 class FlrPreferences(BaseModel):
     _transient = True
@@ -16,13 +18,15 @@ class FlrPreferences(BaseModel):
     confirm_new_password = pw.CharField(verbose_name=n_("Confirm new password"), null=True)
     old_company = pw.ForeignKeyField(r["FlrCompany"], verbose_name=n_("Current company"), null=True)
     new_company = pw.ForeignKeyField(r["FlrCompany"], verbose_name=n_("Change to"), null=True)
+    lang = pw.CharField(verbose_name=n_('Language'), choices=LANG_CHOICES, null=True)
 
     @classmethod
     def get_default(cls):
         user = r["FlrUser"].get_by_id(request.uid)
         return {
             'user': user.get_dict_id_and_name(),
-            'old_company': user.company_id.get_dict_id_and_name()
+            'old_company': user.company_id.get_dict_id_and_name(),
+            'lang': user.lang
         }
 
     @classmethod
@@ -43,6 +47,9 @@ class FlrPreferences(BaseModel):
                 raise FlrException(_("To set a new password please enter current password"))
         if fields.get('new_company'):
             r["FlrUser"].flr_update({'company_id': fields['new_company']},
+                [('id','=',user.id)])
+        if fields.get("lang"):
+            r["FlrUser"].flr_update({'lang': fields["lang"]},
                 [('id','=',user.id)])
         return super(FlrPreferences, cls).flr_create(**fields)
 

@@ -1,4 +1,5 @@
 <script>
+  import { _ } from 'svelte-i18n';
   import { getUserName, logout } from './../services/session.js'
   import { getMenus, getViews, openViews, clickMenu } from './../services/menu.js'
   import { onMount } from 'svelte';
@@ -20,7 +21,7 @@
 
   function openPreferences(){
     getViews("FlrPreferences").then(
-      (resp) => openViews(resp, {asWizard: true, showSaveButton: true})
+      (resp) => openViews(resp, {asWizard: true, showSaveButton: true, reloadOnSave: true})
     )
   }
 
@@ -60,9 +61,9 @@
       <li class="nav-item dropdown ml-auto">
           <button class="btn btn-secondary remove-button-css dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {username} </button>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-              <a class="dropdown-item" href="#" on:click={openPreferences}>Preferencias</a>
+              <a class="dropdown-item" href="#" on:click={openPreferences}>{$_("navbar.preferences")}</a>
               <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#" on:click={logout}>Cerrar sesión</a>
+              <a class="dropdown-item" href="#" on:click={logout}>{$_("navbar.logout")}</a>
           </div>
       </li>
     </ul>

@@ -1,6 +1,6 @@
 import peewee as pw
 from flask import request, Response
-from flare import app, BaseModel, Registry as r, ReportHelpers, add_pages, _, n_
+from flr import app, BaseModel, Registry as r, ReportHelpers, add_pages, _, n_
 from jinja2 import Template
 import subprocess
 import os

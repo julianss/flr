@@ -1,4 +1,5 @@
 <script>
+    import { _ } from 'svelte-i18n';
     import { call, importData } from '../services/service.js';
     import { downloadReport } from '../services/report.js';
     import { fade } from 'svelte/transition';
@@ -101,32 +102,38 @@
     </div>
     <hr/>
     <div>
-        <h3>Export:</h3>
+        <h3>{$_('export_view.export')}:</h3>
         <select class="form-control" bind:value={exportOption}>
-            <option value="page">Current page</option>
-            <option value="all">All pages</option>
-            <option value="selection">Selection</option>
+            <option value="page">{$_('export_view.current')}</option>
+            <option value="all">{$_('export_view.all')}</option>
+            <option value="selection">{$_('export_view.selection')}</option>
         </select>
     </div>
     <div style="text-align:center">
         <button type="button" class="btn btn-primary" on:click={doExport}>
-            <img src="icons/check2.svg" style="filter:invert(1)" title="Export" alt="Export">Export
+            <img src="icons/check2.svg"
+                style="filter:invert(1)"
+                title="{$_('export_view.export')}"
+                alt="{$_('export_view.export')}">{$_('export_view.export')}
         </button>
     </div>
     <hr/>
     <div>
-        <h3>Import:</h3>
+        <h3>{$_('export_view.import')}:</h3>
         <input type="file" bind:files={filesToImport} id="file-to-import"/>
         <div style="text-align:center">
             <button type="button" class="btn btn-primary" on:click={doImport}>
-                <img src="icons/check2.svg" style="filter:invert(1)" title="Import" alt="Export">Import
+                <img src="icons/check2.svg"
+                    style="filter:invert(1)"
+                    title="{$_('export_view.import')}"
+                    alt="Export">{$_('export_view.import')}
             </button>
         </div>
         <div class="import-errors" hidden={!importErrors}>
             {@html importErrors}
         </div>
         <div class="import-ok" transition:fade hidden={!importOk}>
-            Import succesful
+            {$_('export_view.success')}
         </div>
     </div>
 </div>

@@ -40,7 +40,7 @@ export function get_jwt_token(){
 }
 
 export function get_jwt_token_name(){
-    return `flare_${appName}_jwt`;
+    return `flr_${appName}_jwt`;
 }
 
 export function auth(login, password){

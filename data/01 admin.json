@@ -11,7 +11,7 @@
         "model": "FlrGroup",
         "meta_id": "flrgroup_admin",
         "data": {
-            "name": "System administration"
+            "name": "_('System administration')"
         }
     }
 ]

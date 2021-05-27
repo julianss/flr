@@ -1,5 +1,5 @@
 import peewee as pw
-from flare import BaseModel, Registry, n_
+from flr import BaseModel, Registry, n_, _
 from flask import request
 
 class FlrMenuSection(BaseModel):
@@ -22,7 +22,7 @@ class FlrMenu(BaseModel):
         for section in FlrMenuSection.select().order_by(FlrMenuSection.sequence):
             section_obj = {
                 'id': section.id,
-                'name': section.name,
+                'name': _(section.name),
                 'menus': []
             }
             for menu in section.menus.order_by(FlrMenu.sequence):
@@ -30,7 +30,7 @@ class FlrMenu(BaseModel):
                 if not menu.groups or user_groups.intersection(menu_groups):
                     section_obj["menus"].append({
                         "id": menu.id,
-                        "name": menu.name
+                        "name": _(menu.name)
                     })
             if section_obj["menus"]:
                 result.append(section_obj)

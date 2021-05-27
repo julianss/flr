@@ -1,22 +1,30 @@
 <script>
+    import { onMount } from 'svelte';
     import { createEventDispatcher } from 'svelte';
-    import { renderDateTime } from './../../services/utils.js';
+    import { UTCtoLocal, localToUTC, renderDateTime } from './../../services/utils.js';
     const dispatch = createEventDispatcher();
     export let label = "";
     export let value;
     export let edit;
     export let readonly;
+    let valueLocal;
 
     function changed(){
+        value = localToUTC(valueLocal);
         dispatch("change", {});
     }
+
+    onMount(async () => {
+		valueLocal = UTCtoLocal(value);
+	});
+
 </script>
 
 <div class="form-group">
     <label>{label}</label>
     {#if edit & !readonly}
-        <input class="form-control" type="datetime-local" bind:value={value} on:change={changed}/>
+        <input class="form-control" type="datetime-local" bind:value={valueLocal} on:change={changed} step="1"/>
     {:else}
-        <p>{renderDateTime(value)}</p>
+        <p>{value && renderDateTime(value)}</p>
     {/if}
 </div>

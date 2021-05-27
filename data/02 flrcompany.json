@@ -3,14 +3,14 @@
         "model": "FlrGroup",
         "meta_id": "flrgroup_multicompany",
         "data": {
-            "name": "Multicompany"
+            "name": "_('Multicompany')"
         }
     },
     {
         "model": "FlrMenu",
         "meta_id": "menu_company",
         "data": {
-            "name": "Company",
+            "name": "Companies",
             "sequence": 10,
             "section_id_META_ID": "menu_section_admin",
             "groups_META_ID": ["flrgroup_admin"]

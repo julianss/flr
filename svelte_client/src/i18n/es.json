@@ -1,0 +1,70 @@
+{
+    "export_view": {
+        "title": "Exportar/Importar",
+        "export": "Exportar",
+        "import": "Importar",
+        "success": "Importación exitosa",
+        "current": "Página actual",
+        "all": "Todas las páginas",
+        "selection": "Selección"
+    },
+    "list_view": {
+        "new": "Nuevo registro",
+        "actions": "Acciones",
+        "card": "Vista de tarjetas",
+        "list": "Vista de lista",
+        "first": "Primera página",
+        "previous": "Página anterior",
+        "next": "Página siguiente",
+        "last": "Última página",
+        "search": "Búsqueda",
+        "no_records_found": "No se encontraron registros"
+    },
+    "form_view": {
+        "back": "Regresar",
+        "new": "Nuevo",
+        "save": "Guardar",
+        "edit": "Editar",
+        "descard": "Descartar",
+        "download": "Descargar",
+        "required": "Estos campos son obligatorios",
+        "errors": "Estos campos tienen errores"
+    },
+    "loader": {
+        "loading": "Cargando",
+        "loading_long": "Aún cargando, espere un momento"
+    },
+    "login": {
+        "incorrect": "Usuario o contraseña incorrectos",
+        "fill_password": "Favor de llenar los campos",
+        "passwords_dont_match": "La confirmación de la contraseña no coincide",
+        "user": "Usuario",
+        "password": "Contraseña",
+        "login": "Iniciar sesión",
+        "forgot": "Olvidé mi contraseña",
+        "enter_email": "Ingresa tu dirección de correo para reestablecer tu contraseña",
+        "send": "Enviar",
+        "sent": "Se envió un correo a",
+        "new_password": "Nueva contraseña",
+        "confirm_password": "Confirmar contraseña",
+        "change": "Cambiar contraseña",
+        "changed": "La contraseña se ha cambiado con éxito"
+    },
+    "navbar": {
+        "preferences": "Preferencias",
+        "logout": "Cerrar sesión"
+    },
+    "search_view": {
+        "filters":  "Filtros",
+        "is": "es",
+        "is_not": "no es",
+        "gt": "mayor que",
+        "gte": "mayor o igual que",
+        "lt": "menor que",
+        "lte": "menor o igual que",
+        "contains": "contiene",
+        "doesnt_contain": "no contiene",
+        "between": "entre",
+        "apply": "Aplicar"
+    }
+}

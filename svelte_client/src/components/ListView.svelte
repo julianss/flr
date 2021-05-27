@@ -1,4 +1,5 @@
 <script>
+    import { _ } from 'svelte-i18n';
     import { call } from './../services/service.js';
     import * as utils from './../services/utils.js';
     import {
@@ -232,7 +233,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Export/Import</h5>
+                    <h5 class="modal-title">{$_('export_view.title')}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
@@ -254,7 +255,7 @@
         <div class="col-md">
         {#if view && view.definition.create !== false}
             <button type="button" class="btn btn-primary mb-2" on:click={create}>
-                <img src="icons/plus.svg" style="filter:invert(1)" title="Nuevo" alt="Nuevo">
+                <img src="icons/plus.svg" style="filter:invert(1)" title={$_('list_view.new')} alt={$_('list_view.new')}>
             </button>
         {/if}
         {#if view && view.menu_view_name}
@@ -265,7 +266,7 @@
             {#if selectedRecords && getSelectedIds().length > 0 && batchActions.length > 0}
                 <div class="dropdown">
                     <button class="btn btn-secondary" type="button" id="actionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <img src="icons/three-dots.svg" style="filter:invert(1)" title="Actions" alt="Actions">
+                        <img src="icons/three-dots.svg" style="filter:invert(1)" title={$_('list_view.actions')} alt={$_('list_view.actions')}>
                     </button>
                     <div class="dropdown-menu" aria-labelledby="actionsDropdown">
                         {#each batchActions as action}
@@ -285,36 +286,36 @@
             {/if}
             {#if groupImportExportButton}
                 <button on:click={openExportView} class="btn btn-secondary" type="button">
-                    <img src="icons/save.svg" style="filter:invert(1)" title="Export/Import" alt="Export/Import"/>
+                    <img src="icons/save.svg" style="filter:invert(1)" title={$_('list_view.actions')} alt={$_('list_view.actions')}/>
                 </button>
             {/if}
             {#if view && cardViewTemplate && !cardViewEnabled}
                 <button type="button" on:click={()=>{cardViewEnabled=true}}
                     class="btn btn-secondary">
-                    <img src="icons/grid-3x3-gap-fill.svg" style="filter:invert(1)" title="Card view" alt="Card view"/>
+                    <img src="icons/grid-3x3-gap-fill.svg" style="filter:invert(1)" title={$_('list_view.card')} alt={$_('list_view.card')}/>
                 </button>
             {/if}
             {#if cardViewEnabled}
                 <button type="button" on:click={()=>{cardViewEnabled=false}}
                     class="btn btn-secondary">
-                    <img src="icons/list.svg" style="filter:invert(1)" title="List view" alt="List view"/>
+                    <img src="icons/list.svg" style="filter:invert(1)" title={$_('list_view.list')} alt={$_('list_view.list')}/>
                 </button>
             {/if}
             <button type="button" on:click={openSearch}
                 class="btn btn-secondary">
-                <img src="icons/search.svg" style="filter:invert(1)" title="Buscar" alt="Buscar"/>
+                <img src="icons/search.svg" style="filter:invert(1)" title={$_('list_view.search')} alt={$_('list_view.search')}/>
             </button>
             <button type="button"
                 class="btn btn-secondary btn-sm"
                 disabled={fetching || page==1}
                 on:click={()=>gotoPage(1)}>
-                <img src="icons/chevron-double-left.svg" style="filter:invert(1)" title="Primera" alt="Primera">
+                <img src="icons/chevron-double-left.svg" style="filter:invert(1)" title={$_('list_view.first')} alt="{$_('list_view.first')}">
             </button>
             <button type="button"
                 class="btn btn-secondary btn-sm"
                 disabled={fetching || page==1}
                 on:click={()=>changePage(-1)}>
-                <img src="icons/chevron-left.svg" style="filter:invert(1)" title="Anterior" alt="Anterior">
+                <img src="icons/chevron-left.svg" style="filter:invert(1)" title="{$_('list_view.previous')}" alt="{$_('list_view.previous')}">
             </button>
                 {(1 + (page-1) * pageSize) || ''}
                 -
@@ -325,13 +326,13 @@
                 class="btn btn-secondary btn-sm"
                 disabled={fetching || page==numberOfPages}
                 on:click={()=>changePage(1)}>
-                <img src="icons/chevron-right.svg" style="filter:invert(1)" title="Anterior" alt="Anterior">
+                <img src="icons/chevron-right.svg" style="filter:invert(1)" title="{$_('list_view.next')}" alt="{$_('list_view.next')}">
             </button>
             <button type="button"
                 class="btn btn-secondary btn-sm"
                 disabled={fetching || page==numberOfPages}
                 on:click={()=>gotoPage(numberOfPages)}>
-                <img src="icons/chevron-double-right.svg" style="filter:invert(1)" title="Última" alt="Última">
+                <img src="icons/chevron-double-right.svg" style="filter:invert(1)" title="{$_('list_view.last')}" alt="{$_('list_view.last')}">
             </button>
         </div>
     </div>
@@ -413,7 +414,7 @@
         </div>
     {/if}
     {#if fetchedRecords.length === 0 && !fetching }
-        <p>No se encontraron registros</p>
+        <p>{$_('list_view.no_records_found')}</p>
     {/if}
 </div>
 

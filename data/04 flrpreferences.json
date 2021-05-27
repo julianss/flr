@@ -9,14 +9,15 @@
             "wizard": true,
             "definition": {
                 "structure": [
-                    {"section": "Información general"},
-                    {"section": "Cambiar contraseña"},
-                    {"section": "Cambiar compañía", "groups": ["flrgroup_multicompany"]}
+                    {"section": "_('General')"},
+                    {"section": "_('Change password')"},
+                    {"section": "_('Change company')", "groups": ["flrgroup_multicompany"]}
                 ],
-                "Información general": [
-                    {"field": "user", "readonly": true}
+                "_('General')": [
+                    {"field": "user", "readonly": true},
+                    {"field": "lang"}
                 ],
-                "Cambiar contraseña": [
+                "_('Change password')": [
                     {
                         "field": "old_password",
                         "options": {
@@ -39,7 +40,7 @@
                         }
                     }
                 ],
-                "Cambiar compañía": [
+                "_('Change company')": [
                     {"field": "old_company", "readonly": true},
                     {"field": "new_company"}
                 ]

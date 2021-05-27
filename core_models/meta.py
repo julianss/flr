@@ -1,5 +1,5 @@
 import peewee as pw
-from flare import BaseModel, n_
+from flr import BaseModel, n_
 
 class FlrMeta(BaseModel):
     meta_id = pw.CharField(verbose_name=n_("Name"), unique=True)

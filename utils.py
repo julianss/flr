@@ -39,7 +39,7 @@ class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
         try:
             if isinstance(obj, datetime.datetime):
-                return obj.strftime("%Y-%m-%d %H:%M:%S")
+                return obj.strftime("%Y-%m-%dT%H:%M:%S")
 
             elif isinstance(obj, datetime.date):
                 return obj.strftime("%Y-%m-%d")
@@ -109,8 +109,8 @@ class I18n:
                 localedir=self.localedir, languages=[lang])
 
     def translate(self, message, lang):
-        if lang == "en":
+        t = self.translations.get(lang)
+        if lang == "en" or t is None:
             return message
         else:
-            t = self.translations.get(lang)
-            return t.gettext(message) if t is not None else message
+            return t.gettext(message)

@@ -1,6 +1,9 @@
 from dotenv import load_dotenv
 import sys
 import os
+os.environ["TZ"] = "UTC"
+import time
+time.tzset()
 if os.environ.get("flr_app"):
     load_dotenv("." + os.environ.get("flr_app"))
 elif len(sys.argv) > 1:
@@ -9,7 +12,7 @@ else:
     load_dotenv()
 
 from registry import db
-from flare import scheduler
+from flr import scheduler
 import os
 import core_models
 __import__("apps." + os.environ["flr_app"])

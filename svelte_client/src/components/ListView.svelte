@@ -97,8 +97,8 @@
             selectedRecords = {};
             for(let item of view.definition.structure){
                 fields_.push(item.field);
-                if(item.related_fields){
-                    for(let rf of item.related_fields){
+                if(item.options && item.options.related_fields){
+                    for(let rf of item.options.related_fields){
                         fields_.push(item.field + "." + rf.field);
                     }
                 }

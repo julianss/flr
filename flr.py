@@ -141,17 +141,6 @@ class BaseModel(pw.Model):
             'name': name
         }
 
-    def get_dict_id_and_real_name(self):
-        real_name = {}
-        if hasattr(self, "_rec_name"):
-            real_name[self._rec_name] = getattr(self, self._rec_name)
-        elif hasattr(self, "name"):
-            real_name['name'] = self.name
-        else:
-            real_name['name'] = "%s,%s"%(self.__class__.__name__, self.id)
-        real_name.update({'id':self.id})
-        return real_name
-
     @classmethod
     def dict_get_id(cls, value):
         if type(value) == int:
@@ -719,16 +708,16 @@ class BaseModel(pw.Model):
                         related_records = getattr(model, field_name)
                         related_records_dicts = []
                         for relr in related_records:
-                            rendered = relr.get_dict_id_and_real_name()
+                            rendered = relr.get_dict_id_and_name()
                             related_fields = related_fields_m2m.get(field_name, [])
                             if not related_fields and relr.__class__._default_related_read:
                                 related_fields = relr.__class__._default_related_read
-                            if related_fields and not "name" in related_fields and 'name' in rendered:
+                            if related_fields and not "name" in related_fields:
                                 del rendered["name"]
                             for related_field in related_fields:
                                 if type(getattr(relr.__class__, related_field)) in (pw.ForeignKeyField, pw.FileField):
                                     rel = getattr(relr, related_field)
-                                    rendered[related_field] = rel.get_dict_id_and_real_name()
+                                    rendered[related_field] = rel.get_dict_id_and_name()
                                 else:
                                     rendered[related_field] = getattr(relr, related_field)
                             related_records_dicts.append(rendered)

@@ -257,8 +257,21 @@
         if ('field' in item){
             let fieldDesc = fieldsDescription[item.field];
             if(fieldDesc){
-                if (fieldDesc.required === true && !value){
-                    validations['required'].push(item)
+                if (fieldDesc.required === true ||
+                    (['backref', 'manytomany'].includes(fieldDesc.type) && item.required === true)){
+                    if(fieldDesc.type==='char'){
+                        if (value === null || value.trim() === ''){
+                            validations['required'].push(item)
+                        }
+                    }else if (['backref', 'manytomany'].includes(fieldDesc.type)){
+                        if ((value === null) || value.length === 0){
+                            validations['required'].push(item)
+                        }
+                    }else{
+                        if ((value === null || value === false)){
+                            validations['required'].push(item)
+                        }
+                    }
                 }
             }
             if (item.options && item.options.hasOwnProperty('minVal') && value < item.options.minVal){
@@ -397,8 +410,18 @@
                     modifierState[uid].result = new Function(code).call(record);
                 }
                 if (requireds === modifierState){
-                    if (uid in modifierState && fieldsDescription && 'required' in fieldsDescription[uid]){
-                        fieldsDescription[uid].required = modifierState[uid].result
+                    if (uid in modifierState && fieldsDescription){
+                        if (['manytomany', 'backref'].includes(fieldsDescription[uid].type)){
+                            for(let section of sections){
+                                for(let item of view.definition[section]){
+                                    if(item.field == uid){
+                                        item.required = modifierState[uid].result
+                                    }
+                                }
+                            }
+                        }else if ('required' in fieldsDescription[uid]){
+                            fieldsDescription[uid].required = modifierState[uid].result
+                        }
                     }
                 }
             }

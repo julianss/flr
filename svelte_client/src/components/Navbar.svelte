@@ -61,9 +61,9 @@
       <li class="nav-item dropdown ml-auto">
           <button class="btn btn-secondary remove-button-css dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {username} </button>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-              <a class="dropdown-item" href="#" on:click={openPreferences}>{$_("navbar.preferences")}</a>
+              <button class="dropdown-item" on:click={openPreferences}>{$_("navbar.preferences")}</button>
               <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#" on:click={logout}>{$_("navbar.logout")}</a>
+              <button class="dropdown-item" on:click={logout}>{$_("navbar.logout")}</button>
           </div>
       </li>
     </ul>

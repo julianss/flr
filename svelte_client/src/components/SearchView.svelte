@@ -5,7 +5,7 @@
         viewsStore,
         activeViewStore,
         getValue,
-        searchFiltersStore, 
+        searchFiltersStore,
         publish
     } from './../services/writables.js';
     import Field from './Field.svelte';
@@ -39,16 +39,18 @@
                 view = views["search"];
                 for(let field of view.definition.fields){
                     fields.push(field.field);
-                    selectedOperators[field] = null;
-                    selectedValues[field] = null;
+                    selectedValues[field.field] = null;
+                    selectedValues2[field.field] = null;
                 }
             }else if(views != null && views["list"]){
                 view = views["list"];
                 for(let field of view.definition.structure){
                     fields.push(field.field);
-                    selectedOperators[field] = null;
-                    selectedValues[field] = null;
+                    selectedValues[field.field] = null;
+                    selectedValues2[field.field] = null;
                 }
+            }else{
+                view = null;
             }
             //There may be no list nor search view (eg. wizard)
             if(!view){
@@ -68,18 +70,23 @@
             var operator = selectedOperators[field];
             var value = selectedValues[field];
             var value2 = selectedValues2[field];
-            if(typeof(value) === "object"){
+            var type = field in fieldsDescription?fieldsDescription[field].type:null;
+            if(value && typeof(value) === "object"){
                 if(value.id){
                     value = value.id;
                 }
             }
-            if(operator && (value || value2)){
+            if(operator && (value!==null || value2!==null)){
                 if(operator === "between"){
                     if(value){
                         filters.push([field,'>=',value]);
                     }
                     if(value2){
                         filters.push([field,'<=',value2]);
+                    }
+                }else if (value === false){
+                    if (type && type==='boolean'){
+                        filters.push([field, operator, false]);
                     }
                 }else{
                     filters.push([field, operator, value]);
@@ -117,7 +124,7 @@
                 <div class="form-group">
                     {#if fieldsDescription && view}
                         {#each view.definition.fields || view.definition.structure as item}
-                            {#if item.field && item.field in fieldsDescription && !['manytomany','backref'].includes(fieldsDescription[item.field].type) }
+                            {#if item.field && item.field in fieldsDescription}
                                 <div class="search-row">
                                     <span style="width:30%">
                                         <label>{item.label || fieldsDescription[item.field].label}</label>
@@ -125,15 +132,20 @@
                                     <span style="width:20%">
                                         <select class="form-control" bind:value={selectedOperators[item.field]}
                                             on:blur={updateFilters}>
-                                            <option value="=">{$_("search_view.is")}</option>
-                                            <option value="!=">{$_("search_view.is_not")}</option>
+                                            {#if ["manytomany","backref"].includes(fieldsDescription[item.field].type)}
+                                                <option value="in">{$_("search_view.is")}</option>
+                                                <option value="not in">{$_("search_view.is_not")}</option>
+                                            {:else}
+                                                <option value="=">{$_("search_view.is")}</option>
+                                                <option value="!=">{$_("search_view.is_not")}</option>
+                                            {/if}
                                             {#if ["integer","float","date","datetime"].includes(fieldsDescription[item.field].type)}
                                                 <option value="&gt;">{$_("search_view.gt")}</option>
                                                 <option value="&gt;=">{$_("search_view.gte")}</option>
                                                 <option value="&lt;">{$_("search_view.lt")}</option>
                                                 <option value="&lt;=">{$_("search_view.lte")}</option>
                                             {/if}
-                                            {#if ["char","text","manytomany","backref"].includes(fieldsDescription[item.field].type)}
+                                            {#if ["char","text"].includes(fieldsDescription[item.field].type)}
                                                 <option value="ilike">{$_("search_view.contains")}</option>
                                                 <option value="not ilike">{$_("search_view.doesnt_contain")}</option>
                                             {/if}
@@ -149,10 +161,16 @@
                                             edit={true}
                                             bind:value={selectedValues[item.field]}
                                             model={fieldsDescription[item.field].model}
+                                            model_name_field={fieldsDescription[item.field].model_name_field}
                                             choices={fieldsDescription[item.field].options}
                                             required={false}
-                                            nolabel={true}
+                                            relatedFieldsDesc={fieldsDescription[item.field].related_fields}
                                             on:change={updateFilters}
+                                            nolabel={true}
+                                            readonly={false}
+                                            filters={[]}
+                                            viewtype={'search'}
+                                            options={item.options || {}}
                                         />
                                         {#if selectedOperators[item.field] === "between"}
                                             <Field
@@ -161,9 +179,16 @@
                                                 edit={true}
                                                 bind:value={selectedValues2[item.field]}
                                                 model={fieldsDescription[item.field].model}
+                                                model_name_field={fieldsDescription[item.field].model_name_field}
+                                                choices={fieldsDescription[item.field].options}
                                                 required={false}
-                                                nolabel={true}
+                                                relatedFieldsDesc={fieldsDescription[item.field].related_fields}
                                                 on:change={updateFilters}
+                                                nolabel={true}
+                                                readonly={false}
+                                                filters={[]}
+                                                viewtype={'search'}
+                                                options={item.options || {}}
                                             />
                                         {/if}
                                     </span>

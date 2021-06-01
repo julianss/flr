@@ -97,8 +97,8 @@
             selectedRecords = {};
             for(let item of view.definition.structure){
                 fields_.push(item.field);
-                if(item.related_fields){
-                    for(let rf of item.related_fields){
+                if(item.options && item.options.related_fields){
+                    for(let rf of item.options.related_fields){
                         fields_.push(item.field + "." + rf.field);
                     }
                 }
@@ -367,13 +367,17 @@
                                     <td>
                                         <Field
                                             type={fieldsDescription[item.field].type}
+                                            label={item.label || fieldsDescription[item.field].label}
                                             edit={false}
                                             bind:value={record[item.field]}
                                             choices={fieldsDescription[item.field].options}
+                                            required={false}
                                             model={fieldsDescription[item.field].model}
                                             model_name_field={fieldsDescription[item.field].model_name_field}
                                             relatedFieldsDesc={fieldsDescription[item.field].related_fields}
                                             nolabel={true}
+                                            readonly={false}
+                                            filters={[]}
                                             viewtype={'list'}
                                             options={item.options || {}}
                                         />

@@ -239,10 +239,16 @@ class BaseModel(pw.Model):
                 }
             if tattr == pw.BackrefAccessor:
                 field = getattr(cls, k)
+                model_field_name = None
+                if hasattr(field.rel_model, '_rec_name'):
+                    model_field_name = field.rel_model._rec_name
+                elif hasattr(field.rel_model, 'name'):
+                    model_field_name = "name"
                 fields[k] = {
                     'label': prettifyName(k),
                     'type': 'backref',
                     'model': field.rel_model.__name__,
+                    'model_name_field': model_field_name,
                     'related_fields': []
                 }
                 rfs = []
@@ -371,14 +377,20 @@ class BaseModel(pw.Model):
                 field_name, operator, value = node
                 field = getattr(cls, field_name)
                 op = operator_table[operator]
-                if type(field) != pw.ManyToManyField:
+                if not type(field) in {pw.ManyToManyField, pw.BackrefAccessor}:
                     if operator in ("like", "ilike"):
                         value = "%" + value + "%"
                     expr = op(field, value)
                 else:
-                    rel_model_field_id = field.rel_model.__name__.lower() + "_id"
-                    m2m_filter = cls.select().join(field._through_model).where(getattr(field._through_model, rel_model_field_id).in_(value))
-                    expr = op(getattr(cls, "id"), [rec.id for rec in m2m_filter])
+                    if isinstance(value, int):
+                        value = (value, )
+                    if type(field) == pw.ManyToManyField:
+                        rel_model_field_id = field.rel_model.__name__.lower() + "_id"
+                        m2m_filter = cls.select().join(field._through_model).where(getattr(field._through_model, rel_model_field_id).in_(value))
+                        expr = op(getattr(cls, "id"), [rec.id for rec in m2m_filter])
+                    else:
+                        bar_filter = cls.select().join(field.rel_model).where(getattr(field.rel_model, 'id').in_(value))
+                        expr = op(getattr(cls, "id"), [rec.id for rec in bar_filter])
                 stack.append(expr)
                 n_exprs += 1
 

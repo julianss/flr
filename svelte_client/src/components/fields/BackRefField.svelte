@@ -1,21 +1,25 @@
 <script>
     import { call } from "../../services/service.js";
     import Field from "../Field.svelte";
+    import ForeignKeyField from './ForeignKeyField.svelte';
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
     export let label = "";
     export let model = "";
+    export let model_name_field;
     export let filters = [];
     export let value = [];
     export let edit;
     export let relatedFieldsDesc = {};
     export let viewtype;
+    export let readonly;
     export let options;
-    let valueFK;
 
     function renderField(obj, field){
         let val = obj[field];
-        if(typeof(val) == "number" || typeof(val) == "string"){
+        if (typeof(val)=="undefined"){
+            return "";
+        }else if(typeof(val) == "number" || typeof(val) == "string"){
             return val;
         }else if(typeof(val) == "boolean"){
             return val?"✔️":"❌";
@@ -55,6 +59,10 @@
     function changed(){
         dispatch("change", {});
     }
+
+    function selectResult(result){
+        dispatch("change", result);
+    }
 </script>
 
 <div class="form-group">
@@ -88,9 +96,12 @@
                                     choices={relatedFieldsDesc[field.field].options}
                                     required={relatedFieldsDesc[field.field].required}
                                     relatedFieldsDesc={null}
-                                    nolabel={true}
                                     on:change={changed}
+                                    nolabel={true}
+                                    readonly={field.readonly}
                                     options={field.options || {}}
+                                    filters={[]}
+                                    viewtype={viewtype}
                                 />
                             </td>
                         {/each}
@@ -124,6 +135,24 @@
                 {/each}
             {/each}
         {/if}
+    {:else if viewtype === 'search'}
+        <ForeignKeyField
+            label=""
+            bind:value={value}
+            edit={edit}
+            model={model}
+            model_name_field={model_name_field}
+            filters={filters}
+            on:change={selectResult}
+            query={
+                value&&options&&options.name_field?value[options.name_field]:
+                value&&options&&options.related_fields?
+                    options.related_fields.map(item => value[item.field]).join(' - '):
+                value?value[model_name_field]:''}
+            readonly={false}
+            placeholder=""
+            options={options}
+        />
     {/if}
 </div>
 

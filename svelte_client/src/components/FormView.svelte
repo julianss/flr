@@ -32,6 +32,7 @@
         'required': [],
         'others': []
     };
+    let filters = {};
     let isWizard = false;
     let showSaveButton = false;
     let listViewExists = false;
@@ -67,6 +68,7 @@
                 invisibles = {};
                 readonlys = {};
                 requireds = {};
+                record = null;
                 for(let k in view.definition){
                     if (typeof view.definition[k] === 'string'){
                         var uid = getUniqueId();
@@ -185,6 +187,7 @@
                                 notDirty = JSON.parse(JSON.stringify(resp[0]));
                                 refreshModifiers();
                                 fetchingRecord = false;
+                                updateFilters();
                             }
                         );
                     }else{
@@ -206,6 +209,7 @@
                                     editMode = true;
                                     refreshModifiers();
                                     fetchingRecord = false;
+                                    updateFilters();
                                 }
                             }
                         )
@@ -213,6 +217,28 @@
                     }
                 }
             );
+        }
+    }
+    function updateFilters(){
+        filters = {};
+        for(let section of sections){
+            for(let item of view.definition[section]){
+                if(item.field &&
+                    item.options &&
+                    item.options.filters &&
+                    Array.isArray(item.options.filters)){
+                        filters[item.field] = [];
+                        for (let filter of item.options.filters){
+                            let code  = "return " + filter[2];
+                            try{
+                                let fupdate = new Function(code).call(record);
+                                filters[item.field].push([filter[0], filter[1], fupdate])
+                            }catch{
+                                filters[item.field].push([filter[0], filter[1], null])
+                            }
+                        }
+                }
+            }
         }
     }
 
@@ -231,8 +257,21 @@
         if ('field' in item){
             let fieldDesc = fieldsDescription[item.field];
             if(fieldDesc){
-                if (fieldDesc.required === true && !value){
-                    validations['required'].push(item)
+                if (fieldDesc.required === true ||
+                    (['backref', 'manytomany'].includes(fieldDesc.type) && item.required === true)){
+                    if(fieldDesc.type==='char'){
+                        if (value === null || value.trim() === ''){
+                            validations['required'].push(item)
+                        }
+                    }else if (['backref', 'manytomany'].includes(fieldDesc.type)){
+                        if ((value === null) || value.length === 0){
+                            validations['required'].push(item)
+                        }
+                    }else{
+                        if ((value === null || value === false)){
+                            validations['required'].push(item)
+                        }
+                    }
                 }
             }
             if (item.options && item.options.hasOwnProperty('minVal') && value < item.options.minVal){
@@ -352,6 +391,7 @@
             )
         }
         refreshModifiers();
+        updateFilters();
     }
 
     function refreshModifiers(){
@@ -370,8 +410,18 @@
                     modifierState[uid].result = new Function(code).call(record);
                 }
                 if (requireds === modifierState){
-                    if (uid in modifierState && fieldsDescription && 'required' in fieldsDescription[uid]){
-                        fieldsDescription[uid].required = modifierState[uid].result
+                    if (uid in modifierState && fieldsDescription){
+                        if (['manytomany', 'backref'].includes(fieldsDescription[uid].type)){
+                            for(let section of sections){
+                                for(let item of view.definition[section]){
+                                    if(item.field == uid){
+                                        item.required = modifierState[uid].result
+                                    }
+                                }
+                            }
+                        }else if ('required' in fieldsDescription[uid]){
+                            fieldsDescription[uid].required = modifierState[uid].result
+                        }
                     }
                 }
             }
@@ -444,7 +494,6 @@
                             options={button.options}
                             model={view.model}
                             bind:record
-                            view={this}
                         />
                     </div>
                 {/each}
@@ -528,6 +577,7 @@
                                         (item.id in readonlys) ?
                                         readonlys[item.id].result : fieldsDescription[item.field].readonly || false
                                     }
+                                    filters={filters[item.field]|| []}
                                     viewtype={'form'}
                                     options={item.options || {}}
                                 />

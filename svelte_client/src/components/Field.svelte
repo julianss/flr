@@ -20,7 +20,7 @@
     export let edit;
     export let model;
     export let model_name_field;
-    export let filters = [];
+    export let filters;
     export let choices = [];
     export let required;
     export let relatedFieldsDesc;
@@ -28,7 +28,6 @@
     export let readonly;
     export let viewtype;
     export let options;
-
     function changed(){
         dispatch("change", {});
     }
@@ -66,6 +65,7 @@
                 edit={edit}
                 on:change={changed}
                 readonly={readonly}
+                viewtype={viewtype}
             />
         {:else if type === "text"}
             <TextField
@@ -154,6 +154,7 @@
                 bind:value={value}
                 edit={edit}
                 model={model}
+                model_name_field={model_name_field}
                 filters={filters}
                 relatedFieldsDesc={relatedFieldsDesc}
                 on:change={changed}
@@ -168,6 +169,8 @@
                 edit={edit}
                 on:change={changed}
                 readonly={readonly}
+                options={options}
+                viewtype={viewtype}
             />
         {:else if type === "auto"}
             <AutoField
@@ -182,7 +185,7 @@
 </div>
 
 <style>
-    .required :global(label::after){
+    .required :global(label:not(:empty)::after){
         content:"*";
         color:red
     }

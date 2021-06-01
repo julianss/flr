@@ -65,6 +65,7 @@
                 edit={edit}
                 on:change={changed}
                 readonly={readonly}
+                viewtype={viewtype}
             />
         {:else if type === "text"}
             <TextField

@@ -83,6 +83,10 @@
                     if(value2){
                         filters.push([field,'<=',value2]);
                     }
+                }else if (value === false){
+                    if (type && type==='boolean'){
+                        filters.push([field, operator, false]);
+                    }
                 }else{
                     filters.push([field, operator, value]);
                 }

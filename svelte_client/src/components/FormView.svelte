@@ -32,6 +32,7 @@
         'required': [],
         'others': []
     };
+    let filters = {};
     let isWizard = false;
     let showSaveButton = false;
     let listViewExists = false;
@@ -186,6 +187,7 @@
                                 notDirty = JSON.parse(JSON.stringify(resp[0]));
                                 refreshModifiers();
                                 fetchingRecord = false;
+                                updateFilters();
                             }
                         );
                     }else{
@@ -207,6 +209,7 @@
                                     editMode = true;
                                     refreshModifiers();
                                     fetchingRecord = false;
+                                    updateFilters();
                                 }
                             }
                         )
@@ -214,6 +217,28 @@
                     }
                 }
             );
+        }
+    }
+    function updateFilters(){
+        filters = {};
+        for(let section of sections){
+            for(let item of view.definition[section]){
+                if(item.field &&
+                    item.options &&
+                    item.options.filters &&
+                    Array.isArray(item.options.filters)){
+                        filters[item.field] = [];
+                        for (let filter of item.options.filters){
+                            let code  = "return " + filter[2];
+                            try{
+                                let fupdate = new Function(code).call(record);
+                                filters[item.field].push([filter[0], filter[1], fupdate])
+                            }catch{
+                                filters[item.field].push([filter[0], filter[1], null])
+                            }
+                        }
+                }
+            }
         }
     }
 
@@ -353,6 +378,7 @@
             )
         }
         refreshModifiers();
+        updateFilters();
     }
 
     function refreshModifiers(){
@@ -528,6 +554,7 @@
                                         (item.id in readonlys) ?
                                         readonlys[item.id].result : fieldsDescription[item.field].readonly || false
                                     }
+                                    filters={filters[item.field]|| []}
                                     viewtype={'form'}
                                     options={item.options || {}}
                                 />

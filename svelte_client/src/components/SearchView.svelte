@@ -158,6 +158,7 @@
                                             on:change={updateFilters}
                                             nolabel={true}
                                             readonly={false}
+                                            filters={[]}
                                             viewtype={'search'}
                                             options={item.options || {}}
                                         />
@@ -175,6 +176,7 @@
                                                 on:change={updateFilters}
                                                 nolabel={true}
                                                 readonly={false}
+                                                filters={[]}
                                                 viewtype={'search'}
                                                 options={item.options || {}}
                                             />

@@ -42,7 +42,7 @@
         activeElement.set(uniqueId)
         let kwargs = {paginate:[1,10]};
         if(filters.length > 0){
-            kwargs.filters = filters;
+            kwargs.filters = [...filters];
         }else{
             kwargs.filters = [];
         }
@@ -70,28 +70,12 @@
         //(i.e. if there's no name or if it is a property)
         call(model, "read", [readFields], kwargs).then(
             (resp) => {
-                let selectedRecords = resp
-                for(let result of selectedRecords){
-                    FilterResultsByDefinition(result)
-                }
-                results = results;
+                let results = resp;
                 loaded = true;
                 offset = -1;
             }
         )
         showResults = true;
-    }
-    function FilterResultsByDefinition(result){
-        if (options && 'filters' in options){
-            let code = "return " + options.filters;
-            let res = new Function(code).call(result);
-            if (res === true){
-                results.push(result)
-            }
-        }else{
-            results.push(result)
-        }
-
     }
     activeElement.subscribe((value) => {
         if(value){

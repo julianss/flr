@@ -20,7 +20,7 @@
     export let edit;
     export let model;
     export let model_name_field;
-    export let filters = [];
+    export let filters;
     export let choices = [];
     export let required;
     export let relatedFieldsDesc;
@@ -28,7 +28,6 @@
     export let readonly;
     export let viewtype;
     export let options;
-
     function changed(){
         dispatch("change", {});
     }

@@ -94,6 +94,7 @@
                                     nolabel={true}
                                     readonly={field.readonly}
                                     options={field.options || {}}
+                                    filters={[]}
                                     viewtype={viewtype}
                                 />
                             </td>

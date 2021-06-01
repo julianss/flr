@@ -377,6 +377,7 @@
                                             relatedFieldsDesc={fieldsDescription[item.field].related_fields}
                                             nolabel={true}
                                             readonly={false}
+                                            filters={[]}
                                             viewtype={'list'}
                                             options={item.options || {}}
                                         />

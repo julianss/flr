@@ -167,6 +167,8 @@
                 edit={edit}
                 on:change={changed}
                 readonly={readonly}
+                options={options}
+                viewtype={viewtype}
             />
         {:else if type === "auto"}
             <AutoField

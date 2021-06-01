@@ -154,6 +154,7 @@
                 bind:value={value}
                 edit={edit}
                 model={model}
+                model_name_field={model_name_field}
                 filters={filters}
                 relatedFieldsDesc={relatedFieldsDesc}
                 on:change={changed}

@@ -239,10 +239,16 @@ class BaseModel(pw.Model):
                 }
             if tattr == pw.BackrefAccessor:
                 field = getattr(cls, k)
+                model_field_name = None
+                if hasattr(field.rel_model, '_rec_name'):
+                    model_field_name = field.rel_model._rec_name
+                elif hasattr(field.rel_model, 'name'):
+                    model_field_name = "name"
                 fields[k] = {
                     'label': prettifyName(k),
                     'type': 'backref',
                     'model': field.rel_model.__name__,
+                    'model_name_field': model_field_name,
                     'related_fields': []
                 }
                 rfs = []

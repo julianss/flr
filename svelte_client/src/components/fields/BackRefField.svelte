@@ -5,6 +5,7 @@
     const dispatch = createEventDispatcher();
     export let label = "";
     export let model = "";
+    export let model_name_field;
     export let filters = [];
     export let value = [];
     export let edit;

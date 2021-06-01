@@ -181,7 +181,7 @@
 </div>
 
 <style>
-    .required :global(label::after){
+    .required :global(label:not(:empty)::after){
         content:"*";
         color:red
     }

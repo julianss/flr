@@ -1,6 +1,8 @@
 <script>
     import ForeignKeyField from './ForeignKeyField.svelte';
+    import { createEventDispatcher } from 'svelte';
     import { call } from "../../services/service.js"
+    const dispatch = createEventDispatcher();
     export let label = "";
     export let model = "";
     export let model_name_field="";
@@ -41,6 +43,10 @@
             value.push(event.detail);
             value = value;
         }
+    }
+
+    function changed(result){
+        dispatch('change', result);
     }
 
     function remove(id){
@@ -107,7 +113,7 @@
                 </tr>
             {/if}
         </table>
-    {:else if viewtype == 'list'}
+    {:else if viewtype === 'list'}
         {#if (value || []).length>0}
             {#each value as obj}
                 {#each options.related_fields || [] as field}
@@ -115,6 +121,22 @@
                 {/each}
             {/each}
         {/if}
+    {:else if viewtype === 'search'}
+        <ForeignKeyField
+            label=""
+            bind:value={value}
+            edit={edit}
+            model={model}
+            model_name_field={model_name_field}
+            filters={filters}
+            on:change={changed}
+            query={
+                value&&options&&options.name_field?
+                value[options.name_field]:value?value[model_name_field]:''}
+            readonly={false}
+            placeholder=""
+            options={options}
+        />
     {/if}
 </div>
 

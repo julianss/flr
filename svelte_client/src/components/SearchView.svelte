@@ -70,12 +70,13 @@
             var operator = selectedOperators[field];
             var value = selectedValues[field];
             var value2 = selectedValues2[field];
+            var type = field in fieldsDescription?fieldsDescription[field].type:null;
             if(value && typeof(value) === "object"){
                 if(value.id){
                     value = value.id;
                 }
             }
-            if(operator && (value || value2)){
+            if(operator && (value!==null || value2!==null)){
                 if(operator === "between"){
                     if(value){
                         filters.push([field,'>=',value]);
@@ -123,7 +124,7 @@
                 <div class="form-group">
                     {#if fieldsDescription && view}
                         {#each view.definition.fields || view.definition.structure as item}
-                            {#if item.field && item.field in fieldsDescription && !['manytomany','backref'].includes(fieldsDescription[item.field].type) }
+                            {#if item.field && item.field in fieldsDescription}
                                 <div class="search-row">
                                     <span style="width:30%">
                                         <label>{item.label || fieldsDescription[item.field].label}</label>
@@ -131,15 +132,20 @@
                                     <span style="width:20%">
                                         <select class="form-control" bind:value={selectedOperators[item.field]}
                                             on:blur={updateFilters}>
-                                            <option value="=">{$_("search_view.is")}</option>
-                                            <option value="!=">{$_("search_view.is_not")}</option>
+                                            {#if ["manytomany","backref"].includes(fieldsDescription[item.field].type)}
+                                                <option value="in">{$_("search_view.is")}</option>
+                                                <option value="not in">{$_("search_view.is_not")}</option>
+                                            {:else}
+                                                <option value="=">{$_("search_view.is")}</option>
+                                                <option value="!=">{$_("search_view.is_not")}</option>
+                                            {/if}
                                             {#if ["integer","float","date","datetime"].includes(fieldsDescription[item.field].type)}
                                                 <option value="&gt;">{$_("search_view.gt")}</option>
                                                 <option value="&gt;=">{$_("search_view.gte")}</option>
                                                 <option value="&lt;">{$_("search_view.lt")}</option>
                                                 <option value="&lt;=">{$_("search_view.lte")}</option>
                                             {/if}
-                                            {#if ["char","text","manytomany","backref"].includes(fieldsDescription[item.field].type)}
+                                            {#if ["char","text"].includes(fieldsDescription[item.field].type)}
                                                 <option value="ilike">{$_("search_view.contains")}</option>
                                                 <option value="not ilike">{$_("search_view.doesnt_contain")}</option>
                                             {/if}

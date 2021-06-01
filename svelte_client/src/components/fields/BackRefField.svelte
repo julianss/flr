@@ -1,6 +1,7 @@
 <script>
     import { call } from "../../services/service.js";
     import Field from "../Field.svelte";
+    import ForeignKeyField from './ForeignKeyField.svelte';
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
     export let label = "";
@@ -57,6 +58,10 @@
 
     function changed(){
         dispatch("change", {});
+    }
+
+    function selectResult(result){
+        dispatch("change", result);
     }
 </script>
 
@@ -130,6 +135,24 @@
                 {/each}
             {/each}
         {/if}
+    {:else if viewtype === 'search'}
+        <ForeignKeyField
+            label=""
+            bind:value={value}
+            edit={edit}
+            model={model}
+            model_name_field={model_name_field}
+            filters={filters}
+            on:change={selectResult}
+            query={
+                value&&options&&options.name_field?value[options.name_field]:
+                value&&options&&options.related_fields?
+                    options.related_fields.map(item => value[item.field]).join(' - '):
+                value?value[model_name_field]:''}
+            readonly={false}
+            placeholder=""
+            options={options}
+        />
     {/if}
 </div>
 

@@ -70,7 +70,7 @@
         //(i.e. if there's no name or if it is a property)
         call(model, "read", [readFields], kwargs).then(
             (resp) => {
-                let results = resp;
+                results = resp;
                 loaded = true;
                 offset = -1;
             }

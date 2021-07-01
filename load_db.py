@@ -16,6 +16,7 @@ import json
 import os
 import core_models
 import psycopg2
+from psycopg2 import sql
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 __import__("apps." + os.environ["flr_app"])
 os.environ["flr_app_path"] = os.path.abspath(os.path.join("apps", os.environ["flr_app"]))
@@ -33,7 +34,10 @@ try:
     cr.execute("SELECT 1 FROM pg_database where datname=%s", (os.environ["flr_db_name"],))
     if not cr.rowcount:
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        cr.execute("CREATE database %s owner %s"%(os.environ["flr_db_name"], os.environ["flr_db_pass"]))
+        cr.execute(sql.SQL("CREATE database {} owner {};").format(
+            sql.Identifier(os.environ["flr_db_name"]),
+            sql.Identifier(os.environ["flr_db_pass"])
+        ))
 finally:
     conn.close()
 

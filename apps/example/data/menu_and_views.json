@@ -1,0 +1,55 @@
+[
+    {
+       "model": "FlrMenuSection",
+       "meta_id": "example_section",
+       "data": {
+           "name": "Example",
+           "sequence": 1
+       }
+    },
+    {
+        "model": "FlrMenu",
+        "meta_id": "example_menu",
+        "data": {
+            "name": "Person",
+            "sequence": "1",
+            "section_id_META_ID": "example_section"
+        }
+    },
+    {
+        "model": "FlrView",
+        "meta_id": "example_list_view",
+        "data": {
+            "name": "person.view.list",
+            "model": "Person",
+            "view_type": "list",
+            "definition": {
+                "structure": [
+                    {"field": "name"},
+                    {"field": "age"},
+                    {"field": "favorite_color"}
+                ]
+            },
+            "menu_id_META_ID": "example_menu",
+            "sequence": 1
+        }
+    },
+    {
+        "model": "FlrView",
+        "meta_id": "example_form_view",
+        "data": {
+            "name": "person.view.form",
+            "model": "Person",
+            "view_type": "form",
+            "definition": {
+                "structure": [
+                    {"field": "name"},
+                    {"field": "age"},
+                    {"field": "favorite_color"}
+                ]
+            },
+            "menu_id_META_ID": "example_menu",
+            "sequence": 2
+        }
+    }
+]

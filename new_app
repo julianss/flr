@@ -7,7 +7,7 @@ fi
 
 #Create configuration file
 cp ".example" ".$1"
-sed -i -e "s/yourappnamehere/$1/g" ".$1"
+sed -i -e "s/example/$1/g" ".$1"
 sed -i -e "s/yourdatabasename/$1.db/g" ".$1"
 
 #Create folder structure

@@ -15,9 +15,27 @@ from flr import scheduler, m
 import json
 import os
 import core_models
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 __import__("apps." + os.environ["flr_app"])
 os.environ["flr_app_path"] = os.path.abspath(os.path.join("apps", os.environ["flr_app"]))
 print("App path", os.environ["flr_app_path"])
+
+#Attempt to create database if it doesn't exist
+conn = psycopg2.connect("user=%s password=%s host=%s port=%s dbname=postgres"%(
+    os.environ["flr_db_user"],
+    os.environ["flr_db_pass"],
+    os.environ["flr_db_host"],
+    os.environ["flr_db_port"]
+))
+try:
+    cr = conn.cursor()
+    cr.execute("SELECT 1 FROM pg_database where datname=%s", (os.environ["flr_db_name"],))
+    if not cr.rowcount:
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cr.execute("CREATE database %s owner %s"%(os.environ["flr_db_name"], os.environ["flr_db_pass"]))
+finally:
+    conn.close()
 
 db.init(os.environ["flr_db_name"],
     user=os.environ["flr_db_user"],

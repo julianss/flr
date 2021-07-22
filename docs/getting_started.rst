@@ -13,26 +13,31 @@ Run the example app
 --------------------------
 flr is configured through environment variables. This configuration consists of, among other things,
 the name of the app to run (which corresponds to the name of the folder which the app's files are),
-and the parameters to connect to a PostgresQL database. Edit the .example file to provide the
+and the parameters to connect to a PostgresQL database. For now, just edit the .example file to provide the
 necessary credentials to a PostgreSQL instance. 
 
 .. code-block:: text
 
-    flr_db_host=
-    flr_db_user=
-    flr_db_pass=
-    flr_db_name=
+    flr_db_name=example
+    flr_db_user=youruser
+    flr_db_pass=yourpassword
+    flr_db_host=localhost
+    flr_db_port=5432
 
-Run the server by executing the run script and the name of the app.
+Run the server by executing the run script and the name of the app. 
 
 .. code-block:: text
 
     ./run.sh example
 
-You should now be prompted with a bunch of SQL commands. Type "yes" and enter. This will create the
-database tables. When it's done point your browser to localhost:6800 to open the app. You will see
-the login screen. The default user is admin, and the password is also admin (this password can be
-changed through the configuration variables). Once logged in you can interact with the web client.
+If the Postgres user you provided has database creation privileges, the database will be automatically
+created. If not, you must ensure the database exists before running flr.
+
+If the database connection is successful, you will be prompted with a bunch of SQL commands.
+Type "yes" and enter. This will create the database tables. When it's done point your browser
+to ``localhost:6800`` to open the app. You will see the login screen. The default user is admin,
+and the password is also admin (this password can be changed through the env variable ``flr_admin_pass``).
+Once logged in you can interact with the web client.
 
 Web client overview
 --------------------------

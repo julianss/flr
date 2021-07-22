@@ -28,7 +28,9 @@
         "discard": "Discard",
         "download": "Download",
         "required": "These fields are required",
-        "errors": "These fields have errors"
+        "errors": "These fields have errors",
+        "min_value": "Min value is",
+        "max_value": "Max value is"
     },
     "loader": {
         "loading": "Loading",

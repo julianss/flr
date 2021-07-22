@@ -28,7 +28,9 @@
         "descard": "Descartar",
         "download": "Descargar",
         "required": "Estos campos son obligatorios",
-        "errors": "Estos campos tienen errores"
+        "errors": "Estos campos tienen errores",
+        "min_value": "El valor mínimo es",
+        "max_value": "El valor máximo es"
     },
     "loader": {
         "loading": "Cargando",

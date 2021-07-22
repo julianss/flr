@@ -1,4 +1,5 @@
 <script>
+    import { _ } from 'svelte-i18n';
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
     export let label = "";
@@ -35,9 +36,9 @@
                 <button type="button" class="close" data-dismiss="alert"
                     on:click={resetValidations}>×</button>
                 {#if options.minValError}
-                    <strong>Min value is {options.minVal}</strong><br>
+                    <strong>{$_('form_view.min_value')} {options.minVal}</strong><br>
                 {:else if options.maxValError}
-                    <strong>Max value is {options.maxVal}</strong><br>
+                    <strong>{$_('form_view.max_value')} {options.maxVal}</strong><br>
                 {/if}
             </div>
         {/if}

@@ -274,22 +274,26 @@
                     }
                 }
             }
-            if (item.options && item.options.hasOwnProperty('minVal') && value < item.options.minVal){
-                if (validations['others'].indexOf(item)===-1){
-                  validations['others'].push(item);
-                }
-                for (var i in view.definition[section]){
-                    if (view.definition[section][i] === item){
-                        view.definition[section][i].options.minValError = true;
-                    }
-                }
-            }else if (item.options && item.options.hasOwnProperty('maxVal') && value > item.options.maxVal){
-                if (validations['others'].indexOf(item)===-1){
-                    validations['others'].push(item);
-                }
-                for (var i in view.definition[section]){
-                    if (view.definition[section][i] === item){
-                        view.definition[section][i].options.maxValError = true;
+            if(fieldDesc.type == 'float' || fieldDesc.type == 'integer'){
+                if(value || value == 0){
+                    if (item.options && item.options.hasOwnProperty('minVal') && value < item.options.minVal){
+                        if (validations['others'].indexOf(item)===-1){
+                        validations['others'].push(item);
+                        }
+                        for (var i in view.definition[section]){
+                            if (view.definition[section][i] === item){
+                                view.definition[section][i].options.minValError = true;
+                            }
+                        }
+                    }else if (item.options && item.options.hasOwnProperty('maxVal') && value > item.options.maxVal){
+                        if (validations['others'].indexOf(item)===-1){
+                            validations['others'].push(item);
+                        }
+                        for (var i in view.definition[section]){
+                            if (view.definition[section][i] === item){
+                                view.definition[section][i].options.maxValError = true;
+                            }
+                        }
                     }
                 }
             }

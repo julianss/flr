@@ -123,9 +123,6 @@ class BaseModel(pw.Model):
             field = cls._meta.fields[k]
             if getattr(field, 'default'):
                 defaults[k] = field.default
-            else:
-                if type(field) in (pw.IntegerField, pw.FloatField):
-                    defaults[k] = 0
         return defaults
 
     def get_dict_id_and_name(self):

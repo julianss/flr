@@ -210,7 +210,7 @@
             "definition": {
                 "structure": [
                     {"field": "user_id", "readonly": true},
-                    {"field": "password", "options": {"width": "20%"}}
+                    {"field": "password", "options": {"password": true, "width": "20%"}}
                 ]
             }
         }

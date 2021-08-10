@@ -1,0 +1,38 @@
+[
+    {
+        "model": "Person",
+        "meta_id": "person1",
+        "data": {
+            "name": "John",
+            "age": 25,
+            "favorite_color": "G"
+        }
+    },
+    {
+        "model": "Person",
+        "meta_id": "person2",
+        "data": {
+            "name": "David",
+            "age": 46,
+            "favorite_color": "B"
+        }
+    },
+    {
+        "model": "Person",
+        "meta_id": "person3",
+        "data": {
+            "name": "Karen",
+            "age": 29,
+            "favorite_color": "R"
+        }
+    },
+    {
+        "model": "Person",
+        "meta_id": "person4",
+        "data": {
+            "name": "Jennifer",
+            "age": 52,
+            "favorite_color": "G"
+        }
+    }
+]

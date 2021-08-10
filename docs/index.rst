@@ -3,7 +3,7 @@
 Welcome to flr
 ================
 
-Welcome to flr's documentation. flr is a system for creating enterprise
+Welcome to flr's documentation. flr is a system for creating "CRUD"
 web applications. See :doc:`getting_started` for installation instructions
 and to get an example app running. Then in :doc:`creating_app` you can find
 a tutorial for creating a new app. The last part :doc:`reference` contains

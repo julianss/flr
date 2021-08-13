@@ -2,6 +2,7 @@ from flask import Flask, request, has_request_context, jsonify, send_from_direct
 from registry import Registry, ReportHelpers, db
 from utils import normalize_filters, combine_filters, CustomJSONEncoder, add_pages, sendmail, I18n
 from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.triggers.cron import CronTrigger
 import peeweedbevolve
 import peewee as pw
 from playhouse.shortcuts import model_to_dict
@@ -27,7 +28,8 @@ scheduler = BlockingScheduler()
 
 def cron(year=None, month=None, day=None, day_of_week=None, hour=None, minute=None, second=None):
     def inner(func):
-        scheduler.add_job(func, 'cron', year=year, month=month, day=day, day_of_week=day_of_week, hour=hour, minute=minute, second=second)
+        trig = CronTrigger(year=year, month=month, day=day, day_of_week=day_of_week, hour=hour, minute=minute, second=second)
+        scheduler.add_job(func, trig)
         return func
     return inner
 

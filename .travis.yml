@@ -20,7 +20,8 @@ jobs:
         - psql -c "create user flr with password 'flr'"
         - psql -c "alter role flr with createdb"
         - sed -i 's/evolve=True/evolve=False/g' .example
-        - ./run.sh example
+        - ./run.sh example &
+        - sleep 8
       script:
         - tests/build_test.py
 

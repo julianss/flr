@@ -321,6 +321,10 @@ data/animals.json
         }
     ]
 
+
+NOTE: the files present in the ``data/`` folder will be loaded in alphabetical order.
+
+
 Now stop and run the server again. The menus and views will be loaded into the database.
 Go to ``localhost:6800`` and you will now see the "My Vet App" section. 
 
@@ -329,8 +333,6 @@ Go to ``localhost:6800`` and you will now see the "My Vet App" section.
 
 And that's it! The application is now fully functional, new records can be created, and existing
 ones can be edited and deleted.
-
-NOTE: the files present in the ``data/`` folder will be loaded in alphabetical order.
 
 Logos and custom styles
 -------------------------

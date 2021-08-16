@@ -1,14 +1,11 @@
 Reference
 =============
+(work in progress)
 
-Fields
--------
-
-
-Configuration variables
+Configuration
 -------------------------
 
-These are all the environment variables used to configure the app
+These are the environment variables used to configure the app
 
 ``flr_app``
 
@@ -22,23 +19,24 @@ the name that shows in the browser tab).
 
 ``flr_db_name``
 
-The database name. If it doesn't exist at startup time, its creation will be attempted.
+The PostgreSQL database name. If it doesn't exist at startup time, its creation will be attempted.
 
 ``flr_db_user``
 
-The name of the database user.
+The name of the PostgreSQL database user.
 
 ``flr_db_pass``
 
-The password for the database user.
+The password for the PostgreSQL database user.
 
 ``flr_db_host``
 
-The database host.
+The PostgreSQL database host.
 
 ``flr_db_port``
 
-The database port. Must be neccesarily specified, as it does not assume a default value.
+The PostgreSQL database port. The ``new_app`` script writes 5432 for you when creating the dot file
+but change it if needed. Don't leave it blank, though.
 
 ``flr_db_interactive_evolve``
 
@@ -49,14 +47,34 @@ to True during development and to False when in production.
 
 ``flr_flask_debug``
 
-True/False. Whether to run Flask
+True/False. Whether to run Flask in debug mode or not
 
 ``flr_jwt_secret``
-``flr_auth_field``
+
+Place here a random string of characters, this will be the secret used to decode the jwt token used
+for authentication (the ``new_app`` script automatically generates a random string here).
+
 ``flr_admin_pass``
+
+Password for logging in as the superuser (admin). Note that this value is always read each time
+the server is started. If you changed the admin password in any other way it will be overwritten.
+
 ``flr_mail_host``
+
+SMTP host for sending mail.
+
 ``flr_mail_port``
+
+SMTP host port
+
 ``flr_mail_user``
+
+User to login into the SMTP server
+
 ``flr_mail_pass``
+
+Password to login into the SMTP server
+
 ``flr_legacy_table_names``
-``flr_send_error_btn``
+
+True/False. Whether to turn on/off Peewee's ``legacy_table_names`` option.

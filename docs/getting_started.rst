@@ -9,7 +9,16 @@ Download flr and install the Python dependencies, which are provided in the requ
 
     git clone https://github.com/julianss/flr.git
     cd flr
-    pip3 install -r requirements.txt 
+    pip3 install -r requirements.txt
+
+Compile the frontend app.
+
+.. code-block:: text
+
+    cd svelte_client
+    npm install
+    npm run build
+
 
 Run the example app
 --------------------------

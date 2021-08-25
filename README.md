@@ -1,4 +1,4 @@
-# Flare
+# flr
 [![Build Status](https://travis-ci.com/julianss/flr.svg?branch=master)](https://travis-ci.com/julianss/flr)
 
 

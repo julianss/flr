@@ -76,6 +76,14 @@
                     value = value.id;
                 }
             }
+            if(type && ["date", "datetime"].includes(type)){
+                if(value == ''){
+                    value = null;
+                }
+                if(value2 == ''){
+                    value2 = null;
+                }
+            }
             if(operator && (value!==null || value2!==null)){
                 if(operator === "between"){
                     if(value){
@@ -132,6 +140,7 @@
                                     <span style="width:20%">
                                         <select class="form-control" bind:value={selectedOperators[item.field]}
                                             on:blur={updateFilters}>
+                                            <option value=""></option>
                                             {#if ["manytomany","backref"].includes(fieldsDescription[item.field].type)}
                                                 <option value="in">{$_("search_view.is")}</option>
                                                 <option value="not in">{$_("search_view.is_not")}</option>
@@ -155,29 +164,12 @@
                                         </select>
                                     </span>
                                     <span style="width:50%">
-                                        <Field
-                                            type={fieldsDescription[item.field].type}
-                                            label={item.label || fieldsDescription[item.field].label}
-                                            edit={true}
-                                            bind:value={selectedValues[item.field]}
-                                            model={fieldsDescription[item.field].model}
-                                            model_name_field={fieldsDescription[item.field].model_name_field}
-                                            choices={fieldsDescription[item.field].options}
-                                            required={false}
-                                            relatedFieldsDesc={fieldsDescription[item.field].related_fields}
-                                            on:change={updateFilters}
-                                            nolabel={true}
-                                            readonly={false}
-                                            filters={[]}
-                                            viewtype={'search'}
-                                            options={item.options || {}}
-                                        />
-                                        {#if selectedOperators[item.field] === "between"}
+                                        <div hidden={selectedOperators[item.field]==''}>
                                             <Field
                                                 type={fieldsDescription[item.field].type}
                                                 label={item.label || fieldsDescription[item.field].label}
                                                 edit={true}
-                                                bind:value={selectedValues2[item.field]}
+                                                bind:value={selectedValues[item.field]}
                                                 model={fieldsDescription[item.field].model}
                                                 model_name_field={fieldsDescription[item.field].model_name_field}
                                                 choices={fieldsDescription[item.field].options}
@@ -190,7 +182,26 @@
                                                 viewtype={'search'}
                                                 options={item.options || {}}
                                             />
-                                        {/if}
+                                            {#if selectedOperators[item.field] === "between"}
+                                                <Field
+                                                    type={fieldsDescription[item.field].type}
+                                                    label={item.label || fieldsDescription[item.field].label}
+                                                    edit={true}
+                                                    bind:value={selectedValues2[item.field]}
+                                                    model={fieldsDescription[item.field].model}
+                                                    model_name_field={fieldsDescription[item.field].model_name_field}
+                                                    choices={fieldsDescription[item.field].options}
+                                                    required={false}
+                                                    relatedFieldsDesc={fieldsDescription[item.field].related_fields}
+                                                    on:change={updateFilters}
+                                                    nolabel={true}
+                                                    readonly={false}
+                                                    filters={[]}
+                                                    viewtype={'search'}
+                                                    options={item.options || {}}
+                                                />
+                                            {/if}
+                                        </div>
                                     </span>
                                 </div>
                             {/if}

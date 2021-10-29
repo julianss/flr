@@ -3,11 +3,22 @@ Getting Started
 
 Installation
 --------------------------
-Download flr and install its Python dependencies, which are provided in the requirements.txt file.
+Download flr and install the Python dependencies, which are provided in the requirements.txt file.
 
 .. code-block:: text
 
-    pip3 install -r requirements.txt 
+    git clone https://github.com/julianss/flr.git
+    cd flr
+    pip3 install -r requirements.txt
+
+Compile the frontend app.
+
+.. code-block:: text
+
+    cd svelte_client
+    npm install
+    npm run build
+
 
 Run the example app
 --------------------------
@@ -103,7 +114,7 @@ Date fields as a date input, Boolean fields as a checkbox and so on.
 
 Search view
 ^^^^^^^^^^^^^
-This is a dialog used to filter the list and card view, where values and conditions for each field
+This is a dialog used to filter the list view, where values and conditions for each field
 can be specified. Open it by clicking the magnifying glass icon in the List View.
 
 .. image:: img/search_view.PNG

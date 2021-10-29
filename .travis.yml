@@ -1,0 +1,29 @@
+services:
+  - postgresql
+jobs:
+  include:
+    - stage: test
+      language: node_js
+      node_js:
+        - 14
+      install:
+        - cd svelte_client
+        - npm install
+        - npm run build
+    - stage: test
+      language: python
+      python:
+        - 3.6
+      install:
+        - pip install -r requirements.txt
+      before_script:
+        - psql -c "create user flr with password 'flr'"
+        - psql -c "alter role flr with createdb"
+        - sed -i 's/evolve=True/evolve=False/g' .example
+        - ./run.sh example &
+        - sleep 8
+      script:
+        - tests/build_test.py
+
+
+

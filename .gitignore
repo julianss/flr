@@ -1,5 +1,6 @@
 *.env
 *.pyc
 .*
+!.travis.yml
 apps/
 docs/_build/

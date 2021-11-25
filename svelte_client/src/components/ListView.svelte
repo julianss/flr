@@ -226,15 +226,15 @@
 </script>
 
 <div hidden={!visible}>
-    <button id="button-modal-export" style="display:none" type="button" data-toggle="modal"
-        data-target="#export-view-modal"></button>
+    <button id="button-modal-export" style="display:none" type="button" data-bs-toggle="modal"
+        data-bs-target="#export-view-modal"></button>
     <div id="export-view-modal" class="modal fade" tabindex="-1" role="dialog"
         aria-labelledby="exportView" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{$_('export_view.title')}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -259,16 +259,16 @@
             </button>
         {/if}
         {#if view && view.menu_view_name}
-            <strong class="ml-2" style="font-size:30px">{view.menu_view_name}</strong>
+            <strong class="ml-2" style="margin-left:10px;font-size:30px">{view.menu_view_name}</strong>
         {/if}
         </div>
         <div class="col-md top-left-controls">
             {#if selectedRecords && getSelectedIds().length > 0 && batchActions.length > 0}
                 <div class="dropdown">
-                    <button class="btn btn-secondary" type="button" id="actionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-secondary dropdown-toggle" href="#" id="actionsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> 
                         <img src="icons/three-dots.svg" style="filter:invert(1)" title={$_('list_view.actions')} alt={$_('list_view.actions')}>
                     </button>
-                    <div class="dropdown-menu" aria-labelledby="actionsDropdown">
+                    <ul class="dropdown-menu" aria-labelledby="actionsDropdown">
                         {#each batchActions as action}
                         <button class="dropdown-item" type="button"
                             on:click={()=>{
@@ -281,7 +281,7 @@
                                 }
                             }}>{action.label}</button>
                         {/each}
-                    </div>
+                    </ul>
                 </div>
             {/if}
             {#if groupImportExportButton}
@@ -423,10 +423,6 @@
     .tableFixHead thead th {
         position: sticky;
         top: 0;
-    }
-    table{
-        border: 1px solid silver;
-        background-color: white;
     }
 
     #list_view_toolbar {

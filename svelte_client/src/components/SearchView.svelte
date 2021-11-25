@@ -116,17 +116,15 @@
     }
 </script>
 
-<button id="button-modal" style="display:none" type="button" data-toggle="modal"
-    data-target="#search-view-modal"></button>
+<button id="button-modal" style="display:none" type="button" data-bs-toggle="modal"
+    data-bs-target="#search-view-modal"></button>
 <div id="search-view-modal" class="modal fade" tabindex="-1" role="dialog"
     aria-labelledby="searchView" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{$_("search_view.filters")}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"/>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -210,7 +208,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button on:click={applyFilters} type="button" data-dismiss="modal"
+                <button on:click={applyFilters} type="button" data-bs-dismiss="modal"
                     class="btn btn-primary">{$_("search_view.apply")}</button>
             </div>
         </div>
@@ -223,6 +221,7 @@
     .search-row{
         display:flex;
         justify-content: space-evenly;
+        margin-bottom:3px;
     }
     .search-row select{
         width:80px

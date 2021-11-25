@@ -30,7 +30,7 @@
 </script>
 
 <div class="form-group">
-    <label>{label}</label>
+    <label class="form-label" for="input-{uniqueId}">{label}</label>
     {#if edit && options && options.password && !readonly}
         <div class="input-group">
             <input
@@ -41,9 +41,11 @@
                     <button
                         tabindex="-1"
                         type="button"
-                        class="btn border border-left-0 pb-1"
+                        class="btn btn-info"
                         on:click={() => viewPassword()}>
-                        <img id="input-{uniqueId}-img" src="icons/eye.svg" alt=""/>
+                        <img
+                            style="filter:invert(1)" 
+                            id="input-{uniqueId}-img" src="icons/eye.svg" alt=""/>
                     </button>
                 </div>
             {/if}

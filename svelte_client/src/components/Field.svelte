@@ -189,12 +189,12 @@
         content:"*";
         color:red
     }
-    .required :global(input){
+    /* .required :global(input){
         background-color:seashell
     }
     .required :global(select){
         background-color:seashell
-    }
+    } */
     .nolabel :global(label){
         display: none
     }

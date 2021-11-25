@@ -7,6 +7,7 @@
     export let value;
     export let edit;
     export let readonly;
+    export let options;
     let valueLocal;
 
     function changed(){

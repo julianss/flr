@@ -81,6 +81,7 @@
                     <th></th>
                 </tr>
             </thead>
+            <tbody>
             {#if (value || []).length>0}
                 {#each value as obj}
                     <tr>
@@ -107,11 +108,15 @@
                         {/each}
                         <td class="basura">
                             {#if options && options.remove}
-                                <img
+                                <button
+                                    class="btn btn-info"
                                     hidden={!edit}
-                                    on:click={()=>remove(obj.id)}
-                                    src="icons/trash-fill.svg"
-                                    alt="Eliminar"/>
+                                    on:click={()=>remove(obj.id)}>
+                                    <img
+                                        src="icons/trash-fill.svg"
+                                        style="filter:invert(1)"
+                                        alt="Eliminar"/>
+                                </button>
                             {/if}
                         </td>
                     </tr>
@@ -121,6 +126,7 @@
                     <td colspan="100">(Sin elementos)</td>
                 </tr>
             {/if}
+            </tbody>
         </table>
         {#if edit && options.add}
             <button type="button" class="btn btn-secondary new-element" on:click={newElement}>
@@ -157,10 +163,6 @@
 </div>
 
 <style>
-    table{
-        border: 1px solid silver;
-        background-color: white;
-    }
     .basura{
         text-align:right;
         cursor: pointer;

@@ -35,47 +35,43 @@
 </script>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <span class="navbar-brand">
-    <img src="images/logo_navbar.png" alt="Logo"/>
-  </span>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+  <div class="container-fluid">
+    <span class="navbar-brand">
+      <img src="images/logo_navbar.png" alt="Logo"/>
+    </span>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav w-100">
-      {#each sections as section}
-        {#if section.menus}
-          <li class="nav-item dropdown">
-            <button class="btn btn-secondary remove-button-css dropdown-toggle" id="navbarDropdown" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              {section.name}
-            </button>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              {#each section.menus as menu}
-                <button class="dropdown-item" type="button" on:click={()=>clickMenu(menu.id)}>{menu.name}</button>
-              {/each}
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav">
+        {#each sections as section}
+          {#if section.menus}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {section.name}
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                {#each section.menus as menu}
+                  <li><a href="#" class="dropdown-item" type="button" on:click={()=>clickMenu(menu.id)}>{menu.name}</a></li>
+                {/each}
+              </div>
+            </li>
+          {/if}
+        {/each}
+      </ul>
+      <ul class="navbar-nav ms-md-auto">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"  data-bs-toggle="dropdown" aria-expanded="false"> 
+              {username} 
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                <li><a href="#" class="dropdown-item" on:click={openPreferences}>{$_("navbar.preferences")}</a></li>
+                <div class="dropdown-divider"></div>
+                <li><a href="#" class="dropdown-item" on:click={logout}>{$_("navbar.logout")}</a></li>
             </div>
-          </li>
-        {/if}
-      {/each}
-      <li class="nav-item dropdown ml-auto">
-          <button class="btn btn-secondary remove-button-css dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {username} </button>
-          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-              <button class="dropdown-item" on:click={openPreferences}>{$_("navbar.preferences")}</button>
-              <div class="dropdown-divider"></div>
-              <button class="dropdown-item" on:click={logout}>{$_("navbar.logout")}</button>
-          </div>
-      </li>
-    </ul>
-
+        </li>
+      </ul>
+    </div>
   </div>
 </nav>
-
-<style>
-  .remove-button-css {
-    outline: none;
-    border: 0px;
-    box-sizing: none;
-    background-color: transparent;
-  }
-</style>

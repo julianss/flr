@@ -469,8 +469,8 @@
                     <img src="icons/check2.svg" style="filter:invert(1)" title="{$_('form_view.save')}" alt="{$_('form_view.save')}">
                 </button>
                 {#if !isWizard}
-                    <button type="button" class="btn btn-outline-secondary mb-2" on:click={discard}>
-                        <img src="icons/x.svg" title="{$_('form_view.discard')}" alt="{$_('form_view.discard')}">
+                    <button type="button" class="btn btn-secondary mb-2" on:click={discard}>
+                        <img src="icons/x.svg" style="filter:invert(1)" title="{$_('form_view.discard')}" alt="{$_('form_view.discard')}">
                     </button>
                 {/if}
             {/if}
@@ -485,7 +485,7 @@
                 {/if}
             {/if}
             {#if view}
-                <strong class="ml-2" style="font-size:30px">{view.menu_view_name}</strong>
+                <strong class="ml-2" style="margin-left:10px;font-size:30px">{view.menu_view_name}</strong>
             {/if}
         </div>
         <div class="col-md top-left-buttons">
@@ -504,17 +504,17 @@
             {/if}
             {#if record && reports && record.id && reports.length>0}
                 <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="actionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-secondary dropdown-toggle" id="actionsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> 
                         <img src="icons/download.svg" style="filter:invert(1)" title="{$_('form_view.download')}" alt="{$_('form_view.download')}">
                     </button>
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="actionsDropdown">
+                    <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="actionsDropdown">
                         {#each reports as report}
                             <button class="dropdown-item" type="button"
                                 on:click={()=>{
                                 requestReport(report.name, [record.id])
                                 }}>{report.name}</button>
                         {/each}
-                    </div>
+                    </ul>
                 </div>
             {/if}
         </div>
@@ -560,7 +560,7 @@
                     <div class="fields-container">
                     {#each view.definition[section] as item}
                         {#if item.field && item.field in fieldsDescription }
-                            <div class="field-wrapper" style="width:{(item.options && item.options.width) || '100%'}"
+                            <div class="field-wrapper" style="width:{(item.options && item.options.col_width) || '100%'}"
                                 hidden={section != activeSection || invisibles[item.id] && invisibles[item.id].result}>
                                 <Field
                                     type={fieldsDescription[item.field].type}
@@ -614,7 +614,6 @@
 
 <style>
     .tabs {
-        background-color:white;
         margin-bottom: 10px;
     }
     #form_view_toolbar {
@@ -629,21 +628,16 @@
     .top-left-buttons button {
         margin: 2px 2px 2px 2px;
     }
-    @media(min-width: 600px){
+    @media(min-width: 800px){
         #form_area {
-            width: 80%;
-            margin: auto;
-            background-color: white;
-            padding: 30px;
-            position:relative;
-            top:30px;
-            box-shadow: 10px 0px 20px gray
+            width: 60%;
+            padding-bottom: 30px;
         }
     }
-    #form_area_wrapper {
+    /* #form_area_wrapper {
         background: rgb(211,211,211,0.5);
         background: linear-gradient(180deg, rgba(211,211,211,1) 0%, rgba(211,211,211,1) 5%, rgba(255,255,255,0) 100%);
-    }
+    } */
     .fields-container {
         display:flex;
         width:100%;

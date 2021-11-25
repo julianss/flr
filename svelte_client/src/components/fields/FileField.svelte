@@ -52,12 +52,15 @@
                 {:else}
                     {value && (value.name || '') || ''}
                 {/if}
-                <img
-                    hidden={!value || !value.name}
-                    class="boton align-bottom"
+                <button class="btn btn-info"
                     on:click={clear}
-                    src="icons/trash-fill.svg"
-                    alt="Limpiar campo"/>
+                    hidden={!value || !value.name}
+                    >
+                        <img
+                            style="filter:invert(1)"
+                            src="icons/trash-fill.svg"
+                            alt="Limpiar campo"/>
+                </button>
                 <br/>
                 <input type="file" bind:files on:change={changed}/>
             </div>
@@ -71,11 +74,13 @@
                             alt={value && (value.name || '') || ''}
                             title={value.name || ''}/>
                     {/if}
-                    <img
-                        class="boton align-bottom"
-                        on:click={download}
-                        src="icons/download.svg"
-                        alt="Descargar"/>
+                    <button class="btn btn-info"
+                        on:click={download}>
+                            <img
+                                style="filter:invert(1)"
+                                src="icons/download.svg"
+                                alt="Descargar"/>
+                    </button>
                 {/if}
             </div>
         {/if}

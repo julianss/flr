@@ -195,18 +195,22 @@
                 >
                 <div class="input-group-append">
                     <button
-                        class="btn btn-outline-secondary"
+                        class="btn btn-info"
                         on:click={caretDownClicked}
                         type="button"
                         >
-                        <img src="icons/caret-down-fill.svg" alt="v"/>
+                        <img 
+                            style="filter:invert(1)"
+                            src="icons/caret-down-fill.svg" alt="v"/>
                     </button>
                     <button
-                        class="btn btn-outline-secondary"
+                        class="btn btn-info"
                         on:click={clear}
                         type="button"
                         >
-                        <img src="icons/trash-fill.svg" alt="v"/>
+                        <img 
+                            style="filter:invert(1)"
+                            src="icons/trash-fill.svg" alt="v"/>
                     </button>
                    <!--<button
                         data-target="#modal-foreignfield-{uniqueId}"
@@ -315,5 +319,8 @@
     }
     .highlight {
         background-color: lightgray
+    }
+    p.result{
+        color:black
     }
 </style>

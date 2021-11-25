@@ -23,6 +23,6 @@ export function getUserName(){
 }
 
 export function logout(){
-    localStorage.clear();
-    window.location = "/";
+    localStorage.removeItem(get_jwt_token_name());
+    window.location = window.location.pathname;
 }

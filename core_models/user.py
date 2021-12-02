@@ -23,14 +23,14 @@ class FlrUser(BaseModel):
     active = pw.BooleanField(verbose_name=n_("Active"), null=True, default=True)
     login = pw.CharField(verbose_name=n_("Login"), unique=True, null=True)
     email = pw.CharField(verbose_name=n_("Email"), unique=True, null=True)
-    password = pw.CharField(verbose_name=n_("Password"))
+    password = pw.CharField(verbose_name=n_("Password"), null=True)
     role = pw.CharField(verbose_name=n_("Role"), null=True)
     email_notifications = pw.BooleanField(verbose_name=n_("Email notifications"), null=True, default=True)
     lang = pw.CharField(verbose_name=n_("Language"), null=True, choices=LANG_CHOICES)
+    can_login_admin_panel = pw.BooleanField(verbose_name=n_("Can log in to admin panel"), null=True)
 
     @staticmethod
     def auth(login, password):
-        crypt_password = CryptContext(schemes=["pbkdf2_sha512"]).encrypt(password)
         auth_field_name = os.environ.get("flr_auth_field", "login")
         if auth_field_name == "login":
             auth_field = FlrUser.login
@@ -40,6 +40,12 @@ class FlrUser(BaseModel):
         if not user:
             return False
         user = user.first()
+        #When trying to log in to the admin panel in an app where there
+        #is a end-user frontend, check for permission
+        if os.environ.get("flr_web_route"):
+            if request.referrer.split("?")[0].endswith(os.environ.get("flr_web_route")):
+                if not user.can_login_admin_panel:
+                    return False
         if not pbkdf2_sha512.verify(password, user.password):
             return False
         else:

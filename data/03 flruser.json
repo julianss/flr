@@ -73,7 +73,8 @@
                     {"field": "company_id"},
                     {"field": "active"},
                     {"field": "lang"},
-                    {"field": "email_notifications"}
+                    {"field": "email_notifications"},
+                    {"field": "can_login_admin_panel"}
                 ],
                 "_('Roles')": [
                     {

@@ -314,10 +314,6 @@ msgstr "Compañías permitidas"
 msgid "Users"
 msgstr "Usuarios"
 
-# data/03 flruser.json
-msgid "Roles"
-msgstr "Roles"
-
 # data/01 admin.json
 msgid "System settings"
 msgstr "Configuración"
@@ -337,3 +333,7 @@ msgstr "Compañías"
 # data/03 flruser.json
 msgid "Access control (ACL)"
 msgstr "Control de acceso (ACL)"
+
+# core_models/user.py
+msgid "Can log in to admin panel"
+msgstr "Puede iniciar sesión en panel admin"

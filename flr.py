@@ -1059,48 +1059,51 @@ def create_user():
 # SERVING STATIC FILES
 # --------------------------------
 
-def send_from_app_public_directory(file, app=False):
+def get_referrer_path():
+    if not request.referrer:
+        return "/"
+    url = request.referrer
+    url = url.replace("//", "")
+    path = "/" + url.split("/")[1]
+    print(request.referrer, path)
+    return path
+
+def send_from_app_public_directory(file):
+    #Try serving the file from different folders according to the following logic
+    #1. The app's public directory
+    #   a. If the alt route mode is not activated, then the app's public folder (apps/[name_of_app]/public)
+    #   b. If it is activated, then:
+    #      - If the request comes from the alt route, then search in the app's "admin panel" folder (apps/[name_of_app]/public/flr)
+    #      - Otherwise the app's regular public folder (apps/[name_of_app]/public)
+    #2. The default public folder (svelte_client/public folder)
     app_public_folder = os.path.join("apps", os.environ["flr_app"], "public")
-    #Default behavior:
+    app_public_admin_folder = os.path.join("apps", os.environ["flr_app"], "public", "flr")
+    default_public_folder = os.path.join('svelte_client', 'public')
     if not os.environ.get("flr_web_route"):
-        #First try to serve it from the app's public directory then,
-        #if the file doesn't exist, from the svelte_client/public folder
-        if os.path.exists(os.path.join(app_public_folder, file)):
-            return send_from_directory(app_public_folder, file)
-        else:
-            return send_from_directory(os.path.join('svelte_client', 'public'), file)
-
-    #Behavior when the alt route is activated (see below):
+        first_folder = app_public_folder
     else:
-        #Here the default is to serve from flr's directory
-        #unless explicitly requested to be from the app's directory
-        if app:
-            return send_from_directory(app_public_folder, file)
+        if get_referrer_path().startswith(os.environ["flr_web_route"]):
+            first_folder = app_public_admin_folder
         else:
-            return send_from_directory(os.path.join('svelte_client', 'public'), file)
+            first_folder = app_public_folder
+    if os.path.exists(os.path.join(first_folder, file)):
+        return send_from_directory(first_folder, file)
+    else:
+        return send_from_directory(default_public_folder, file)
 
-# USING AN ALTERNATE ROUTE FOR THE CLIENT
-#------------------------------------------
+# USING AN ALTERNATE ROUTE FOR THE FLR CLIENT
+#--------------------------------------------
 #Te flr_web_route allows for the flr client to be used alongside another custom frontend 
 #i.e. an separate, stand-alone frontend is located in the public/ directory of the app
 #Thus, through this route the normal flr frontend (svelte_client/public) can still be accessed
 if os.environ.get("flr_web_route"):
-
     @app.route(os.environ.get("flr_web_route"))
     def base_alt():
         return send_from_directory(os.path.join('svelte_client', 'public'), "index.html")
 
-    #In this setup an additional route is needed to be able differentiate
-    #static file requests from the flr client and from the custom client
-    @app.route("/app/<path:path>")
-    def static_file_alt(path):
-        return send_from_app_public_directory(path, app=True)
-
 @app.route("/")
 def base():
-    #must pass app=True to ensure the custom frontend is served if
-    #the alt route mode is enabled
-    return send_from_app_public_directory('index.html', app=True)
+    return send_from_app_public_directory('index.html')
 
 @app.route("/<path:path>")
 def static_file(path):

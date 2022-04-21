@@ -13,7 +13,7 @@ APP = os.environ.get("flr_app")
 class AttachmentsMixin:
     @property
     def attachments(self):
-        return FlrFile.read(["name"], [['rec_id','=',self.id], ['model','=',self.__class__.__name__]])
+        return FlrFile.read(["name"], [], [['rec_id','=',self.id], ['model','=',self.__class__.__name__]])
 
     def update_attachments(self, new_ids):
         old_ids = [rec["id"] for rec in self.attachments]

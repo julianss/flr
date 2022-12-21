@@ -36,7 +36,7 @@ class FlrReport(BaseModel):
         }
         encoded = jwt.encode(payload, SECRET, algorithm='HS256')
         return {
-            'token': encoded.decode("ascii"),
+            'token': encoded
         }
 
     def render(self, ids):

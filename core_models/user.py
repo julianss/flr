@@ -56,7 +56,7 @@ class FlrUser(BaseModel):
                 auth_field_name: getattr(user, auth_field_name)
             }
             encoded_jwt = jwt.encode(jwt_payload, SECRET, algorithm='HS256')
-            return encoded_jwt.decode('ascii')
+            return encoded_jwt
 
     @classmethod
     def create(cls, **fields):

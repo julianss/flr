@@ -802,7 +802,7 @@ class BaseModel(pw.Model):
         }
         encoded = jwt.encode(payload, SECRET, algorithm='HS256')
         return {
-            'token': encoded.decode("ascii"),
+            'token': encoded,
         }
 
     @classmethod
@@ -973,7 +973,7 @@ def recoverypassword():
         request.uid = user.id
         token = jwt.encode({"id":user.id}, SECRET, algorithm="HS256")
         host = os.getenv('flr_db_host')
-        url = "http://%s:%s/resetPassword?token=%s" % (host, os.environ.get("flr_port", 6800), token.decode('ascii'))
+        url = "http://%s:%s/resetPassword?token=%s" % (host, os.environ.get("flr_port", 6800), token)
         message = _('Click <a href="%s"><strong>here</strong></a> to reset your password') % url
         sendmail("", email, _('Reset password'), message)
         return make_response(jsonify({

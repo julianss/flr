@@ -39,8 +39,8 @@
 
 <div class="form-group">
     <label>{label}</label>
-    {#if viewtype === 'form'}
-        {#if edit && !readonly}
+    {#if viewtype === 'form' || viewtype === 'list'}
+        {#if viewtype === 'form' && edit && !readonly}
             <div>
                 {#if (preview || value && value.id) && options && options.image === true}
                     <img
@@ -75,7 +75,7 @@
                             title={value.name || ''}/>
                     {/if}
                     <button class="btn btn-info"
-                        on:click={download}>
+                        on:click|stopPropagation={download}>
                             <img
                                 style="filter:invert(1)"
                                 src="icons/download.svg"

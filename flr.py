@@ -728,7 +728,10 @@ class BaseModel(pw.Model):
                             for related_field in related_fields:
                                 if type(getattr(relr.__class__, related_field)) in (pw.ForeignKeyField, pw.FileField):
                                     rel = getattr(relr, related_field)
-                                    rendered[related_field] = rel.get_dict_id_and_name()
+                                    if rel:
+                                        rendered[related_field] = rel.get_dict_id_and_name()
+                                    else:
+                                        rendered[related_field] = {}
                                 else:
                                     rendered[related_field] = getattr(relr, related_field)
                             related_records_dicts.append(rendered)
